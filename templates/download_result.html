@@ -11,7 +11,7 @@
     <h1>다운로드 완료!</h1>
     <div class="download-info">
         <h2>{{ title }}</h2>
-        <a href="{{ url_for('download_file', file_path=file_path) }}" class="download-btn">파일 다운로드</a>
+        <a href="{{ url_for('download_file', file_id=file_id) }}" class="download-btn">파일 다운로드</a>
     </div>
     <a href="{{ url_for('index') }}" class="back-btn">다른 영상 다운로드</a>
 </div>
