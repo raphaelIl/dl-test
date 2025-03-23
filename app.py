@@ -6,15 +6,15 @@ import re
 import threading
 import time
 import logging
-from datetime import datetime
+import shutil
+import gc
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache
-from werkzeug.utils import secure_filename
 from urllib.parse import quote
-from slugify import slugify
+import atexit
 
 # 환경 변수 로드
 load_dotenv()
@@ -29,13 +29,6 @@ MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 2 * 1024 * 1024 * 1024))  # 기�
 # 다운로드 상태를 저장할 딕셔너리
 download_status = {}
 
-# 로깅 설정
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
 # 요청 제한 설정
 limiter = Limiter(
     key_func=get_remote_address,
@@ -46,8 +39,28 @@ limiter.init_app(app)
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+# 로깅 설정
+logging.basicConfig(
+    filename='logs/app.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 # 스레드 풀 초기화
 executor = ThreadPoolExecutor(max_workers=5)
+
+def safe_path_join(*paths):
+    """안전한 경로 결합"""
+    base = os.path.abspath(paths[0])
+    for path in paths[1:]:
+        joined = os.path.abspath(os.path.join(base, path))
+        if not joined.startswith(base):
+            raise ValueError("Invalid path")
+        base = joined
+    return base
 
 def get_video_info(url):
     with yt_dlp.YoutubeDL({'quiet': True, 'simulate': True}) as ydl:
@@ -95,16 +108,22 @@ def download_video(video_url, file_id, download_path):
             download_status[file_id] = {
                 'status': 'completed',
                 'title': info.get('title', '알 수 없는 제목'),
-                'url': video_url
+                'url': video_url,
+                'timestamp': datetime.now().timestamp()
             }
             logging.info(f"다운로드 성공: {info.get('title')} ({video_url})")
             return info
     except Exception as e:
-        download_status[file_id] = {'status': 'error', 'error': str(e)}
+        download_status[file_id] = {
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().timestamp()
+        }
+        if os.path.exists(download_path):
+            shutil.rmtree(download_path)
         logging.error(f"다운로드 오류 (URL: {video_url}): {str(e)}")
         return None
     finally:
-        import gc
         gc.collect()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -117,7 +136,7 @@ def index():
 
         try:
             file_id = str(uuid.uuid4())
-            download_path = os.path.join(DOWNLOAD_FOLDER, file_id)
+            download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
 
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
@@ -171,7 +190,7 @@ def result(file_id):
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
         return redirect(url_for('index'))
 
-    download_path = os.path.join(DOWNLOAD_FOLDER, file_id)
+    download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
         return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.")
@@ -182,7 +201,7 @@ def result(file_id):
         return render_template('index.html', error="다운로드된 파일이 없습니다.")
 
     file_name = files[0]
-    file_path = os.path.join(download_path, file_name)
+    file_path = safe_path_join(download_path, file_name)
     file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else 0
 
     def readable_size(size_bytes):
@@ -211,7 +230,7 @@ def download_file(file_id):
             logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
             return render_template('index.html', error="유효하지 않은 파일 ID입니다.")
 
-        download_path = os.path.join(DOWNLOAD_FOLDER, file_id)
+        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
 
         if not os.path.exists(download_path):
             logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
@@ -223,7 +242,7 @@ def download_file(file_id):
             return render_template('index.html', error="다운로드된 파일이 없습니다.")
 
         filename = files[0]
-        file_path = os.path.join(download_path, filename)
+        file_path = safe_path_join(download_path, filename)
 
         if not os.path.isfile(file_path):
             logging.error(f"파일이 아닌 경로: {file_path}")
@@ -251,22 +270,34 @@ def clean_old_files():
         cleaned_count = 0
 
         for folder_name in os.listdir(DOWNLOAD_FOLDER):
-            folder_path = os.path.join(DOWNLOAD_FOLDER, folder_name)
+            folder_path = safe_path_join(DOWNLOAD_FOLDER, folder_name)
             if os.path.isdir(folder_path):
                 folder_creation_time = datetime.fromtimestamp(os.path.getctime(folder_path))
                 days_old = (now - folder_creation_time).days
 
                 if days_old > MAX_FILE_AGE:
-                    for file_name in os.listdir(folder_path):
-                        file_path = os.path.join(folder_path, file_name)
-                        if os.path.isfile(file_path):
-                            os.remove(file_path)
-                    os.rmdir(folder_path)
+                    shutil.rmtree(folder_path)
                     cleaned_count += 1
 
         logging.info(f"파일 정리 완료: {cleaned_count}개 폴더 삭제됨")
     except Exception as e:
         logging.error(f"파일 정리 실행 중 오류 발생: {str(e)}", exc_info=True)
+
+def clean_status_dict():
+    while True:
+        try:
+            now = datetime.now()
+            for file_id in list(download_status.keys()):
+                status = download_status[file_id]
+                if status['status'] in ['completed', 'error']:
+                    timestamp = status.get('timestamp', 0)
+                    if (now - datetime.fromtimestamp(timestamp)).total_seconds() > 3600:  # 1시간
+                        del download_status[file_id]
+
+            time.sleep(3600)  # 1시간
+        except Exception as e:
+            logging.error(f"상태 정보 정리 중 오류: {str(e)}")
+            time.sleep(600)  # 10분 후 재시도
 
 def schedule_cleaning():
     while True:
@@ -277,20 +308,9 @@ def schedule_cleaning():
             logging.error(f"예약된 파일 정리 중 오류: {str(e)}")
             time.sleep(3600)  # 1시간 후 재시도
 
-def clean_status_dict():
-    while True:
-        try:
-            now = datetime.now()
-            for file_id in list(download_status.keys()):
-                status_age = (now - datetime.fromtimestamp(os.path.getctime(os.path.join(DOWNLOAD_FOLDER, file_id)))).days if os.path.exists(os.path.join(DOWNLOAD_FOLDER, file_id)) else MAX_FILE_AGE + 1
-
-                if status_age > MAX_FILE_AGE:
-                    del download_status[file_id]
-
-            time.sleep(3600)  # 1시간
-        except Exception as e:
-            logging.error(f"상태 정보 정리 중 오류: {str(e)}")
-            time.sleep(600)  # 10분 후 재시도
+def cleanup_on_exit():
+    executor.shutdown(wait=True)
+    logging.info("애플리케이션 종료: 리소스 정리 완료")
 
 def init_app():
     clean_old_files()
@@ -302,6 +322,8 @@ def init_app():
     status_cleaning_thread = threading.Thread(target=clean_status_dict)
     status_cleaning_thread.daemon = True
     status_cleaning_thread.start()
+
+    atexit.register(cleanup_on_exit)
 
 init_app()
 
