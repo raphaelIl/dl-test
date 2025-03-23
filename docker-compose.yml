@@ -1,8 +1,9 @@
-version: '3'
+version: '3.8'
 
 services:
-  video-downloader:
+  web:
     build: .
+    restart: unless-stopped
     ports:
       - "5000:5000"
     volumes:
@@ -12,4 +13,3 @@ services:
       - DOWNLOAD_FOLDER=/app/downloads
       - MAX_FILE_AGE=14
       - MAX_FILE_SIZE=2147483648
-    restart: unless-stopped
