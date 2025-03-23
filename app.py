@@ -16,8 +16,12 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 import atexit
 
+# TODO(2025.03.23.Sun): 환경변수 외부에서 관리하기
 # 환경 변수 로드
 load_dotenv()
+
+# 환경 변수에서 ffmpeg 경로 가져오기
+FFMPEG_PATH = os.getenv('FFMPEG_PATH', r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe')
 
 app = Flask(__name__)
 
@@ -84,7 +88,7 @@ def download_video(video_url, file_id, download_path):
 
         ydl_opts = {
             'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
+            'ffmpeg_location': FFMPEG_PATH,
             'merge_output_format': 'mp4',
             'outtmpl': download_path + '/%(title)s.%(ext)s',
             'noplaylist': True,
