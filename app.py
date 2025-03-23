@@ -1,3 +1,4 @@
+# TODO(2025.03.23.Sun): celery를 사용하여 비동기로 다운로드 제공할 수 있게 해야할수도
 from flask import Flask, render_template, request, send_file, url_for, redirect
 import yt_dlp
 import os
@@ -56,22 +57,23 @@ def index():
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
 
-            # yt-dlp 향상된 옵션 설정 (항상 최고 품질)
             ydl_opts = {
-                'format': 'best',
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                'merge_output_format': 'mp4',  # 출력 형식을 mp4로 강제 지정
                 'outtmpl': download_path + '/%(title)s.%(ext)s',
                 'noplaylist': True,
-                'retries': 5,  # 재시도 횟수
+                'retries': 5,
                 'fragment_retries': 5,
-                'socket_timeout': 30,  # 소켓 타임아웃 설정
+                'socket_timeout': 30,
                 'max_filesize': MAX_FILE_SIZE,
                 'http_headers': {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8',
-                    'Referer': 'https://www.google.com/'
                 },
-                # 'progress_hooks': [lambda d: print(f'다운로드 중: {d.get("_percent_str", "진행 중")}')],
+                'postprocessors': [{
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'mp4',
+                }],
             }
 
             # 비디오 정보 추출
@@ -187,7 +189,8 @@ def schedule_cleaning():
             logging.error(f"예약된 파일 정리 중 오류: {str(e)}")
             time.sleep(3600)  # 오류 발생 시 1시간 후 재시도
 
-if __name__ == '__main__':
+# 애플리케이션 초기화 함수
+def init_app():
     # 서버 시작 시 오래된 파일 정리
     clean_old_files()
 
@@ -196,4 +199,10 @@ if __name__ == '__main__':
     cleaning_thread.daemon = True
     cleaning_thread.start()
 
+# 애플리케이션 초기화 (Gunicorn에서 사용)
+init_app()
+
+# 개발 환경에서 직접 실행할 때만 사용
+if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(host='0.0.0.0', port=5000, debug=False)
