@@ -5,15 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>다운로드 완료</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .file-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .file-url {
+            word-break: break-all;
+            font-size: 0.9em;
+            color: #555;
+            max-width: 100%;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-blue {
+            background-color: #2196F3;
+        }
+        .btn-blue:hover {
+            background-color: #0b7dda;
+        }
+        .success-icon {
+            font-size: 64px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1>다운로드 완료!</h1>
-    <div class="download-info">
-        <h2>{{ title }}</h2>
-        <a href="{{ url_for('download_file', file_id=file_id) }}" class="download-btn">파일 다운로드</a>
+    <div class="success-icon">✓</div>
+    <h1>다운로드 완료</h1>
+
+    <div class="file-info">
+        <h3>파일 정보</h3>
+        <p><strong>제목:</strong> {{ title }}</p>
+        <p><strong>파일명:</strong> {{ file_name }}</p>
+        <p><strong>파일크기:</strong> {{ file_size }}</p>
+        {% if url %}
+        <p><strong>원본:</strong> <span class="file-url" title="{{ url }}">{{ url }}</span></p>
+        {% endif %}
     </div>
-    <a href="{{ url_for('index') }}" class="back-btn">다른 영상 다운로드</a>
+
+    <p>아래 버튼을 클릭하여 파일을 다운로드하세요.</p>
+
+    <a href="/download-file/{{ file_id }}" class="btn">파일 다운로드</a>
+    <a href="/" class="btn btn-blue">새 다운로드</a>
 </div>
 </body>
 </html>
