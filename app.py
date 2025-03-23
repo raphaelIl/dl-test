@@ -12,6 +12,40 @@ DOWNLOAD_FOLDER = 'downloads'
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
+# @app.route('/', methods=['GET', 'POST'])
+# def index():
+#     if request.method == 'POST':
+#         video_url = request.form['video_url']
+#         if not video_url:
+#             return render_template('index.html', error='URL을 입력해주세요.')
+#
+#         try:
+#             # 고유한 파일 이름 생성
+#             file_id = str(uuid.uuid4())
+#             download_path = os.path.join(DOWNLOAD_FOLDER, file_id)
+#
+#             # yt-dlp 옵션 설정
+#             ydl_opts = {
+#                 'format': 'best',
+#                 'outtmpl': download_path + '/%(title)s.%(ext)s',
+#                 'noplaylist': True,
+#             }
+#
+#             # 비디오 정보 추출
+#             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#                 info = ydl.extract_info(video_url, download=True)
+#                 video_title = info.get('title', 'video')
+#                 video_ext = info.get('ext', 'mp4')
+#                 downloaded_file = os.path.join(download_path, f"{video_title}.{video_ext}")
+#
+#                 # 다운로드 결과 페이지로 리다이렉트
+#                 return redirect(url_for('download_result', file_path=downloaded_file, title=video_title))
+#
+#         except Exception as e:
+#             return render_template('index.html', error=f'다운로드 중 오류가 발생했습니다: {str(e)}')
+#
+#     return render_template('index.html')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -24,11 +58,24 @@ def index():
             file_id = str(uuid.uuid4())
             download_path = os.path.join(DOWNLOAD_FOLDER, file_id)
 
-            # yt-dlp 옵션 설정
+            # 폴더 생성
+            if not os.path.exists(download_path):
+                os.makedirs(download_path)
+
+            # yt-dlp 향상된 옵션 설정
             ydl_opts = {
                 'format': 'best',
                 'outtmpl': download_path + '/%(title)s.%(ext)s',
                 'noplaylist': True,
+                'retries': 3,  # 재시도 횟수
+                'fragment_retries': 3,
+                'socket_timeout': 30,  # 소켓 타임아웃 설정
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8',
+                    'Referer': 'https://www.google.com/'
+                }
             }
 
             # 비디오 정보 추출
@@ -41,6 +88,14 @@ def index():
                 # 다운로드 결과 페이지로 리다이렉트
                 return redirect(url_for('download_result', file_path=downloaded_file, title=video_title))
 
+        except yt_dlp.utils.DownloadError as e:
+            error_msg = str(e)
+            if "Connection reset by peer" in error_msg:
+                return render_template('index.html', error='접근이 제한된 사이트이거나 서버 접속이 차단되었습니다. 다른 URL을 시도해보세요.')
+            elif "unavailable" in error_msg.lower() or "not available" in error_msg.lower():
+                return render_template('index.html', error='영상을 찾을 수 없거나 제공자에 의해 제한된 콘텐츠입니다.')
+            else:
+                return render_template('index.html', error=f'다운로드 중 오류가 발생했습니다: {error_msg}')
         except Exception as e:
             return render_template('index.html', error=f'다운로드 중 오류가 발생했습니다: {str(e)}')
 
