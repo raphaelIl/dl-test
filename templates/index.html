@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 다운로더</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>영상 다운로더</h1>
+    <p>YouTube, Instagram, TikTok 등 다양한 사이트에서 영상을 다운로드할 수 있습니다.</p>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        <input type="text" name="video_url" placeholder="영상 URL을 입력하세요" required>
+        <button type="submit">다운로드</button>
+    </form>
+
+    <div class="supported-sites">
+        <p>지원 사이트: YouTube, TikTok, Instagram, Twitter 등</p>
+    </div>
+</div>
+</body>
+</html>
