@@ -84,6 +84,7 @@ def download_video(video_url, file_id, download_path):
 
         ydl_opts = {
             'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
             'merge_output_format': 'mp4',
             'outtmpl': download_path + '/%(title)s.%(ext)s',
             'noplaylist': True,
@@ -328,4 +329,7 @@ def init_app():
 init_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # host = os.getenv('FLASK_HOST', '127.0.0.1')
+    host = os.getenv('FLASK_HOST', '0.0.0.0')
+    port = int(os.getenv('FLASK_PORT', 5000))
+    app.run(host=host, port=port, debug=True)
