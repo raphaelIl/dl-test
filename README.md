@@ -22,47 +22,44 @@ docker-compose logs -f
 # Diagram
 ```mermaid
 sequenceDiagram
-    participant Client as 클라이언트
-    participant Flask as Flask 서버
-    participant ThreadPool as 스레드풀(5개)
-    participant Storage as 파일시스템
-    participant Status as 상태저장소
+    actor User as 사용자
+    participant Web as 웹 인터페이스
+    participant Thread as ThreadPoolExecutor
+    participant Status as 상태 관리(download_status)
+    participant FS as 파일 시스템
 
-%% 초기 다운로드 요청
-    Client->>Flask: POST / (video_url 전송)
-    Flask->>Flask: UUID 생성
-    Flask->>Storage: 다운로드 폴더 생성
-    Flask->>ThreadPool: download_video 작업 제출
-    Flask-->>Client: /download-waiting/{file_id}로 리다이렉트
+    User->>Web: YouTube URL 입력
+    Web->>Web: UUID 생성
+    Web->>Thread: 다운로드 작업 제출
+    Web->>User: 대기 페이지로 리다이렉트
 
-%% 다운로드 진행 상태 확인
-    loop 2초마다
-        Client->>Flask: GET /check-status/{file_id}
-        Flask->>Status: 상태 조회
-        Status-->>Flask: 현재 상태 반환
-        Flask-->>Client: 상태 정보 응답
+    Thread->>Status: 상태 업데이트(status_lock)
+    Thread->>FS: YouTube 동영상 다운로드(fs_lock)
+    Thread->>Status: 완료 상태 업데이트(status_lock)
+
+    loop 상태 확인
+        User->>Web: 상태 확인 요청
+        Web->>Status: 상태 조회(status_lock)
+        Web->>User: 상태 응답(진행 중)
     end
 
-%% 다운로드 완료 시
-    ThreadPool->>Storage: 영상 파일 저장
-    ThreadPool->>Status: 상태 업데이트 (completed)
+    User->>Web: 상태 확인 요청
+    Web->>Status: 상태 조회(status_lock)
+    Web->>User: 완료 페이지로 리다이렉트
 
-    Client->>Flask: GET /result/{file_id}
-    Flask->>Status: 완료 상태 확인
-    Flask->>Storage: 파일 정보 조회
-    Flask-->>Client: 다운로드 결과 페이지
+    User->>Web: 다운로드 요청
+    Web->>FS: 파일 존재 확인(fs_lock)
+    Web->>FS: 파일 목록 조회(safely_access_files)
+    Web->>FS: 파일 확인(fs_lock)
+    Web->>User: 파일 전송
 
-%% 파일 다운로드
-    Client->>Flask: GET /download-file/{file_id}
-    Flask->>Storage: 파일 읽기
-    Flask-->>Client: 파일 전송
+    par 백그라운드 작업
+        loop 24시간마다
+            Thread->>FS: 오래된 파일 정리(fs_lock)
+        end
 
-%% 백그라운드 정리 작업
-    loop 24시간마다
-        Flask->>Storage: 오래된 파일 정리
-    end
-
-    loop 1시간마다
-        Flask->>Status: 오래된 상태 정보 정리
+        loop 1시간마다
+            Thread->>Status: 오래된 상태 정리(status_lock)
+        end
     end
 ```
