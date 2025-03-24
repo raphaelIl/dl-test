@@ -348,6 +348,74 @@ def safely_access_files(directory_path):
             return files
         return []
 
+@app.route('/health')
+def health_check():
+    try:
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "version": os.getenv('APP_VERSION', '1.0.0'),
+            "components": {}
+        }
+
+        # 파일 시스템 상태 확인
+        try:
+            with fs_lock:
+                fs_writeable = os.access(DOWNLOAD_FOLDER, os.W_OK)
+                available_space = shutil.disk_usage(DOWNLOAD_FOLDER).free
+
+            health_data["components"]["filesystem"] = {
+                "status": "healthy" if fs_writeable else "degraded",
+                "available_space_gb": round(available_space / (1024**3), 2),
+                "writable": fs_writeable
+            }
+        except Exception as e:
+            health_data["components"]["filesystem"] = {
+                "status": "unhealthy",
+                "error": str(e)
+            }
+            health_data["status"] = "degraded"
+
+        # 스레드 풀 상태 확인
+        try:
+            stats = executor._max_workers - executor._work_queue.qsize()
+            health_data["components"]["thread_pool"] = {
+                "status": "healthy",
+                "max_workers": executor._max_workers,
+                "available_workers": stats,
+                "utilization_percent": round((executor._max_workers - stats) / executor._max_workers * 100, 2) if stats < executor._max_workers else 0
+            }
+        except Exception as e:
+            health_data["components"]["thread_pool"] = {
+                "status": "unknown",
+                "error": str(e)
+            }
+
+        # 다운로드 상태 통계
+        try:
+            with status_lock:
+                total = len(download_status)
+                completed = sum(1 for s in download_status.values() if s.get('status') == 'completed')
+                downloading = sum(1 for s in download_status.values() if s.get('status') == 'downloading')
+                errors = sum(1 for s in download_status.values() if s.get('status') == 'error')
+
+            health_data["components"]["downloads"] = {
+                "status": "healthy",
+                "total": total,
+                "completed": completed,
+                "in_progress": downloading,
+                "errors": errors
+            }
+        except Exception as e:
+            health_data["components"]["downloads"] = {
+                "status": "unknown",
+                "error": str(e)
+            }
+
+        return health_data, 200
+    except Exception as e:
+        logging.error(f"헬스 체크 중 오류: {str(e)}", exc_info=True)
+        return {"status": "unhealthy", "error": str(e)}, 500
 
 def init_app():
     clean_old_files()
