@@ -5,3 +5,5 @@ python-dotenv==1.0.0
 Flask-Limiter==3.5.0
 gunicorn==21.2.0
 python-slugify==8.0.1
+Flask-Babel>=3.0.0
+Babel>=2.9.0
