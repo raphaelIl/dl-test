@@ -1,31 +1,27 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# ffmpeg 설치 (yt-dlp에 필요)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ffmpeg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Python 패키지 설치
+# 의존성 설치를 위한 requirements.txt 복사 및 설치
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 애플리케이션 코드 복사
+# 앱 코드 복사
 COPY . .
 
-# 다운로드/로그 디렉토리 생성
-RUN mkdir -p downloads logs
+# 다국어 처리를 위한 번역 파일 컴파일
+RUN pybabel compile -d translations
 
 # 환경 변수 설정
-ENV PYTHONUNBUFFERED=1 \
-    DOWNLOAD_FOLDER=/app/downloads \
-    MAX_FILE_AGE=14 \
-    MAX_FILE_SIZE=2147483648
+ENV FLASK_HOST=0.0.0.0
+ENV FLASK_PORT=5000
+ENV PYTHONUNBUFFERED=1
 
+# 다운로드 폴더 생성 및 권한 설정
+RUN mkdir -p /app/downloads && chmod 777 /app/downloads
+
+# 포트 노출
 EXPOSE 5000
 
-# gunicorn으로 실행
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "2", "--timeout", "120", "app:app"]
+# Flask 앱 실행 (gunicorn 대신 flask로 실행)
+CMD ["python", "app.py"]

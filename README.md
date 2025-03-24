@@ -12,10 +12,10 @@ docker run -d -p 5000:5000 -v $(pwd)/downloads:/app/downloads -v $(pwd)/logs:/ap
 ```
 
 ```bash
-# Docker Compose로 빌드 및 실행
+docker-compose build
+
 docker-compose up -d
 
-# 로그 확인
 docker-compose logs -f
 ```
 
