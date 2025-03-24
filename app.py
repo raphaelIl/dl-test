@@ -50,7 +50,7 @@ logging.basicConfig(
 )
 
 # 스레드 풀 초기화
-executor = ThreadPoolExecutor(max_workers=5)
+executor = ThreadPoolExecutor(max_workers=6) # 코어당 3개 스레드
 
 def safe_path_join(*paths):
     """안전한 경로 결합"""
@@ -84,7 +84,7 @@ def download_video(video_url, file_id, download_path):
 
         ydl_opts = {
             'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
+            # 'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
             'merge_output_format': 'mp4',
             'outtmpl': download_path + '/%(title)s.%(ext)s',
             'noplaylist': True,
