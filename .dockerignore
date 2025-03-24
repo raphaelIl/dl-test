@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.git/
+.env
+*.mp4
+downloads/

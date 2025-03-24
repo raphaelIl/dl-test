@@ -1,0 +1,422 @@
+# English translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-03-24 22:54+0900\n"
+"PO-Revision-Date: 2025-03-24 22:54+0900\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:173
+msgid "URL을 입력해주세요."
+msgstr "Please enter a URL."
+
+#: app.py:287
+msgid "유효하지 않은 파일 ID입니다."
+msgstr "invalid file ID"
+
+#: templates/download_result.html:6
+msgid "다운로드 완료"
+msgstr "Download Complete"
+
+#: templates/download_result.html:135
+msgid "다운로드 완료!"
+msgstr "Download Complete!"
+
+#: templates/download_result.html:138
+msgid "파일 이름:"
+msgstr "File Name:"
+
+#: templates/download_result.html:139
+msgid "파일 크기:"
+msgstr "File Size:"
+
+#: templates/download_result.html:140
+msgid "제목:"
+msgstr "Subject:"
+
+#: templates/download_result.html:141
+msgid "출처:"
+msgstr "Source:"
+
+#: templates/download_result.html:148
+msgid "파일 다운로드"
+msgstr "File Download"
+
+#: templates/download_result.html:151
+msgid "메인으로 돌아가기"
+msgstr "Go to Main"
+
+#: templates/download_waiting.html:6 templates/download_waiting.html:181
+msgid "다운로드 진행 중"
+msgstr "Downloading"
+
+#: templates/download_waiting.html:21
+msgid "다운로드 중입니다..."
+msgstr "Downloading..."
+
+#: templates/download_waiting.html:25
+msgid "파일 처리 중입니다..."
+msgstr "Processing file..."
+
+#: templates/download_waiting.html:29
+msgid "다운로드 완료! 이동 중..."
+msgstr "Download complete! Moving..."
+
+#: templates/download_waiting.html:35
+msgid "다운로드 오류:"
+msgstr "Download error:"
+
+#: templates/download_waiting.html:35
+msgid "알 수 없는 오류"
+msgstr "Unknown error"
+
+#: templates/download_waiting.html:42
+msgid "상태 확인 중 오류:"
+msgstr "error checking status:"
+
+#: templates/download_waiting.html:183
+msgid "다운로드가 진행 중입니다..."
+msgstr "Downloading..."
+
+#: templates/download_waiting.html:193
+msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
+msgstr "Once the download is complete, it will automatically go to the next page."
+
+#: templates/download_waiting.html:194
+msgid "취소하고 메인으로 돌아가기"
+msgstr "Cancel it and go back to main"
+
+#: templates/index.html:6 templates/index.html:180
+msgid "동영상 다운로더"
+msgstr "Video Downloader"
+
+#: templates/index.html:183
+msgid "동영상 URL:"
+msgstr "Video URL:"
+
+#: templates/index.html:184
+msgid "여기에 URL을 붙여넣으세요"
+msgstr "Paste URL here"
+
+#: templates/index.html:186
+msgid "다운로드"
+msgstr "Download"
+
+#: templates/index.html:195
+msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다."
+msgstr "You can download videos from many platforms, including YouTube, Instagram, TikTok, Facebook, and Twitter. Simply copy and paste the video URL from the site you want and it will be downloaded at the highest quality."
+
+#: templates/index.html:198
+msgid "지원되는 사이트"
+msgstr "Supported Sites"
+
+#: templates/index.html:208
+msgid "안전하고 빠른 비디오 다운로드 서비스"
+msgstr "Safe and fast video download service"
+
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:556
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:560
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1124
+msgid "Aborted!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1349
+#: venv/lib/python3.10/site-packages/click/core.py:1379
+#, python-brace-format
+msgid "(Deprecated) {text}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1396
+msgid "Options"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1422
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1438
+#, python-brace-format
+msgid "DeprecationWarning: The command {name!r} is deprecated."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1645
+msgid "Commands"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1677
+msgid "Missing command."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1755
+#, python-brace-format
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2313
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2334
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2783
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2813
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2828
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2841
+msgid "required"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:457
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:520
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:541
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:49
+#: venv/lib/python3.10/site-packages/click/exceptions.py:88
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:80
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:129
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:131
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:187
+msgid "Missing argument"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:189
+msgid "Missing option"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:191
+msgid "Missing parameter"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:193
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:200
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:220
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:232
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:270
+msgid "unknown error"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:277
+#, python-brace-format
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:233
+#, python-brace-format
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:415
+#, python-brace-format
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:476
+#, python-brace-format
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:326
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:333
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:158
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:174
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:176
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:187
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:243
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:773
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:267
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:299
+#, python-brace-format
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:393
+#, python-brace-format
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:415
+#, python-brace-format
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:471
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:612
+#, python-brace-format
+msgid "{value!r} is not a valid boolean."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:636
+#, python-brace-format
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:826
+msgid "file"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:828
+msgid "directory"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:830
+msgid "path"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:881
+#, python-brace-format
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:890
+#, python-brace-format
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:898
+#, python-brace-format
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:907
+#, python-brace-format
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:916
+#, python-brace-format
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:925
+#, python-brace-format
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:992
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""

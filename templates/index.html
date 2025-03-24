@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>동영상 다운로더</title>
+    <title>{{ _('동영상 다운로더') }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -144,20 +144,46 @@
             font-weight: 600;
             color: #555;
         }
+
+        .language-selector {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .language-selector a {
+            margin-left: 10px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .language-selector a.active {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="language-selector">
+        {% for code, name in languages.items() %}
+        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+           {% if current_lang == code %}class="active"{% endif %}>
+            {{ name }}
+        </a>
+        {% endfor %}
+    </div>
+
     <div class="logo">
         <i class="fas fa-download"></i>
     </div>
-    <h1>동영상 다운로더</h1>
-    <form method="post">
+    <h1>{{ _('동영상 다운로더') }}</h1>
+    <form method="post" action="{{ url_for('index', lang=current_lang) }}">
         <div class="form-group">
-            <label for="video_url">동영상 URL:</label>
-            <input type="text" id="video_url" name="video_url" placeholder="여기에 URL을 붙여넣으세요" required>
+            <label for="video_url">{{ _('동영상 URL:') }}</label>
+            <input type="text" id="video_url" name="video_url" placeholder="{{ _('여기에 URL을 붙여넣으세요') }}" required>
         </div>
-        <button type="submit"><i class="fas fa-cloud-download-alt"></i> 다운로드</button>
+        <button type="submit"><i class="fas fa-cloud-download-alt"></i> {{ _('다운로드') }}</button>
     </form>
     {% if error %}
     <div class="error">
@@ -166,11 +192,10 @@
     {% endif %}
 
     <div class="description">
-        YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다.
-        원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다.
+        {{ _('YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다.') }}
     </div>
 
-    <div class="site-title">지원되는 사이트</div>
+    <div class="site-title">{{ _('지원되는 사이트') }}</div>
     <div class="supported-sites">
         <i class="fab fa-youtube site-icon" title="YouTube"></i>
         <i class="fab fa-instagram site-icon" title="Instagram"></i>
@@ -180,7 +205,7 @@
     </div>
 
     <div class="footer">
-        안전하고 빠른 비디오 다운로드 서비스
+        {{ _('안전하고 빠른 비디오 다운로드 서비스') }}
     </div>
 </div>
 </body>

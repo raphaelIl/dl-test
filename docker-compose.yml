@@ -1,15 +1,19 @@
-version: '3.8'
+version: '3'
 
 services:
-  web:
+  video-downloader:
     build: .
-    restart: unless-stopped
+    container_name: video-downloader
+    restart: always
     ports:
       - "5000:5000"
     volumes:
       - ./downloads:/app/downloads
       - ./logs:/app/logs
     environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - PYTHONUNBUFFERED=1
       - DOWNLOAD_FOLDER=/app/downloads
-      - MAX_FILE_AGE=14
-      - MAX_FILE_SIZE=2147483648
+      - MAX_FILE_AGE=7
+      - APP_VERSION=1.0.0

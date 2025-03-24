@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 import atexit
 import threading
+from flask_babel import Babel, gettext as _
 
 # 환경 변수 로드
 load_dotenv()
@@ -52,8 +53,34 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# 언어 설정
+LANGUAGES = {
+    'ko': '한국어',
+    'en': 'English',
+    'ja': '日本語',
+    'zh': '中文'
+}
+
 # 스레드 풀 초기화
 executor = ThreadPoolExecutor(max_workers=6) # 코어당 3개 스레드
+
+# 먼저 babel 객체 생성
+babel = Babel(app)
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
+# 그 다음 get_locale 함수 정의
+def get_locale():
+    # URL 경로에서 언어 코드 확인 (예: /ko/, /en/ 등)
+    path_parts = request.path.split('/')
+    if len(path_parts) > 1 and path_parts[1] in LANGUAGES:
+        return path_parts[1]
+
+    # 브라우저 언어 설정 확인
+    return request.accept_languages.best_match(LANGUAGES.keys(), default='en')
+
+# 최신 Flask-Babel API 사용
+babel.init_app(app, locale_selector=get_locale)
 
 def update_status(file_id, status_data):
     with status_lock:
@@ -134,13 +161,22 @@ def download_video(video_url, file_id, download_path):
     finally:
         gc.collect()
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/')
+def index_redirect():
+    # 브라우저 언어에 따라 적절한 언어 URL로 리다이렉트
+    lang = get_locale()
+    return redirect(f'/{lang}/')
+
+@app.route('/<lang>/', methods=['GET', 'POST'])
+def index(lang):
+    if lang not in LANGUAGES:
+        return redirect('/')
+
     if request.method == 'POST':
         video_url = request.form['video_url']
 
         if not video_url:
-            return render_template('index.html', error='URL을 입력해주세요.')
+            return render_template('index.html', error=_('URL을 입력해주세요.'))
 
         try:
             file_id = str(uuid.uuid4())
@@ -150,30 +186,36 @@ def index():
                 os.makedirs(download_path)
 
             executor.submit(download_video, video_url, file_id, download_path)
-            return redirect(url_for('download_waiting', file_id=file_id))
+            return redirect(url_for('download_waiting', lang=lang, file_id=file_id))
 
         except Exception as e:
             logging.error(f"예상치 못한 오류 (URL: {video_url}): {str(e)}", exc_info=True)
-            return render_template('index.html', error=f'다운로드 중 오류가 발생했습니다: {str(e)}')
+            return render_template('index.html', error=f'{_("다운로드 중 오류가 발생했습니다")}: {str(e)}')
 
     return render_template('index.html', max_file_size_gb=MAX_FILE_SIZE/(1024*1024*1024))
 
-@app.route('/download-waiting/<file_id>')
-def download_waiting(file_id):
+@app.route('/<lang>/download-waiting/<file_id>')
+def download_waiting(lang, file_id):
+    if lang not in LANGUAGES:
+        return redirect('/')
+
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
-        return redirect(url_for('index'))
+        return redirect(url_for('index', lang=lang))
 
     with status_lock:
         status = download_status.get(file_id, {'status': 'unknown'})
 
     if status['status'] == 'completed':
-        return redirect(url_for('result', file_id=file_id))
+        return redirect(url_for('result', lang=lang, file_id=file_id))
 
     return render_template('download_waiting.html', file_id=file_id, status=status)
 
-@app.route('/check-status/<file_id>')
-def check_status(file_id):
+@app.route('/<lang>/check-status/<file_id>')
+def check_status(lang, file_id):
+    if lang not in LANGUAGES:
+        return {'status': 'error', 'error': '지원하지 않는 언어입니다'}
+
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 상태 확인 시도: {file_id}")
         return {'status': 'error', 'error': '유효하지 않은 파일 ID'}
@@ -184,16 +226,19 @@ def check_status(file_id):
     if status.get('status') == 'completed':
         return {
             'status': 'completed',
-            'redirect': url_for('result', file_id=file_id)
+            'redirect': url_for('result', lang=lang, file_id=file_id)
         }
 
     return status
 
-@app.route('/result/<file_id>')
-def result(file_id):
+@app.route('/<lang>/result/<file_id>')
+def result(lang, file_id):
+    if lang not in LANGUAGES:
+        return redirect('/')
+
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
-        return redirect(url_for('index'))
+        return redirect(url_for('index', lang=lang))
 
     with status_lock:
         status = download_status.get(file_id)
@@ -234,14 +279,18 @@ def result(file_id):
                            file_name=file_name,
                            file_size=readable_size(file_size))
 
-@app.route('/download-file/<file_id>')
-def download_file(file_id):
+
+@app.route('/<lang>/download-file/<file_id>')
+def download_file(lang, file_id):
+    if lang not in LANGUAGES:
+        return redirect('/')
+
     try:
         logging.info(f"파일 다운로드 시작: {file_id}")
 
         if not re.match(r'^[0-9a-f\-]+$', file_id):
             logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
-            return render_template('index.html', error="유효하지 않은 파일 ID입니다.")
+            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."))
 
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
 
@@ -348,6 +397,13 @@ def safely_access_files(directory_path):
             return files
         return []
 
+@app.context_processor
+def inject_languages():
+    return {
+        'languages': LANGUAGES,
+        'current_lang': get_locale()
+    }
+
 @app.route('/health')
 def health_check():
     try:
@@ -433,7 +489,7 @@ def init_app():
 init_app()
 
 if __name__ == '__main__':
-    # host = os.getenv('FLASK_HOST', '127.0.0.1')
-    host = os.getenv('FLASK_HOST', '0.0.0.0')
+    host = os.getenv('FLASK_HOST', '127.0.0.1')
+    # host = os.getenv('FLASK_HOST', '0.0.0.0')
     port = int(os.getenv('FLASK_PORT', 5000))
     app.run(host=host, port=port, debug=True)
