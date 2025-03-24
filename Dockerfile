@@ -1,27 +1,63 @@
-FROM python:3.10-slim
+#FROM python:3.10-slim
+#
+#WORKDIR /app
+#
+## 의존성 설치를 위한 requirements.txt 복사 및 설치
+#COPY requirements.txt .
+#RUN pip install --no-cache-dir -r requirements.txt
+#
+## 앱 코드 복사
+#COPY . .
+#
+## 다국어 처리를 위한 번역 파일 컴파일
+#RUN pybabel compile -d translations
+#
+## 환경 변수 설정
+#ENV FLASK_HOST=0.0.0.0
+#ENV FLASK_PORT=5000
+#ENV PYTHONUNBUFFERED=1
+#
+## 다운로드 폴더 생성 및 권한 설정
+#RUN mkdir -p /app/downloads && chmod 777 /app/downloads
+#
+## 포트 노출
+#EXPOSE 5000
+#
+## Flask 앱 실행 (gunicorn 대신 flask로 실행)
+#CMD ["python", "app.py"]
+
+FROM python:3.10-slim-bullseye
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 의존성 설치를 위한 requirements.txt 복사 및 설치
+# 번역 관련 파일들을 먼저 복사
+COPY babel.cfg .
+COPY messages.pot .
+COPY translations ./translations
+
+# 앱 파일들 복사
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY app.py .
+COPY static ./static
+COPY templates ./templates
 
-# 앱 코드 복사
-COPY . .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pybabel compile -d translations \
+    && apt-get purge -y --auto-remove gcc python3-dev \
+    && rm -rf /root/.cache/pip
 
-# 다국어 처리를 위한 번역 파일 컴파일
-RUN pybabel compile -d translations
+ENV FLASK_HOST=0.0.0.0 \
+    FLASK_PORT=5000 \
+    PYTHONUNBUFFERED=1
 
-# 환경 변수 설정
-ENV FLASK_HOST=0.0.0.0
-ENV FLASK_PORT=5000
-ENV PYTHONUNBUFFERED=1
-
-# 다운로드 폴더 생성 및 권한 설정
 RUN mkdir -p /app/downloads && chmod 777 /app/downloads
 
-# 포트 노출
 EXPOSE 5000
 
-# Flask 앱 실행 (gunicorn 대신 flask로 실행)
 CMD ["python", "app.py"]
