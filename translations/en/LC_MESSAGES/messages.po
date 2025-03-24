@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-24 22:54+0900\n"
-"PO-Revision-Date: 2025-03-24 22:54+0900\n"
+"POT-Creation-Date: 2025-03-25 00:33+0900\n"
+"PO-Revision-Date: 2025-03-25 00:33+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -18,13 +18,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:173
+#: app.py:179
 msgid "URL을 입력해주세요."
 msgstr "Please enter a URL."
 
-#: app.py:287
+#: app.py:293
 msgid "유효하지 않은 파일 ID입니다."
-msgstr "invalid file ID"
+msgstr "Invalid file ID."
 
 #: templates/download_result.html:6
 msgid "다운로드 완료"
@@ -44,7 +44,7 @@ msgstr "File Size:"
 
 #: templates/download_result.html:140
 msgid "제목:"
-msgstr "Subject:"
+msgstr "Title:"
 
 #: templates/download_result.html:141
 msgid "출처:"
@@ -52,15 +52,15 @@ msgstr "Source:"
 
 #: templates/download_result.html:148
 msgid "파일 다운로드"
-msgstr "File Download"
+msgstr "Download File"
 
 #: templates/download_result.html:151
 msgid "메인으로 돌아가기"
-msgstr "Go to Main"
+msgstr "Return to Main"
 
 #: templates/download_waiting.html:6 templates/download_waiting.html:181
 msgid "다운로드 진행 중"
-msgstr "Downloading"
+msgstr "Download in Progress"
 
 #: templates/download_waiting.html:21
 msgid "다운로드 중입니다..."
@@ -72,7 +72,7 @@ msgstr "Processing file..."
 
 #: templates/download_waiting.html:29
 msgid "다운로드 완료! 이동 중..."
-msgstr "Download complete! Moving..."
+msgstr "Download complete! Redirecting..."
 
 #: templates/download_waiting.html:35
 msgid "다운로드 오류:"
@@ -84,19 +84,19 @@ msgstr "Unknown error"
 
 #: templates/download_waiting.html:42
 msgid "상태 확인 중 오류:"
-msgstr "error checking status:"
+msgstr "Status check error:"
 
 #: templates/download_waiting.html:183
 msgid "다운로드가 진행 중입니다..."
-msgstr "Downloading..."
+msgstr "Download in progress..."
 
 #: templates/download_waiting.html:193
 msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
-msgstr "Once the download is complete, it will automatically go to the next page."
+msgstr "You will be automatically redirected when the download is complete."
 
 #: templates/download_waiting.html:194
 msgid "취소하고 메인으로 돌아가기"
-msgstr "Cancel it and go back to main"
+msgstr "Cancel and return to main"
 
 #: templates/index.html:6 templates/index.html:180
 msgid "동영상 다운로더"
@@ -107,16 +107,16 @@ msgid "동영상 URL:"
 msgstr "Video URL:"
 
 #: templates/index.html:184
-msgid "여기에 URL을 붙여넣으세요"
-msgstr "Paste URL here"
+msgid "여기에 URL을 붙여넣으세요."
+msgstr "Paste URL here."
 
 #: templates/index.html:186
 msgid "다운로드"
 msgstr "Download"
 
 #: templates/index.html:195
-msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다."
-msgstr "You can download videos from many platforms, including YouTube, Instagram, TikTok, Facebook, and Twitter. Simply copy and paste the video URL from the site you want and it will be downloaded at the highest quality."
+msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
+msgstr "Download videos from various platforms including YouTube, Instagram, TikTok, Facebook, and Twitter. Simply copy and paste the video URL from your desired site to download in the highest quality."
 
 #: templates/index.html:198
 msgid "지원되는 사이트"
@@ -124,7 +124,7 @@ msgstr "Supported Sites"
 
 #: templates/index.html:208
 msgid "안전하고 빠른 비디오 다운로드 서비스"
-msgstr "Safe and fast video download service"
+msgstr "Safe and Fast Video Download Service"
 
 #: venv/lib/python3.10/site-packages/click/_termui_impl.py:556
 #, python-brace-format

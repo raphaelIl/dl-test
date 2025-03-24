@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-24 23:07+0900\n"
-"PO-Revision-Date: 2025-03-24 23:07+0900\n"
+"POT-Creation-Date: 2025-03-25 00:33+0900\n"
+"PO-Revision-Date: 2025-03-25 00:33+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
 "Language-Team: ja <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:178
+#: app.py:179
 msgid "URL을 입력해주세요."
 msgstr "URLを入力してください。"
 
-#: app.py:292
+#: app.py:293
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "無効なファイルIDです。"
 
@@ -32,23 +32,23 @@ msgstr "ダウンロード完了"
 
 #: templates/download_result.html:135
 msgid "다운로드 완료!"
-msgstr "ダウンロード完了!"
+msgstr "ダウンロードが完了しました！"
 
 #: templates/download_result.html:138
 msgid "파일 이름:"
-msgstr "ファイル名:"
+msgstr "ファイル名："
 
 #: templates/download_result.html:139
 msgid "파일 크기:"
-msgstr "ファイルサイズ:"
+msgstr "ファイルサイズ："
 
 #: templates/download_result.html:140
 msgid "제목:"
-msgstr "タイトル:"
+msgstr "タイトル："
 
 #: templates/download_result.html:141
 msgid "출처:"
-msgstr "ソース:"
+msgstr "ソース："
 
 #: templates/download_result.html:148
 msgid "파일 다운로드"
@@ -56,7 +56,7 @@ msgstr "ファイルをダウンロード"
 
 #: templates/download_result.html:151
 msgid "메인으로 돌아가기"
-msgstr "メインに戻る"
+msgstr "メインページに戻る"
 
 #: templates/download_waiting.html:6 templates/download_waiting.html:181
 msgid "다운로드 진행 중"
@@ -64,67 +64,67 @@ msgstr "ダウンロード進行中"
 
 #: templates/download_waiting.html:21
 msgid "다운로드 중입니다..."
-msgstr "ダウンロード中です···"
+msgstr "ダウンロード中です..."
 
 #: templates/download_waiting.html:25
 msgid "파일 처리 중입니다..."
-msgstr "ファイル処理中です···"
+msgstr "ファイル処理中です..."
 
 #: templates/download_waiting.html:29
 msgid "다운로드 완료! 이동 중..."
-msgstr "ダウンロード完了！ 移動中······"
+msgstr "ダウンロード完了！移動中..."
 
 #: templates/download_waiting.html:35
 msgid "다운로드 오류:"
-msgstr "ダウンロードエラー:"
+msgstr "ダウンロードエラー："
 
 #: templates/download_waiting.html:35
 msgid "알 수 없는 오류"
-msgstr "不明な誤り"
+msgstr "不明なエラー"
 
 #: templates/download_waiting.html:42
 msgid "상태 확인 중 오류:"
-msgstr "ステータス確認中のエラー:"
+msgstr "状態確認中にエラーが発生："
 
 #: templates/download_waiting.html:183
 msgid "다운로드가 진행 중입니다..."
-msgstr "ダウンロードが進行中です···"
+msgstr "ダウンロードが進行中です..."
 
 #: templates/download_waiting.html:193
 msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
-msgstr "ダウンロードが完了したら、自動的に次のページに移動します。"
+msgstr "ダウンロードが完了すると自動的に次のページに移動します。"
 
 #: templates/download_waiting.html:194
 msgid "취소하고 메인으로 돌아가기"
-msgstr "キャンセルしてメインに戻る"
+msgstr "キャンセルしてメインページに戻る"
 
 #: templates/index.html:6 templates/index.html:180
 msgid "동영상 다운로더"
-msgstr "動画ダウンロード"
+msgstr "動画ダウンローダー"
 
 #: templates/index.html:183
 msgid "동영상 URL:"
-msgstr "動画URL:"
+msgstr "動画URL："
 
 #: templates/index.html:184
-msgid "여기에 URL을 붙여넣으세요"
-msgstr "ここにURLを貼り付けてください"
+msgid "여기에 URL을 붙여넣으세요."
+msgstr "ここにURLを貼り付けてください。"
 
 #: templates/index.html:186
 msgid "다운로드"
 msgstr "ダウンロード"
 
 #: templates/index.html:195
-msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다."
-msgstr "YouTube、Instagram、TikTok、Facebook、Twitterなど様々なプラットフォームから動画をダウンロードできます。 ご希望のサイトから動画URLをコピーして貼り付けるだけで、最高画質でダウンロードできます。"
+msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
+msgstr "YouTube、Instagram、TikTok、Facebook、Twitterなど、様々なプラットフォームから動画をダウンロードできます。希望のサイトから動画URLをコピーして貼り付けるだけで、最高画質でダウンロードできます。"
 
 #: templates/index.html:198
 msgid "지원되는 사이트"
-msgstr "サポートされているサイト"
+msgstr "対応サイト"
 
 #: templates/index.html:208
 msgid "안전하고 빠른 비디오 다운로드 서비스"
-msgstr "安全かつ迅速なビデオダウンロードサービス"
+msgstr "安全で高速な動画ダウンロードサービス"
 
 #: venv/lib/python3.10/site-packages/click/_termui_impl.py:556
 #, python-brace-format

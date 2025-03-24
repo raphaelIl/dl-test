@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-24 23:19+0900\n"
-"PO-Revision-Date: 2025-03-24 23:19+0900\n"
+"POT-Creation-Date: 2025-03-25 00:33+0900\n"
+"PO-Revision-Date: 2025-03-25 00:33+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
 "Language-Team: zh <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgstr "下载完成"
 
 #: templates/download_result.html:135
 msgid "다운로드 완료!"
-msgstr "下载完成!"
+msgstr "下载完成！"
 
 #: templates/download_result.html:138
 msgid "파일 이름:"
@@ -60,7 +60,7 @@ msgstr "返回主页"
 
 #: templates/download_waiting.html:6 templates/download_waiting.html:181
 msgid "다운로드 진행 중"
-msgstr "下载进行中"
+msgstr "正在下载"
 
 #: templates/download_waiting.html:21
 msgid "다운로드 중입니다..."
@@ -84,11 +84,11 @@ msgstr "未知错误"
 
 #: templates/download_waiting.html:42
 msgid "상태 확인 중 오류:"
-msgstr "检查状态时出错："
+msgstr "状态检查错误："
 
 #: templates/download_waiting.html:183
 msgid "다운로드가 진행 중입니다..."
-msgstr "下载正在进行中..."
+msgstr "正在下载中..."
 
 #: templates/download_waiting.html:193
 msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
@@ -107,16 +107,16 @@ msgid "동영상 URL:"
 msgstr "视频URL："
 
 #: templates/index.html:184
-msgid "여기에 URL을 붙여넣으세요"
-msgstr "在此粘贴URL"
+msgid "여기에 URL을 붙여넣으세요."
+msgstr "在此处粘贴URL。"
 
 #: templates/index.html:186
 msgid "다운로드"
 msgstr "下载"
 
 #: templates/index.html:195
-msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드됩니다."
-msgstr "您可以从YouTube、Instagram、TikTok、Facebook、Twitter等各种平台下载视频。只需从所需网站复制视频URL并粘贴，即可以最高画质下载视频。"
+msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
+msgstr "支持从YouTube、Instagram、TikTok、Facebook、Twitter等多个平台下载视频。只需复制并粘贴视频URL，即可以最高画质下载视频。"
 
 #: templates/index.html:198
 msgid "지원되는 사이트"
