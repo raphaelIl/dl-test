@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, url_for, redirect, Response
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort
 import yt_dlp
 import os
 import uuid
@@ -16,7 +16,10 @@ from urllib.parse import quote
 import atexit
 import threading
 from flask_babel import Babel, gettext as _
+from ipaddress import ip_network, ip_address
 
+# 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
+ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',')
 # 환경 변수 로드
 load_dotenv()
 
@@ -25,7 +28,7 @@ app = Flask(__name__)
 # 다운로드 파일 저장 폴더 및 설정
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 2 * 1024 * 1024 * 1024))  # 기본 2GB
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
 
 # 전역 변수로 락 추가
 status_lock = threading.Lock()
@@ -36,7 +39,7 @@ download_status = {}
 # 요청 제한 설정
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["200 per day", "50 per hour"],
 )
 limiter.init_app(app)
 
@@ -406,6 +409,10 @@ def inject_languages():
 
 @app.route('/health')
 def health_check():
+    client_ip = get_remote_address()
+    if not check_ip_allowed(client_ip):
+        logging.warning(f"허용되지 않은 IP({client_ip})에서 health 엔드포인트 접근 시도")
+        abort(403)
     try:
         health_data = {
             "status": "healthy",
@@ -472,6 +479,20 @@ def health_check():
     except Exception as e:
         logging.error(f"헬스 체크 중 오류: {str(e)}", exc_info=True)
         return {"status": "unhealthy", "error": str(e)}, 500
+
+def check_ip_allowed(ip_str):
+    try:
+        client_ip = ip_address(ip_str)
+        for allowed in ALLOWED_HEALTH_IPS:
+            # CIDR 표기법 (예: 10.0.0.0/8) 또는 단일 IP 처리
+            if '/' in allowed:
+                if client_ip in ip_network(allowed):
+                    return True
+            elif client_ip == ip_address(allowed):
+                return True
+        return False
+    except ValueError:
+        return False
 
 def init_app():
     clean_old_files()
