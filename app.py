@@ -20,6 +20,10 @@ from ipaddress import ip_network, ip_address
 
 # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',')
+
+# 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
+MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3))
+
 # 환경 변수 로드
 load_dotenv()
 
@@ -65,7 +69,7 @@ LANGUAGES = {
 }
 
 # 스레드 풀 초기화
-executor = ThreadPoolExecutor(max_workers=6) # 코어당 3개 스레드
+executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
 # 먼저 babel 객체 생성
 babel = Babel(app)
