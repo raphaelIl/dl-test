@@ -18,27 +18,23 @@ import threading
 from flask_babel import Babel, gettext as _
 from ipaddress import ip_network, ip_address
 
-# 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
-ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',')
+load_dotenv() # 환경 변수 로드
 
-# 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
-MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3))
-
-# 환경 변수 로드
-load_dotenv()
-
-app = Flask(__name__)
-
-# 다운로드 파일 저장 폴더 및 설정
+# Env
+ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
+MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
 
-# 전역 변수로 락 추가
-status_lock = threading.Lock()
+app = Flask(__name__)
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
-# 다운로드 상태를 저장할 딕셔너리
-download_status = {}
+status_lock = threading.Lock() # 전역 변수로 락 추가
+download_status = {} # 다운로드 상태를 저장할 딕셔너리
+fs_lock = threading.Lock() # 파일 시스템 접근을 위한 락
+executor = None  # ThreadPoolExecutor 전역 변수
 
 # 요청 제한 설정
 limiter = Limiter(
@@ -68,15 +64,10 @@ LANGUAGES = {
     'zh': '中文'
 }
 
-# 스레드 풀 초기화
-executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
-
-# 먼저 babel 객체 생성
+# 1. Babel 인스턴스 생성
 babel = Babel(app)
-app.config['BABEL_DEFAULT_LOCALE'] = 'en'
-app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
-# 그 다음 get_locale 함수 정의
+# 2. get_locale 함수 정의
 def get_locale():
     # URL 경로에서 언어 코드 확인 (예: /ko/, /en/ 등)
     path_parts = request.path.split('/')
@@ -86,7 +77,7 @@ def get_locale():
     # 브라우저 언어 설정 확인
     return request.accept_languages.best_match(LANGUAGES.keys(), default='en')
 
-# 최신 Flask-Babel API 사용
+# 3. Babel 초기화 (get_locale 함수 정의 후에)
 babel.init_app(app, locale_selector=get_locale)
 
 def update_status(file_id, status_data):
@@ -395,8 +386,6 @@ def cleanup_on_exit():
     executor.shutdown(wait=True)
     logging.info("애플리케이션 종료: 리소스 정리 완료")
 
-fs_lock = threading.Lock()
-
 def safely_access_files(directory_path):
     with fs_lock:
         if os.path.exists(directory_path):
@@ -499,6 +488,9 @@ def check_ip_allowed(ip_str):
         return False
 
 def init_app():
+    global executor
+    executor = ThreadPoolExecutor(max_workers=MAX_WORKERS) # 스레드 풀 초기화
+
     clean_old_files()
 
     cleaning_thread = threading.Thread(target=schedule_cleaning)
