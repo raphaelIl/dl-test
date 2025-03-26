@@ -7,7 +7,7 @@ import time
 import logging
 import shutil
 import gc
-from datetime import datetime, timedelta
+from datetime import datetime
 from dotenv import load_dotenv
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -118,8 +118,8 @@ def download_video(video_url, file_id, download_path):
 
         ydl_opts = {
             # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            # 'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
-            'format': 'bestvideo[vcodec^=avc][height<=1080]+bestaudio[ext=m4a]/best[vcodec^=avc][height<=1080]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
+            'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
+            # 'format': 'bestvideo[vcodec^=avc][height<=1080]+bestaudio[ext=m4a]/best[vcodec^=avc][height<=1080]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
             # 'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
             'merge_output_format': 'mp4',
             'outtmpl': download_path + '/%(title)s.%(ext)s',
@@ -439,13 +439,19 @@ def health_check():
             health_data["status"] = "degraded"
 
         # 스레드 풀 상태 확인
-        try:
-            stats = executor._max_workers - executor._work_queue.qsize()
+        try: # TODO(2025.03.27.Thu): waiting_tasks 최대값 로깅으로 기록하려면?
+            queue_size = executor._work_queue.qsize() # 현재 대기 중인 작업 수
+            total_tasks = sum(1 for s in download_status.values() if s.get('status') == 'downloading' or s.get('status') == 'processing') # 전체 작업 추적을 위한 변수들 추가
+            active_workers = min(total_tasks - queue_size, executor._max_workers) if total_tasks > queue_size else 0 # 실제 실행 중인 작업자 수 (전체 작업 - 대기 중인 작업)
+            available_workers = executor._max_workers - active_workers # 사용 가능한 작업자 수
             health_data["components"]["thread_pool"] = {
                 "status": "healthy",
                 "max_workers": executor._max_workers,
-                "available_workers": stats,
-                "utilization_percent": round((executor._max_workers - stats) / executor._max_workers * 100, 2) if stats < executor._max_workers else 0
+                "available_workers": available_workers,
+                "active_workers": active_workers,
+                "waiting_tasks": queue_size,
+                "total_tasks": total_tasks,
+                "utilization_percent": round((active_workers / executor._max_workers) * 100, 2) if active_workers > 0 else 0
             }
         except Exception as e:
             health_data["components"]["thread_pool"] = {
