@@ -26,6 +26,8 @@ MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
+DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 10 per minute").split(',')
+DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
 app = Flask(__name__)
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
@@ -39,7 +41,7 @@ executor = None  # ThreadPoolExecutor 전역 변수
 # 요청 제한 설정
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=None,
 )
 limiter.init_app(app)
 
@@ -173,6 +175,8 @@ def index(lang):
         return redirect('/')
 
     if request.method == 'POST':
+        for limit in DOWNLOAD_LIMITS:
+            limiter.limit(limit)(lambda: None)()
         video_url = request.form['video_url']
 
         if not video_url:
