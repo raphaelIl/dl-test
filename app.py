@@ -115,7 +115,9 @@ def download_video(video_url, file_id, download_path):
                 update_status(file_id, {'status': 'processing', 'progress': 100})
 
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            # 'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
+            'format': 'bestvideo[vcodec^=avc][height<=1080]+bestaudio[ext=m4a]/best[vcodec^=avc][height<=1080]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
             # 'ffmpeg_location': r'C:\Users\raphael\Desktop\setup\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe',  # Running on window
             'merge_output_format': 'mp4',
             'outtmpl': download_path + '/%(title)s.%(ext)s',

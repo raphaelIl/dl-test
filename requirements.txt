@@ -1,6 +1,6 @@
 Flask==2.3.3
 Werkzeug==2.3.7
-yt-dlp==2023.11.16
+yt-dlp==2025.3.26
 python-dotenv==1.0.0
 Flask-Limiter==3.5.0
 gunicorn==21.2.0
