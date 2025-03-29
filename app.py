@@ -17,6 +17,7 @@ import atexit
 import threading
 from flask_babel import Babel, gettext as _
 from ipaddress import ip_network, ip_address
+from flask import send_from_directory
 
 load_dotenv() # 환경 변수 로드
 
@@ -498,6 +499,10 @@ def check_ip_allowed(ip_str):
         return False
     except ValueError:
         return False
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.static_folder, 'robots.txt')
 
 def init_app():
     global executor

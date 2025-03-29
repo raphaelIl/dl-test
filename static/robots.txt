@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /*/
+Disallow: /*/check-status/
+Disallow: /*/download-file/
+Disallow: /*/download-waiting/
+Disallow: /*/result/
+Disallow: /check-status/
+Disallow: /download-file/
+Disallow: /download-waiting/
+Disallow: /downloads/
+Disallow: /health
+Disallow: /result/
