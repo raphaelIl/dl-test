@@ -18,6 +18,7 @@ import threading
 from flask_babel import Babel, gettext as _
 from ipaddress import ip_network, ip_address
 from flask import send_from_directory
+from flask_limiter.errors import RateLimitExceeded
 
 load_dotenv() # 환경 변수 로드
 
@@ -28,6 +29,7 @@ DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 10 per minute").split(',')
+# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
 app = Flask(__name__)
@@ -96,6 +98,13 @@ def safe_path_join(*paths):
             raise ValueError("Invalid path")
         base = joined
     return base
+
+def safely_access_files(directory_path):
+    with fs_lock:
+        if os.path.exists(directory_path):
+            files = os.listdir(directory_path)
+            return files
+        return []
 
 def get_video_info(url):
     with yt_dlp.YoutubeDL({'quiet': True, 'simulate': True}) as ydl:
@@ -169,6 +178,11 @@ def index_redirect():
     # 브라우저 언어에 따라 적절한 언어 URL로 리다이렉트
     lang = get_locale()
     return redirect(f'/{lang}/')
+
+@app.errorhandler(429)
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_handler(e):
+    return render_template('index.html', error="Too many download requests. Please try again later."), 429
 
 @app.route('/<lang>/', methods=['GET', 'POST'])
 def index(lang):
@@ -284,7 +298,6 @@ def result(lang, file_id):
                            file_name=file_name,
                            file_size=readable_size(file_size))
 
-
 @app.route('/<lang>/download-file/<file_id>')
 def download_file(lang, file_id):
     if lang not in LANGUAGES:
@@ -332,6 +345,10 @@ def download_file(lang, file_id):
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
         return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}")
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.static_folder, 'robots.txt')
 
 def clean_old_files():
     try:
@@ -392,13 +409,6 @@ def schedule_cleaning():
 def cleanup_on_exit():
     executor.shutdown(wait=True)
     logging.info("애플리케이션 종료: 리소스 정리 완료")
-
-def safely_access_files(directory_path):
-    with fs_lock:
-        if os.path.exists(directory_path):
-            files = os.listdir(directory_path)
-            return files
-        return []
 
 @app.context_processor
 def inject_languages():
@@ -499,10 +509,6 @@ def check_ip_allowed(ip_str):
         return False
     except ValueError:
         return False
-
-@app.route('/robots.txt')
-def robots_txt():
-    return send_from_directory(app.static_folder, 'robots.txt')
 
 def init_app():
     global executor
