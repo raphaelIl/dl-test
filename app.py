@@ -28,8 +28,8 @@ MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
-DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 10 per minute").split(',')
-# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
+# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 10 per minute").split(',')
+DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
 app = Flask(__name__)
@@ -178,11 +178,6 @@ def index_redirect():
     # 브라우저 언어에 따라 적절한 언어 URL로 리다이렉트
     lang = get_locale()
     return redirect(f'/{lang}/')
-
-@app.errorhandler(429)
-@app.errorhandler(RateLimitExceeded)
-def ratelimit_handler(e):
-    return render_template('index.html', error="Too many download requests. Please try again later."), 429
 
 @app.route('/<lang>/', methods=['GET', 'POST'])
 def index(lang):
@@ -509,6 +504,35 @@ def check_ip_allowed(ip_str):
         return False
     except ValueError:
         return False
+
+# error handler
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html', error="The page you requested was not found."), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    logging.error(f"Server error occurred: {str(e)}", exc_info=True)
+    return render_template('error.html', error="An internal server error occurred. Please try again later."), 500
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('error.html', error="You don't have permission to access this resource."), 403
+
+@app.errorhandler(400)
+def bad_request(e):
+    return render_template('error.html', error="Invalid request."), 400
+
+@app.errorhandler(429)
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_handler(e):
+    logging.warning(f"Rate limit exceeded: {get_remote_address()}")
+    return render_template('error.html', error="Too many download requests. Please try again later."), 429
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(e):
+    logging.error(f"Unexpected error: {str(e)}", exc_info=True)
+    return render_template('error.html', error="An unexpected error occurred. Please try again later."), 500
 
 def init_app():
     global executor
