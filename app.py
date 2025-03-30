@@ -28,7 +28,7 @@ MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
-# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 10 per minute").split(',')
+# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
@@ -63,10 +63,15 @@ logging.basicConfig(
 
 # 언어 설정
 LANGUAGES = {
-    'ko': '한국어',
-    'en': 'English',
-    'ja': '日本語',
-    'zh': '中文'
+    'en': 'English',            # 영어 - 기본 언어
+    'id': 'Bahasa Indonesia',   # 인도네시아어 - 인도네시아 공식 언어
+    'pt_BR': 'Português (Brasil)',  # 브라질 포르투갈어 - 브라질에서 사용되는 포르투갈어 방언
+    'ko': '한국어',              # 한국어 - 대한민국의 공식 언어
+    'ja': '日本語',             # 일본어 - 일본의 공식 언어
+    'zh': '中文',               # 중국어 - 중국, 대만, 홍콩 등에서 사용
+    'vi': 'Tiếng Việt',        # 베트남어 - 베트남의 공식 언어
+    'es_MX': 'Español (México)',  # 멕시코 스페인어 - 멕시코에서 사용되는 스페인어 방언
+    'fil': 'Filipino'           # 필리핀어(타갈로그어) - 필리핀의 공식 언어
 }
 
 # 1. Babel 인스턴스 생성
@@ -552,7 +557,7 @@ def init_app():
 
 init_app()
 
-if __name__ == '__main__':
+if __name__ == '__main__': # local
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('FLASK_PORT', 5000))
     debug = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
