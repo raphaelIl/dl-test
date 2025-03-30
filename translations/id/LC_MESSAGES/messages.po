@@ -1,131 +1,130 @@
-# Translations template for PROJECT.
+# Indonesian translations for PROJECT.
 # Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-30 01:09+0900\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2025-03-30 00:57+0900\n"
+"PO-Revision-Date: 2025-03-30 00:57+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: id\n"
+"Language-Team: id <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:196
+#: app.py:194
 msgid "URL을 입력해주세요."
-msgstr ""
+msgstr "Silakan masukkan URL."
 
-#: app.py:309
+#: app.py:307
 msgid "유효하지 않은 파일 ID입니다."
-msgstr ""
+msgstr "ID file tidak valid."
 
 #: templates/download_result.html:6
 msgid "다운로드 완료"
-msgstr ""
+msgstr "Unduhan Selesai"
 
 #: templates/download_result.html:135
 msgid "다운로드 완료!"
-msgstr ""
+msgstr "Unduhan Selesai!"
 
 #: templates/download_result.html:138
 msgid "파일 이름:"
-msgstr ""
+msgstr "Nama File:"
 
 #: templates/download_result.html:139
 msgid "파일 크기:"
-msgstr ""
+msgstr "Ukuran File:"
 
 #: templates/download_result.html:140
 msgid "제목:"
-msgstr ""
+msgstr "Judul:"
 
 #: templates/download_result.html:141
 msgid "출처:"
-msgstr ""
+msgstr "Sumber:"
 
 #: templates/download_result.html:148
 msgid "파일 다운로드"
-msgstr ""
+msgstr "Unduh File"
 
 #: templates/download_result.html:151
 msgid "메인으로 돌아가기"
-msgstr ""
+msgstr "Kembali ke Halaman Utama"
 
 #: templates/download_waiting.html:6 templates/download_waiting.html:181
 msgid "다운로드 진행 중"
-msgstr ""
+msgstr "Mengunduh"
 
 #: templates/download_waiting.html:21
 msgid "다운로드 중입니다..."
-msgstr ""
+msgstr "Sedang mengunduh..."
 
 #: templates/download_waiting.html:25
 msgid "파일 처리 중입니다..."
-msgstr ""
+msgstr "Sedang memproses file..."
 
 #: templates/download_waiting.html:29
 msgid "다운로드 완료! 이동 중..."
-msgstr ""
+msgstr "Unduhan selesai! Sedang mengalihkan..."
 
 #: templates/download_waiting.html:35
 msgid "다운로드 오류:"
-msgstr ""
+msgstr "Kesalahan unduhan:"
 
 #: templates/download_waiting.html:35
 msgid "알 수 없는 오류"
-msgstr ""
+msgstr "Kesalahan tidak diketahui"
 
 #: templates/download_waiting.html:42
 msgid "상태 확인 중 오류:"
-msgstr ""
+msgstr "Kesalahan saat memeriksa status:"
 
 #: templates/download_waiting.html:183
 msgid "다운로드가 진행 중입니다..."
-msgstr ""
+msgstr "Unduhan sedang berlangsung..."
 
 #: templates/download_waiting.html:193
 msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
-msgstr ""
+msgstr "Akan otomatis dialihkan ke halaman berikutnya setelah unduhan selesai."
 
 #: templates/download_waiting.html:194
 msgid "취소하고 메인으로 돌아가기"
-msgstr ""
+msgstr "Batalkan dan kembali ke halaman utama"
 
 #: templates/index.html:6 templates/index.html:180
 msgid "동영상 다운로더"
-msgstr ""
+msgstr "Pengunduh Video"
 
 #: templates/index.html:183
 msgid "동영상 URL:"
-msgstr ""
+msgstr "URL Video:"
 
 #: templates/index.html:184
 msgid "여기에 URL을 붙여넣으세요."
-msgstr ""
+msgstr "Tempel URL di sini."
 
 #: templates/index.html:186
 msgid "다운로드"
-msgstr ""
+msgstr "Unduh"
 
 #: templates/index.html:195
-msgid ""
-"YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 "
-"있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
-msgstr ""
+msgid "YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
+msgstr "Anda dapat mengunduh video dari berbagai platform seperti YouTube, Instagram, TikTok, Facebook, Twitter, dan banyak lagi. Cukup salin URL video dari situs yang Anda inginkan dan tempelkan di sini untuk mengunduh dengan kualitas terbaik."
 
 #: templates/index.html:198
 msgid "지원되는 사이트"
-msgstr ""
+msgstr "Situs yang Didukung"
 
 #: templates/index.html:218
 msgid "안전하고 빠른 비디오 다운로드 서비스"
-msgstr ""
+msgstr "Layanan pengunduhan video yang aman dan cepat"
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"
@@ -659,4 +658,3 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
-
