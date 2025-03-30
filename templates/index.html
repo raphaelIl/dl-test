@@ -183,7 +183,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             padding: 15px;
-            width: 280px;
+            width: 320px;
             display: none;
             margin-top: 10px;
         }
@@ -225,7 +225,8 @@
         }
 
         .language-flag {
-            width: 24px;
+            min-width: 32px;
+            display: inline-block;
             margin-right: 8px;
             text-align: center;
             font-weight: bold;
@@ -278,7 +279,7 @@
     {% endif %}
 
     <div class="description">
-        {{ _('YouTube, Instagram, TikTok, Facebook, Twitter 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다.') }}
+        {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다.') }}
     </div>
 
     <div class="site-title">{{ _('지원되는 사이트') }}</div>
@@ -296,7 +297,7 @@
             <i class="fab fa-facebook site-icon" title="Facebook"></i>
         </a>
         <a href="https://twitter.com" target="_blank" rel="noopener">
-            <i class="fab fa-twitter site-icon" title="Twitter"></i>
+            <i class="fab fa-twitter site-icon" title="Twitter(X)"></i>
         </a>
     </div>
 
