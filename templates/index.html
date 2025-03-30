@@ -145,33 +145,119 @@
             color: #555;
         }
 
-        .language-selector {
-            text-align: right;
+        .language-dropzone {
+            display: flex;
+            justify-content: flex-end;
             margin-bottom: 20px;
+            position: relative;
         }
 
-        .language-selector a {
-            margin-left: 10px;
-            color: #555;
-            text-decoration: none;
+        .lang-btn {
+            position: relative;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            margin-right: 10px;
             font-size: 0.9rem;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
         }
 
-        .language-selector a.active {
-            font-weight: bold;
+        .lang-btn:hover {
+            background-color: #e5e5e5;
+        }
+
+        .lang-btn i {
+            margin-right: 5px;
+        }
+
+        .language-drawer {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1000;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            width: 280px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .language-drawer.open {
+            display: block;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .language-option:hover {
+            background-color: #f5f5f5;
+        }
+
+        .language-option.active {
+            background-color: rgba(52, 152, 219, 0.1);
             color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .language-option.dragging {
+            opacity: 0.5;
+        }
+
+        .language-flag {
+            width: 24px;
+            margin-right: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="language-selector">
-        {% for code, name in languages.items() %}
-        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-           {% if current_lang == code %}class="active"{% endif %}>
-            {{ name }}
-        </a>
-        {% endfor %}
+    <div class="language-dropzone">
+        <div class="lang-btn" id="languageToggle">
+            <i class="fas fa-globe"></i>
+            {{ languages[current_lang] }}
+            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+        </div>
+        <div class="language-drawer" id="languageDrawer">
+            <div class="language-options" id="languageOptions">
+                {% for code, name in languages.items() %}
+                <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                   class="language-option {% if current_lang == code %}active{% endif %}"
+                   draggable="true"
+                   data-lang-code="{{ code }}">
+                    <span class="language-flag">{{ code|upper }}</span>
+                    {{ name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
     <div class="logo">
@@ -218,5 +304,126 @@
         {{ _('안전하고 빠른 비디오 다운로드 서비스') }}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const languageToggle = document.getElementById('languageToggle');
+        const languageDrawer = document.getElementById('languageDrawer');
+        const languageOptions = document.getElementById('languageOptions');
+        const languages = document.querySelectorAll('.language-option');
+
+        languageToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            languageDrawer.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (languageDrawer.classList.contains('open') &&
+                !languageDrawer.contains(e.target) &&
+                e.target !== languageToggle) {
+                languageDrawer.classList.remove('open');
+            }
+        });
+
+        let draggedItem = null;
+
+        languages.forEach(lang => {
+            lang.addEventListener('dragstart', function(e) {
+                draggedItem = this;
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.getAttribute('data-lang-code'));
+
+                const ghostElement = document.createElement('div');
+                ghostElement.classList.add('language-option');
+                ghostElement.textContent = this.textContent;
+                ghostElement.style.opacity = '0.5';
+                document.body.appendChild(ghostElement);
+                e.dataTransfer.setDragImage(ghostElement, 0, 0);
+
+                setTimeout(() => {
+                    document.body.removeChild(ghostElement);
+                }, 0);
+            });
+
+            lang.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                draggedItem = null;
+                saveLanguageOrder();
+            });
+
+            lang.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            lang.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                if (this !== draggedItem) {
+                    this.style.backgroundColor = '#f0f0f0';
+                }
+            });
+
+            lang.addEventListener('dragleave', function() {
+                if (this !== draggedItem) {
+                    this.style.backgroundColor = '';
+                }
+            });
+
+            lang.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (this !== draggedItem) {
+                    this.style.backgroundColor = '';
+
+                    const targetRect = this.getBoundingClientRect();
+                    const targetMiddleY = targetRect.y + (targetRect.height / 2);
+
+                    if (e.clientY < targetMiddleY) {
+                        languageOptions.insertBefore(draggedItem, this);
+                    } else {
+                        languageOptions.insertBefore(draggedItem, this.nextSibling);
+                    }
+                }
+            });
+        });
+
+        function saveLanguageOrder() {
+            const orderedLangs = [];
+            document.querySelectorAll('.language-option').forEach(lang => {
+                orderedLangs.push(lang.getAttribute('data-lang-code'));
+            });
+
+            localStorage.setItem('languageOrder', JSON.stringify(orderedLangs));
+        }
+
+        function loadLanguageOrder() {
+            const savedOrder = localStorage.getItem('languageOrder');
+            if (savedOrder) {
+                try {
+                    const order = JSON.parse(savedOrder);
+                    const fragment = document.createDocumentFragment();
+
+                    order.forEach(langCode => {
+                        const langEl = document.querySelector(`.language-option[data-lang-code="${langCode}"]`);
+                        if (langEl) {
+                            fragment.appendChild(langEl);
+                        }
+                    });
+
+                    document.querySelectorAll('.language-option').forEach(lang => {
+                        if (!order.includes(lang.getAttribute('data-lang-code'))) {
+                            fragment.appendChild(lang);
+                        }
+                    });
+
+                    languageOptions.innerHTML = '';
+                    languageOptions.appendChild(fragment);
+                } catch (e) {
+                    console.error('Error loading language order:', e);
+                }
+            }
+        }
+
+        loadLanguageOrder();
+    });
+</script>
 </body>
 </html>
