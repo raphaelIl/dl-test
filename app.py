@@ -19,6 +19,7 @@ from flask_babel import Babel, gettext as _
 from ipaddress import ip_network, ip_address
 from flask import send_from_directory
 from flask_limiter.errors import RateLimitExceeded
+import psutil
 
 load_dotenv() # 환경 변수 로드
 
@@ -418,12 +419,15 @@ def inject_languages():
         'current_lang': get_locale()
     }
 
+# health check endpoint
 @app.route('/health')
 def health_check():
     client_ip = get_remote_address()
+    logging.info(f"헬스체크 요청 IP: {client_ip}")
     if not check_ip_allowed(client_ip):
         logging.warning(f"허용되지 않은 IP({client_ip})에서 health 엔드포인트 접근 시도")
         abort(403)
+
     try:
         health_data = {
             "status": "healthy",
@@ -451,7 +455,7 @@ def health_check():
             health_data["status"] = "degraded"
 
         # 스레드 풀 상태 확인
-        try: # TODO(2025.03.27.Thu): waiting_tasks 최대값 로깅으로 기록하려면?
+        try:
             queue_size = executor._work_queue.qsize() # 현재 대기 중인 작업 수
             total_tasks = sum(1 for s in download_status.values() if s.get('status') == 'downloading' or s.get('status') == 'processing') # 전체 작업 추적을 위한 변수들 추가
             active_workers = min(total_tasks - queue_size, executor._max_workers) if total_tasks > queue_size else 0 # 실제 실행 중인 작업자 수 (전체 작업 - 대기 중인 작업)
@@ -492,10 +496,96 @@ def health_check():
                 "error": str(e)
             }
 
+        # Gunicorn 워커/스레드 상태 추정
+        try:
+            process = psutil.Process()
+            connections = len(process.connections(kind='inet'))
+            cpu_percent = process.cpu_percent(interval=0.1)
+            system_load = os.getloadavg()[0]  # 1분 평균 로드
+
+            # 실시간 연결 수 vs. 최대 처리 가능 연결 수
+            workers = int(os.environ.get('GUNICORN_WORKERS', 1))
+            threads = int(os.environ.get('GUNICORN_THREADS', 4))
+
+            # 최대 동시 처리 가능 요청 수 계산
+            gunicorn_capacity = workers * threads
+            connections = len(process.connections(kind='inet'))
+
+            gunicorn_usage = min(100, (connections / gunicorn_capacity) * 100)
+            gunicorn_queue_estimate = max(0, connections - gunicorn_capacity)
+
+            # 스레드풀 대기열 크기 가져오기
+            threadpool_queue = health_data["components"]["thread_pool"]["waiting_tasks"]
+
+            health_data["components"]["gunicorn_stats"] = {
+                "status": "healthy" if gunicorn_usage < 80 else "warning",
+                "capacity": {
+                    "workers": workers,
+                    "threads_per_worker": threads,
+                    "max_concurrent_requests": gunicorn_capacity
+                },
+                "usage": {
+                    "active_connections": connections,
+                    "usage_percent": round(gunicorn_usage, 1),
+                    "estimated_queue": gunicorn_queue_estimate
+                },
+                "system": {
+                    "cpu_percent": round(cpu_percent, 1),
+                    "system_load": round(system_load, 2)
+                }
+            }
+
+            # 전체 병목 상태 평가
+            health_data["components"]["bottleneck_analysis"] = {
+                "http_layer_pressure": "high" if gunicorn_usage > 80 else "moderate" if gunicorn_usage > 60 else "low",
+                "worker_pool_pressure": "high" if threadpool_queue > 0 else "low",
+                "primary_bottleneck": "gunicorn_threads" if gunicorn_usage > 80 and (threadpool_queue == 0) else
+                "worker_pool" if threadpool_queue > 0 and gunicorn_usage < 80 else
+                "both" if gunicorn_usage > 80 and threadpool_queue > 0 else "none",
+                "scaling_recommendation": get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent)
+            }
+        except Exception as e:
+            health_data["components"]["gunicorn_stats"] = {
+                "status": "unknown",
+                "error": str(e)
+            }
+
         return health_data, 200
     except Exception as e:
         logging.error(f"헬스 체크 중 오류: {str(e)}", exc_info=True)
         return {"status": "unhealthy", "error": str(e)}, 500
+
+def get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent):
+    if gunicorn_usage > 80 and threadpool_queue > 0:
+        return {
+            "action": "increase_both",
+            "reason": "HTTP 요청과 작업 처리 모두 병목 발생",
+            "recommendation": "Gunicorn threads와 MAX_WORKERS 모두 증가 필요"
+        }
+    elif gunicorn_usage > 80:
+        return {
+            "action": "increase_threads",
+            "reason": "HTTP 요청 처리 병목 발생",
+            "recommendation": "Gunicorn threads 증가 또는 workers 증가 필요"
+        }
+    elif threadpool_queue > 0:
+        return {
+            "action": "increase_max_workers",
+            "reason": "다운로드 작업 처리 병목 발생",
+            "recommendation": "ThreadPool MAX_WORKERS 증가 필요"
+        }
+    elif cpu_percent > 80:
+        return {
+            "action": "increase_workers",
+            "reason": "CPU 사용률 높음",
+            "recommendation": "Gunicorn workers 증가로 CPU 활용도 향상 필요"
+        }
+    else:
+        return {
+            "action": "none",
+            "reason": "현재 모든 지표가 정상 범위",
+            "recommendation": "현재 설정 유지"
+        }
 
 def check_ip_allowed(ip_str):
     try:

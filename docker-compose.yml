@@ -1,20 +1,27 @@
 version: '3'
-
 services:
-  video-downloader:
+  web:
     build: .
+    image: raphael1021/dl-test:latest
     container_name: video-downloader
     restart: always
     ports:
-      - "5000:5000"
+      - "8080:5000"
     volumes:
       - ./downloads:/app/downloads
       - ./logs:/app/logs
     environment:
-      - FLASK_HOST=0.0.0.0
-      - FLASK_PORT=5000
-      - FLASK_DEBUG=false
-      - PYTHONUNBUFFERED=1
-      - DOWNLOAD_FOLDER=/app/downloads
+      - DOWNLOAD_FOLDER=downloads
       - MAX_FILE_AGE=7
-      - APP_VERSION=1.0.0
+      - MAX_FILE_SIZE=1073741824
+      - GUNICORN_WORKERS=1
+      - GUNICORN_THREADS=4
+      - MAX_WORKERS=3
+      - DOWNLOAD_LIMITS=300 per hour, 20 per minute
+      - PYTHONUNBUFFERED=1
+      - ALLOWED_HEALTH_IPS=127.0.0.1,125.177.83.187,172.16.0.0/12,192.168.0.0/16
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
