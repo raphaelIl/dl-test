@@ -3,13 +3,12 @@
 # Docker
 ## Docker build
 ```bash
-docker build -t video-downloader .
+docker build -t raphael1021/dl-test .
 ```
 
 ## Run
-```bash
-docker run -d -p 5000:5000 -v $(pwd)/downloads:/app/downloads -v $(pwd)/logs:/app/logs --name video-downloader video-downloader
-```
+5000 port는 맥에서 다른걸로 점유하고 있는듯  
+8080 port로 변경
 
 ```bash
 docker-compose build
