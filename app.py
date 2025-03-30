@@ -22,15 +22,15 @@ from flask_limiter.errors import RateLimitExceeded
 import psutil
 
 load_dotenv() # 환경 변수 로드
-
+# TODO(2025.03.31.Mon): div container 제거, seo 최적화, 광고 문구 추가(워터마크제거)
 # Env
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
-# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
-DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
+DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
+# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
 app = Flask(__name__)
