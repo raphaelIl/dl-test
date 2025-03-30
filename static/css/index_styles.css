@@ -1,0 +1,241 @@
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --error-color: #e74c3c;
+    --background-color: #f8f9fa;
+    --card-color: #ffffff;
+}
+
+.container {
+    width: 90%;
+    max-width: 600px;
+    background-color: var(--card-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
+    margin: 40px auto;
+}
+
+.logo {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e1e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+}
+
+button i {
+    margin-right: 8px;
+}
+
+.error {
+    color: var(--error-color);
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: rgba(231, 76, 60, 0.1);
+    text-align: left;
+}
+
+.footer {
+    margin-top: 30px;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.description {
+    margin: 20px 0;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* 지원되는 사이트 스타일 */
+.supported-sites {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.site-icon {
+    color: #777;
+    font-size: 1.5rem;
+    transition: color 0.3s;
+}
+
+.site-icon:hover {
+    color: var(--primary-color);
+}
+
+.site-title {
+    margin-top: 15px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* 언어 선택 드롭다운 스타일 */
+.language-dropzone {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.lang-btn {
+    position: relative;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+}
+
+.lang-btn:hover {
+    background-color: #e5e5e5;
+}
+
+.lang-btn i {
+    margin-right: 5px;
+}
+
+.language-drawer {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    width: 320px;
+    display: none;
+    margin-top: 10px;
+}
+
+.language-drawer.open {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.language-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: #333;
+}
+
+.language-option:hover {
+    background-color: #f5f5f5;
+}
+
+.language-option.active {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.language-option.dragging {
+    opacity: 0.5;
+}
+
+.language-flag {
+    min-width: 32px;
+    display: inline-block;
+    margin-right: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* 사용 설명서 스타일 */
+.guide-button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 5px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.guide-content {
+    margin-top: 20px;
+    text-align: left;
+    background-color: rgba(52, 152, 219, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

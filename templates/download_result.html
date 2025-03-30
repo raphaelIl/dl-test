@@ -1,124 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ current_lang }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ _('다운로드 완료') }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --success-color: #2ecc71;
-            --background-color: #f8f9fa;
-            --card-color: #ffffff;
-        }
+{% extends "base.html" %}
 
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--background-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+{% block title %}{{ _('다운로드 완료') }}{% endblock %}
 
-        .container {
-            width: 90%;
-            max-width: 600px;
-            background-color: var(--card-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            text-align: center;
-        }
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+{% endblock %}
 
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .success-icon {
-            font-size: 3rem;
-            color: var(--success-color);
-            margin-bottom: 20px;
-        }
-
-        .file-info {
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .file-info p {
-            margin: 8px 0;
-            color: #555;
-        }
-
-        .file-info .label {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 10px 5px;
-            transition: background-color 0.3s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-        }
-
-        .btn-success:hover {
-            background-color: #27ae60;
-        }
-
-        .btn i {
-            margin-right: 8px;
-        }
-
-        .actions {
-            margin-top: 25px;
-        }
-
-        .language-selector {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-
-        .language-selector a {
-            margin-left: 10px;
-            color: #555;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .language-selector a.active {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-    </style>
-</head>
-<body>
+{% block content %}
 <div class="container">
     <div class="language-selector">
         {% for code, name in languages.items() %}
@@ -152,5 +41,4 @@
         </a>
     </div>
 </div>
-</body>
-</html>
+{% endblock %}

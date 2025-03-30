@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
+{% block title %}{{ _('오류 발생') }}{% endblock %}
+
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
 <style>
     .error-container {
         margin-top: 3rem;
@@ -46,21 +50,28 @@
 
 {% block content %}
 <div class="container error-container">
+    <div class="language-selector">
+        {% for code, name in languages.items() %}
+        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+           {% if current_lang == code %}class="active"{% endif %}>
+            {{ name }}
+        </a>
+        {% endfor %}
+    </div>
+
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <div class="text-center">
-                <div class="error-icon">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                </div>
-            </div>
             <div class="card error-card">
-                <div class="card-header error-header text-white">
-                    <h3 class="mb-0 text-center">Oops! Error Occurred</h3>
+                <div class="error-header text-center text-white">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h2>{{ _('오류가 발생했습니다') }}</h2>
                 </div>
-                <div class="card-body error-body text-center">
+                <div class="error-body text-center">
                     <p class="error-message">{{ error }}</p>
-                    <a href="{{ url_for('index_redirect') }}" class="btn btn-primary home-button">
-                        <i class="bi bi-house-door-fill me-2"></i> Return to Home
+                    <a href="{{ url_for('index', lang=current_lang) }}" class="btn home-button">
+                        <i class="fas fa-home"></i> {{ _('홈으로 돌아가기') }}
                     </a>
                 </div>
             </div>
@@ -73,14 +84,14 @@
 <script>
     // 페이지 로드 시 간단한 애니메이션 효과
     document.addEventListener('DOMContentLoaded', function() {
-        const card = document.querySelector('.error-card');
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'all 0.5s ease';
+        const errorCard = document.querySelector('.error-card');
+        errorCard.style.opacity = '0';
+        errorCard.style.transform = 'translateY(20px)';
 
-        setTimeout(function() {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
+        setTimeout(() => {
+            errorCard.style.transition = 'all 0.5s ease';
+            errorCard.style.opacity = '1';
+            errorCard.style.transform = 'translateY(0)';
         }, 100);
     });
 </script>

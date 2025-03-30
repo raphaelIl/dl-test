@@ -1,173 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ current_lang }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ _('다운로드 진행 중') }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        // 주기적으로 상태 확인
-        let checkStatusInterval;
+{% extends "base.html" %}
 
-        function checkStatus() {
-            fetch('/{{ current_lang }}/check-status/{{ file_id }}')
-                .then(response => response.json())
-                .then(data => {
-                    const statusElement = document.getElementById('status-text');
-                    const progressBar = document.getElementById('progress-bar');
-                    const progressText = document.getElementById('progress-text');
+{% block title %}{{ _('다운로드 진행 중') }}{% endblock %}
 
-                    if (data.status === 'downloading') {
-                        statusElement.innerText = '{{ _('다운로드 중입니다...') }}';
-                        progressBar.style.width = Math.min(data.progress, 100) + '%';
-                        progressText.innerText = Math.round(data.progress) + '%';
-                    } else if (data.status === 'processing') {
-                        statusElement.innerText = '{{ _('파일 처리 중입니다...') }}';
-                        progressBar.style.width = '100%';
-                        progressText.innerText = '100%';
-                    } else if (data.status === 'completed') {
-                        statusElement.innerText = '{{ _('다운로드 완료! 이동 중...') }}';
-                        progressBar.style.width = '100%';
-                        progressText.innerText = '100%';
-                        clearInterval(checkStatusInterval);
-                        window.location.href = data.redirect;
-                    } else if (data.status === 'error') {
-                        statusElement.innerText = '{{ _('다운로드 오류:') }} ' + (data.error || '{{ _('알 수 없는 오류') }}');
-                        progressBar.style.backgroundColor = '#f44336';
-                        progressBar.style.width = '100%';
-                        clearInterval(checkStatusInterval);
-                    }
-                })
-                .catch(error => {
-                    console.error('{{ _('상태 확인 중 오류:') }}', error);
-                });
-        }
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+{% endblock %}
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // 페이지 로드 시 즉시 상태 확인
-            checkStatus();
-
-            // 2초마다 상태 확인
-            checkStatusInterval = setInterval(checkStatus, 2000);
-        });
-    </script>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --error-color: #e74c3c;
-            --background-color: #f8f9fa;
-            --card-color: #ffffff;
-        }
-
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--background-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 600px;
-            background-color: var(--card-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .status-text {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            color: #555;
-        }
-
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 5px solid var(--primary-color);
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .progress-container {
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            position: relative;
-            height: 30px;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            background-color: var(--primary-color);
-            height: 100%;
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .progress-text {
-            color: white;
-            font-weight: bold;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 500;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .language-selector {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-
-        .language-selector a {
-            margin-left: 10px;
-            color: #555;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .language-selector a.active {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-    </style>
-</head>
-<body>
+{% block content %}
 <div class="container">
     <div class="language-selector">
         {% for code, name in languages.items() %}
@@ -191,7 +31,57 @@
     </div>
 
     <p>{{ _('다운로드가 완료되면 자동으로 다음 페이지로 이동합니다.') }}</p>
-    <a href="{{ url_for('index', lang=current_lang) }}" class="btn">{{ _('취소하고 메인으로 돌아가기') }}</a>
+    <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
+        <i class="fas fa-home"></i> {{ _('취소하고 메인으로 돌아가기') }}
+    </a>
 </div>
-</body>
-</html>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 주기적으로 상태 확인
+    let checkStatusInterval;
+
+    function checkStatus() {
+        fetch('/{{ current_lang }}/check-status/{{ file_id }}')
+            .then(response => response.json())
+            .then(data => {
+                const statusElement = document.getElementById('status-text');
+                const progressBar = document.getElementById('progress-bar');
+                const progressText = document.getElementById('progress-text');
+
+                if (data.status === 'downloading') {
+                    statusElement.innerText = '{{ _('다운로드 중입니다...') }}';
+                    progressBar.style.width = Math.min(data.progress, 100) + '%';
+                    progressText.innerText = Math.round(data.progress) + '%';
+                } else if (data.status === 'processing') {
+                    statusElement.innerText = '{{ _('파일 처리 중입니다...') }}';
+                    progressBar.style.width = '100%';
+                    progressText.innerText = '100%';
+                } else if (data.status === 'completed') {
+                    statusElement.innerText = '{{ _('다운로드 완료! 이동 중...') }}';
+                    progressBar.style.width = '100%';
+                    progressText.innerText = '100%';
+                    clearInterval(checkStatusInterval);
+                    window.location.href = data.redirect;
+                } else if (data.status === 'error') {
+                    statusElement.innerText = '{{ _('다운로드 오류:') }} ' + (data.error || '{{ _('알 수 없는 오류') }}');
+                    progressBar.style.backgroundColor = '#f44336';
+                    progressBar.style.width = '100%';
+                    clearInterval(checkStatusInterval);
+                }
+            })
+            .catch(error => {
+                console.error('{{ _('상태 확인 중 오류:') }}', error);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 페이지 로드 시 즉시 상태 확인
+        checkStatus();
+
+        // 2초마다 상태 확인
+        checkStatusInterval = setInterval(checkStatus, 2000);
+    });
+</script>
+{% endblock %}
