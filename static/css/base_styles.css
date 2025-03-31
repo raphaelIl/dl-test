@@ -41,6 +41,10 @@ header {
     justify-content: center;
 }
 
+.site-logo::after {
+    display: none;
+}
+
 .grab {
     color: #ffffff;
 }

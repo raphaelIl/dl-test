@@ -68,17 +68,17 @@ h1 {
     width: 100%;
 }
 
-h1::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: var(--primary-gradient);
-    border-radius: 2px;
-}
+/*h1::after {*/
+/*    content: '';*/
+/*    position: absolute;*/
+/*    bottom: -8px;*/
+/*    left: 50%;*/
+/*    transform: translateX(-50%);*/
+/*    width: 80px;*/
+/*    height: 4px;*/
+/*    background: var(--primary-gradient);*/
+/*    border-radius: 2px;*/
+/*}*/
 
 /* Description text styles */
 .description {
@@ -291,17 +291,17 @@ form button i {
     width: 100%;
 }
 
-.how-to-section h3::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background: var(--primary-gradient);
-    border-radius: 2px;
-}
+/*.how-to-section h3::after {*/
+/*    content: '';*/
+/*    position: absolute;*/
+/*    bottom: 0;*/
+/*    left: 50%;*/
+/*    transform: translateX(-50%);*/
+/*    width: 40px;*/
+/*    height: 3px;*/
+/*    background: var(--primary-gradient);*/
+/*    border-radius: 2px;*/
+/*}*/
 
 .step-cards {
     display: flex;
@@ -469,6 +469,34 @@ form button i {
     text-transform: uppercase;
 }
 
+.legal-notice {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px 30px;
+    margin-top: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.legal-notice h4 {
+    color: #444;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+}
+
+.legal-notice h4::after {
+    display: none; /* 밑줄 제거 */
+}
+
+.legal-notice p {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
 /* Media queries */
 @media (max-width: 1200px) {
     .container {
@@ -503,5 +531,19 @@ form button i {
     .language-drawer {
         position: absolute;
         right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .legal-notice {
+        padding: 15px 20px;
+    }
+
+    .legal-notice h4 {
+        font-size: 1.1rem;
+    }
+
+    .legal-notice p {
+        font-size: 0.85rem;
     }
 }
