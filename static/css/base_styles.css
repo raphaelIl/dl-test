@@ -15,7 +15,6 @@ body {
     padding: 0;
 }
 
-/* 헤더 스타일 */
 header {
     background-color: #333;
     color: white;
@@ -39,18 +38,22 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: 300;
 }
 
 .site-logo::after {
     display: none;
+    font-weight: 300;
 }
 
 .grab {
     color: #ffffff;
+    font-weight: 300;
 }
 
 .video {
     color: var(--primary-color);
+    font-weight: 300;
 }
 
 .logo-icon {
@@ -64,8 +67,6 @@ header {
     opacity: 0.8;
 }
 
-/* base_styles.css에 공통 언어 선택기 스타일 추가 */
-/* 언어 선택 드롭다운 공통 스타일 */
 .language-dropzone {
     display: flex;
     justify-content: flex-end;
@@ -149,13 +150,11 @@ header {
     font-weight: bold;
 }
 
-/* 애니메이션 */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 메인 콘텐츠 영역 */
 main {
     padding: 2rem 0;
 }
@@ -166,7 +165,6 @@ main {
     padding: 0 20px;
 }
 
-/* 푸터 스타일 */
 footer {
     background-color: #333;
     color: white;
@@ -186,7 +184,6 @@ footer p {
     opacity: 0.8;
 }
 
-/* 반응형 스타일 */
 @media (max-width: 768px) {
     .site-logo {
         font-size: 1.8rem;

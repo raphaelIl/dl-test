@@ -43,7 +43,6 @@ h1 {
     margin-right: 8px;
 }
 
-/* download_waiting 페이지 스타일 */
 .status-text {
     font-size: 1.2rem;
     margin-bottom: 20px;
@@ -91,7 +90,6 @@ h1 {
     font-weight: bold;
 }
 
-/* download_result 페이지 스타일 */
 .success-icon {
     font-size: 3rem;
     color: var(--success-color);
