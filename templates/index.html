@@ -35,7 +35,7 @@
 
     <h1>{{ _('최고 화질의 SNS 동영상 다운로더') }}</h1>
     <p class="description">
-        {{ _('GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다.') | safe }}
+        {{ _('GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다.') | safe }}
     </p>
 
     {% if error %}
@@ -54,37 +54,6 @@
         </button>
     </form>
 
-    <div class="benefits-section">
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-mobile-alt"></i>
-            </div>
-            <h3 class="benefit-title">{{ _('모바일 완벽 호환') }}</h3>
-            <p>{{ _('스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요.') }}</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-dollar-sign"></i>
-            </div>
-            <h3 class="benefit-title">{{ _('완전 무료') }}</h3>
-            <p>{{ _('모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다.') }}</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-tachometer-alt"></i>
-            </div>
-            <h3 class="benefit-title">{{ _('빠른 다운로드') }}</h3>
-            <p>{{ _('최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다.') }}</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">
-                <i class="fas fa-ban"></i>
-            </div>
-            <h3 class="benefit-title">{{ _('워터마크 없음') }}</h3>
-            <p>{{ _('다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다.') }}</p>
-        </div>
-    </div>
-
     <div class="how-to-section">
         <h3>{{ _('사용 방법') }}</h3>
         <div class="step-cards">
@@ -94,7 +63,7 @@
                     <i class="fas fa-copy"></i>
                 </div>
                 <h4>{{ _('URL 복사') }}</h4>
-                <p>{{ _('YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.(공유하기)') }}</p>
+                <p>{{ _('YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기 버튼)') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-number">2</div>
@@ -120,6 +89,34 @@
         <div class="step-cards">
             <div class="step-card">
                 <div class="step-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>{{ _('모바일 완벽 호환') }}</h4>
+                <p>{{ _('스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h4>{{ _('완전 무료') }}</h4>
+                <p>{{ _('모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <h4>{{ _('브라우저 기반') }}</h4>
+                <p>{{ _('전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <h4>{{ _('워터마크 없음') }}</h4>
+                <p>{{ _('다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <h4>{{ _('최고 화질') }}</h4>
@@ -141,14 +138,13 @@
             </div>
             <div class="step-card">
                 <div class="step-icon">
-                    <i class="fas fa-desktop"></i>
+                    <i class="fas fa-tachometer-alt"></i>
                 </div>
-                <h4>{{ _('브라우저 기반') }}</h4>
-                <p>{{ _('전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요.') }}</p>
+                <h4>{{ _('빠른 다운로드') }}</h4>
+                <p>{{ _('최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다.') }}</p>
             </div>
         </div>
     </div>
-
     <div class="site-title">{{ _('지원하는 플랫폼') }}</div>
     <div class="supported-sites">
         <a href="https://www.youtube.com" title="YouTube" target="_blank" rel="noopener noreferrer">
