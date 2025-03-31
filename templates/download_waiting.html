@@ -53,7 +53,6 @@
 
 {% block extra_js %}
     <script>
-        // Language dropdown functionality
         document.addEventListener('DOMContentLoaded', function() {
             const languageToggle = document.getElementById('languageToggle');
             const languageDrawer = document.getElementById('languageDrawer');
@@ -73,18 +72,15 @@
                 });
             }
 
-            // 초기 상태 확인 및 주기적 업데이트 설정
-            checkStatus(); // 초기 상태 확인
-            checkStatusInterval = setInterval(checkStatus, 2000); // 2초마다 상태 확인
+            checkStatus();
+            checkStatusInterval = setInterval(checkStatus, 2000);
         });
 
-        // 주기적으로 상태 확인
         let checkStatusInterval;
 
         function checkStatus() {
             const fileId = '{{ file_id }}';
 
-            // 진행률 부드럽게 증가시키는 함수
             function smoothProgress() {
                 const progressBar = document.getElementById('progress-bar');
                 const progressText = document.getElementById('progress-text');
@@ -96,12 +92,10 @@
                     progressBar.style.width = `${newProgress}%`;
                     progressText.textContent = `${Math.round(newProgress)}%`;
 
-                    // 계속 부드럽게 증가
                     setTimeout(smoothProgress, 300);
                 }
             }
 
-            // 초기 부드러운 증가 시작
             if (parseFloat(document.getElementById('progress-bar').style.width || '0') < 5) {
                 setTimeout(smoothProgress, 300);
             }
@@ -114,7 +108,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Status data:', data); // 디버깅 로그
+                    console.log('Status data:', data);
                     const progressBar = document.getElementById('progress-bar');
                     const progressText = document.getElementById('progress-text');
                     const statusText = document.getElementById('status-text');
@@ -123,9 +117,8 @@
                         clearInterval(checkStatusInterval);
                         statusText.textContent = '{{ _("다운로드 완료! 잠시 후 결과 페이지로 이동합니다...") }}';
 
-                        // 100%로 부드럽게 전환
                         const currentWidth = parseFloat(progressBar.style.width || '0');
-                        const duration = 500; // 0.5초 동안 완료 애니메이션
+                        const duration = 500;
                         const start = performance.now();
 
                         function animateToCompletion(timestamp) {
@@ -139,7 +132,6 @@
                             if (progress < 1) {
                                 requestAnimationFrame(animateToCompletion);
                             } else {
-                                // 애니메이션 완료 후 리디렉션
                                 setTimeout(() => {
                                     window.location.href = `/{{ current_lang }}/result/${fileId}`;
                                 }, 1000);
@@ -148,28 +140,22 @@
 
                         requestAnimationFrame(animateToCompletion);
                     } else if (data.status === 'processing') {
-                        // 진행 상태 값 처리
                         let targetProgress = 0;
 
-                        // 서버에서 제공하는 진행률 확인
                         if (data.progress !== undefined) {
                             targetProgress = parseFloat(data.progress);
                         } else if (data.percent !== undefined) {
                             targetProgress = parseFloat(data.percent);
                         }
 
-                        // 유효하지 않은 값 처리
                         if (isNaN(targetProgress)) targetProgress = 0;
 
-                        // 진행 중일 때는 10-95% 범위 제한
                         targetProgress = Math.max(10, Math.min(95, targetProgress));
 
-                        // 현재 표시된 진행률
                         const currentWidth = parseFloat(progressBar.style.width || '0');
 
-                        // 현재 진행률보다 서버값이 크면 부드럽게 증가
                         if (targetProgress > currentWidth) {
-                            const duration = 1000; // 1초 동안 애니메이션
+                            const duration = 1000;
                             const start = performance.now();
 
                             function animateProgress(timestamp) {
@@ -203,19 +189,16 @@
                 .catch(error => {
                     console.error('Status check error:', error);
 
-                    // 오류 발생 시에도 진행률은 계속 증가
                     const progressBar = document.getElementById('progress-bar');
                     const progressText = document.getElementById('progress-text');
                     const currentWidth = parseFloat(progressBar.style.width || '0');
 
                     if (currentWidth < 95) {
-                        // 서버 응답이 없을 때는 더 천천히 증가
                         const increment = Math.max(0.2, Math.min(1, 95 - currentWidth) / 30);
                         const newProgress = currentWidth + increment;
                         progressBar.style.width = `${newProgress}%`;
                         progressText.textContent = `${Math.round(newProgress)}%`;
                     } else {
-                        // 95% 이상이면 최종적으로 결과 페이지로 리디렉션
                         setTimeout(() => {
                             window.location.href = `/{{ current_lang }}/result/${fileId}`;
                         }, 5000);

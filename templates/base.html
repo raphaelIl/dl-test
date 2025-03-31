@@ -15,6 +15,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base_styles.css') }}">
     <!-- SEO - Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "GrabVideo",
+        "description": "YouTube, Instagram, TikTok, Twitter(X), Facebook(Meta) 등 다양한 소셜 미디어 플랫폼에서 영상을 다운로드할 수 있는 서비스입니다.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web"
+    }
+    </script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
