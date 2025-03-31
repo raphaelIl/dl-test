@@ -1,204 +1,287 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('동영상 다운로더 - YouTube, TikTok, Instagram 무료 다운로드') }}{% endblock %}
+{% block title %}{{ _('동영상 다운로더') }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="language-dropzone">
-            <div class="lang-btn" id="languageToggle">
-                <i class="fas fa-globe"></i>
-                {{ languages[current_lang] }}
-                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
-            </div>
-            <div class="language-drawer" id="languageDrawer">
-                <div class="language-options" id="languageOptions">
-                    {% for code, name in languages.items() %}
-                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-                           class="language-option {% if current_lang == code %}active{% endif %}"
-                           data-lang-code="{{ code }}">
-                            <span class="language-flag">{{ code }}</span>
-                            {{ name }}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
+<div class="container">
+    <div class="language-dropzone">
+        <div class="lang-btn" id="languageToggle">
+            <i class="fas fa-globe"></i>
+            {{ languages[current_lang] }}
+            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
         </div>
-
-        <div style="text-align: center;">
-            <div class="logo">
-                <i class="fas fa-video"></i>
+        <div class="language-drawer" id="languageDrawer">
+            <div class="language-options" id="languageOptions">
+                {% for code, name in languages.items() %}
+                <a href="/{{ code }}/"
+                   class="language-option {% if current_lang == code %}active{% endif %}"
+                   data-lang-code="{{ code }}">
+                    <span class="language-flag">{{ code }}</span>
+                    {{ name }}
+                </a>
+                {% endfor %}
             </div>
-            <h1>{{ _('동영상 다운로더') }}</h1>
-        </div>
-
-        <div class="description">
-            {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다.') }}
-        </div>
-
-        <form method="post" action="{{ url_for('index', lang=current_lang) }}">
-            <div class="form-group">
-                <label for="video_url">{{ _('동영상 URL') }}</label>
-                <input type="text" id="video_url" name="video_url" placeholder="{{ _('동영상 URL을 입력하세요') }}"
-                       value="{{ video_url }}" required>
-            </div>
-            <button type="submit"><i class="fas fa-cloud-download-alt"></i> {{ _('다운로드') }}</button>
-        </form>
-        {% if error %}
-            <div class="error">
-                <i class="fas fa-exclamation-circle"></i> {{ error }}
-            </div>
-        {% endif %}
-
-        <div class="benefits-section">
-            <div class="benefit-card">
-                <div class="benefit-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="benefit-title">{{ _('빠른 다운로드') }}</div>
-                <p>{{ _('최적화된 서버로 빠른 다운로드 속도를 제공합니다.') }}</p>
-            </div>
-            <div class="benefit-card">
-                <div class="benefit-icon">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <div class="benefit-title">{{ _('안전한 사용') }}</div>
-                <p>{{ _('광고 없이 안전하게 이용할 수 있습니다.') }}</p>
-            </div>
-            <div class="benefit-card">
-                <div class="benefit-icon">
-                    <i class="fas fa-award"></i>
-                </div>
-                <div class="benefit-title">{{ _('최고 화질') }}</div>
-                <p>{{ _('가능한 최고 화질로 동영상을 다운로드합니다.') }}</p>
-            </div>
-        </div>
-
-        <div class="site-title">{{ _('지원되는 사이트') }}</div>
-        <div class="supported-sites">
-            <a href="https://www.youtube.com" target="_blank" rel="noopener">
-                <i class="fab fa-youtube site-icon"></i>
-            </a>
-            <a href="https://www.instagram.com" target="_blank" rel="noopener">
-                <i class="fab fa-instagram site-icon"></i>
-            </a>
-            <a href="https://www.tiktok.com" target="_blank" rel="noopener">
-                <i class="fab fa-tiktok site-icon"></i>
-            </a>
-            <a href="https://www.facebook.com" target="_blank" rel="noopener">
-                <i class="fab fa-facebook site-icon"></i>
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener">
-                <i class="fab fa-twitter site-icon"></i>
-            </a>
-        </div>
-
-        <div class="how-to-section">
-            <h3>{{ _('사용 방법') }}</h3>
-            <div class="step-cards">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <div class="step-icon"><i class="fas fa-link"></i></div>
-                    <p>{{ _('원하는 동영상의 URL을 복사하세요') }}</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <div class="step-icon"><i class="fas fa-paste"></i></div>
-                    <p>{{ _('URL을 입력란에 붙여넣기하세요') }}</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <div class="step-icon"><i class="fas fa-download"></i></div>
-                    <p>{{ _('다운로드 버튼을 클릭하세요') }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <h3>{{ _('자주 묻는 질문') }}</h3>
-            <div class="faq-section">
-                <div class="faq-question">
-                    {{ _('어떤 사이트를 지원하나요?') }}
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer" style="display: none;">
-                    {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등의 주요 동영상 사이트를 지원합니다.') }}
-                </div>
-
-                <div class="faq-question">
-                    {{ _('다운로드 속도가 느린 이유는 무엇인가요?') }}
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer" style="display: none;">
-                    {{ _('다운로드 속도는 서버 트래픽, 인터넷 연결 속도, 파일 크기에 따라 달라질 수 있습니다.') }}
-                </div>
-
-                <div class="faq-question">
-                    {{ _('사용료는 얼마인가요?') }}
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer" style="display: none;">
-                    {{ _('모든 기능을 무료로 이용할 수 있습니다.') }}
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            {{ _('안전하고 빠른 비디오 다운로드 서비스') }}
         </div>
     </div>
+
+    <div class="logo">
+        <i class="fas fa-video"></i>
+    </div>
+
+    <h1>{{ _('최고 화질의 동영상 다운로더') }}</h1>
+    <p class="description">
+        {{ _('GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook 등 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요. 완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다. PC뿐만 아니라 모바일에서도 완벽하게 작동합니다.') }}
+    </p>
+
+    {% if error %}
+    <div class="error">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        <div class="form-group">
+            <label for="video_url">{{ _('동영상 URL') }}</label>
+            <input type="text" id="video_url" name="video_url" placeholder="{{ _('YouTube, TikTok, Instagram, Facebook 등의 동영상 URL을 붙여넣으세요') }}" required>
+        </div>
+        <button type="submit">
+            <i class="fas fa-download"></i> {{ _('다운로드 시작') }}
+        </button>
+    </form>
+
+    <!-- 우수성 강조 섹션 -->
+    <div class="benefits-section">
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3 class="benefit-title">{{ _('모바일 완벽 호환') }}</h3>
+            <p>{{ _('스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요.') }}</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <h3 class="benefit-title">{{ _('완전 무료') }}</h3>
+            <p>{{ _('모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다.') }}</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <h3 class="benefit-title">{{ _('빠른 다운로드') }}</h3>
+            <p>{{ _('최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다.') }}</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">
+                <i class="fas fa-ban"></i>
+            </div>
+            <h3 class="benefit-title">{{ _('워터마크 없음') }}</h3>
+            <p>{{ _('다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다.') }}</p>
+        </div>
+    </div>
+
+    <div class="how-to-section">
+        <h3>{{ _('사용 방법') }}</h3>
+        <div class="step-cards">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <h4>{{ _('URL 복사') }}</h4>
+                <p>{{ _('YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.(공유하기)') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">
+                    <i class="fas fa-paste"></i>
+                </div>
+                <h4>{{ _('URL 붙여넣기') }}</h4>
+                <p>{{ _('복사한 URL을 위 입력란에 붙여넣으세요.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h4>{{ _('다운로드') }}</h4>
+                <p>{{ _('다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다.') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="how-to-section">
+        <h3>{{ _('GrabVideo의 특별한 기능') }}</h3>
+        <div class="step-cards">
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h4>{{ _('최고 화질') }}</h4>
+                <p>{{ _('4K, HD 등 가능한 최고 화질로 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>{{ _('안전한 다운로드') }}</h4>
+                <p>{{ _('광고나 악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h4>{{ _('회원가입 불필요') }}</h4>
+                <p>{{ _('계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다.') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <h4>{{ _('무제한 다운로드') }}</h4>
+                <p>{{ _('일일 다운로드 제한이 없습니다. 필요한 만큼 자유롭게 이용하세요.') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="site-title">{{ _('지원하는 플랫폼') }}</div>
+    <div class="supported-sites">
+        <a href="#" title="YouTube">
+            <i class="fab fa-youtube site-icon"></i>
+        </a>
+        <a href="#" title="Instagram">
+            <i class="fab fa-instagram site-icon"></i>
+        </a>
+        <a href="#" title="TikTok">
+            <i class="fab fa-tiktok site-icon"></i>
+        </a>
+        <a href="#" title="Facebook">
+            <i class="fab fa-facebook site-icon"></i>
+        </a>
+        <a href="#" title="Twitter">
+            <i class="fab fa-twitter site-icon"></i>
+        </a>
+    </div>
+
+    <!-- FAQ 섹션 -->
+    <div class="how-to-section">
+        <h3>{{ _('자주 묻는 질문') }}</h3>
+        <div class="faq-section">
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('GrabVideo는 정말 완전 무료인가요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('다운로드한 동영상에 워터마크가 있나요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('모바일에서도 사용할 수 있나요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('어떤 품질로 동영상을 다운로드할 수 있나요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('GrabVideo는 가능한 최고 화질로 동영상을 다운로드합니다. 원본 동영상이 4K 또는 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('다운로드 속도는 어떤가요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('다운로드 속도는 어떤가요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다.') }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Language dropdown functionality
-            const languageToggle = document.getElementById('languageToggle');
-            const languageDrawer = document.getElementById('languageDrawer');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 언어 토글 기능
+        const languageToggle = document.getElementById('languageToggle');
+        const languageDrawer = document.getElementById('languageDrawer');
 
-            if (languageToggle && languageDrawer) {
-                languageToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    languageDrawer.classList.toggle('open');
+        if (languageToggle && languageDrawer) {
+            languageToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                languageDrawer.classList.toggle('open');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (languageDrawer.classList.contains('open') &&
+                    !languageDrawer.contains(e.target) &&
+                    e.target !== languageToggle) {
+                    languageDrawer.classList.remove('open');
+                }
+            });
+        }
+
+        // FAQ 아코디언 기능
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isOpen = answer.style.display === 'block';
+
+                // 이미 열린 다른 FAQ 닫기
+                document.querySelectorAll('.faq-answer').forEach(item => {
+                    item.style.display = 'none';
+                });
+                document.querySelectorAll('.faq-question i').forEach(icon => {
+                    icon.className = 'fas fa-chevron-down';
                 });
 
-                document.addEventListener('click', function(e) {
-                    if (languageDrawer.classList.contains('open') &&
-                        !languageDrawer.contains(e.target) &&
-                        e.target !== languageToggle) {
-                        languageDrawer.classList.remove('open');
-                    }
-                });
-            }
-
-            // FAQ section toggle
-            const faqQuestions = document.querySelectorAll('.faq-question');
-
-            faqQuestions.forEach(question => {
-                question.addEventListener('click', function() {
-                    const answer = this.nextElementSibling;
-                    const isOpen = answer.style.display === 'block';
-
-                    // Close all answers
-                    document.querySelectorAll('.faq-answer').forEach(ans => {
-                        ans.style.display = 'none';
-                    });
-
-                    document.querySelectorAll('.faq-question i').forEach(icon => {
-                        icon.className = 'fas fa-chevron-down';
-                    });
-
-                    // Open this answer if it was closed
-                    if (!isOpen) {
-                        answer.style.display = 'block';
-                        this.querySelector('i').className = 'fas fa-chevron-up';
-                    }
-                });
+                // 현재 FAQ 토글
+                if (!isOpen) {
+                    answer.style.display = 'block';
+                    question.querySelector('i').className = 'fas fa-chevron-up';
+                }
             });
         });
-    </script>
+    });
+</script>
 {% endblock %}
