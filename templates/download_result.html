@@ -3,42 +3,77 @@
 {% block title %}{{ _('다운로드 완료') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="language-selector">
-        {% for code, name in languages.items() %}
-        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-           {% if current_lang == code %}class="active"{% endif %}>
-            {{ name }}
-        </a>
-        {% endfor %}
-    </div>
+    <div class="container">
+        <div class="language-dropzone">
+            <div class="lang-btn" id="languageToggle">
+                <i class="fas fa-globe"></i>
+                {{ languages[current_lang] }}
+                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+            </div>
+            <div class="language-drawer" id="languageDrawer">
+                <div class="language-options" id="languageOptions">
+                    {% for code, name in languages.items() %}
+                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                           class="language-option {% if current_lang == code %}active{% endif %}"
+                           data-lang-code="{{ code }}">
+                            <span class="language-flag">{{ code }}</span>
+                            {{ name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
-    <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
-    </div>
-    <h1>{{ _('다운로드 완료!') }}</h1>
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>{{ _('다운로드 완료!') }}</h1>
 
-    <div class="file-info">
-        <p><span class="label">{{ _('파일 이름:') }}</span> {{ file_name }}</p>
-        <p><span class="label">{{ _('파일 크기:') }}</span> {{ file_size }}</p>
-        <p><span class="label">{{ _('제목:') }}</span> {{ title }}</p>
-        <p><span class="label">{{ _('출처:') }}</span>
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>
-        </p>
-    </div>
+        <div class="file-info">
+            <p><span class="label">{{ _('파일 이름:') }}</span> {{ file_name }}</p>
+            <p><span class="label">{{ _('파일 크기:') }}</span> {{ file_size }}</p>
+            <p><span class="label">{{ _('제목:') }}</span> {{ title }}</p>
+            <p><span class="label">{{ _('출처:') }}</span>
+                <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>
+            </p>
+        </div>
 
-    <div class="actions">
-        <a href="{{ url_for('download_file', lang=current_lang, file_id=file_id) }}" class="btn btn-success">
-            <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
-        </a>
-        <a href="{{ url_for('index', lang=current_lang) }}" class="btn btn-primary">
-            <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
-        </a>
+        <div class="actions">
+            <a href="{{ url_for('download_file', lang=current_lang, file_id=file_id) }}" class="btn btn-success">
+                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            </a>
+            <a href="{{ url_for('index', lang=current_lang) }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
+        </div>
     </div>
-</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageToggle = document.getElementById('languageToggle');
+            const languageDrawer = document.getElementById('languageDrawer');
+
+            if (languageToggle && languageDrawer) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    languageDrawer.classList.toggle('open');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (languageDrawer.classList.contains('open') &&
+                        !languageDrawer.contains(e.target) &&
+                        e.target !== languageToggle) {
+                        languageDrawer.classList.remove('open');
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

@@ -3,385 +3,200 @@
 {% block title %}{{ _('동영상 다운로더 - YouTube, TikTok, Instagram 무료 다운로드') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
-<style>
-    .benefits-section {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        margin: 30px 0;
-        text-align: left;
-    }
-
-    .benefit-card {
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        padding: 15px;
-        flex: 1 1 250px;
-        max-width: 280px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        transition: transform 0.3s;
-    }
-
-    .benefit-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .benefit-icon {
-        color: var(--primary-color);
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-    }
-
-    .benefit-title {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #333;
-    }
-
-    .how-to-section {
-        margin: 30px 0;
-        background-color: rgba(52, 152, 219, 0.05);
-        padding: 20px;
-        border-radius: 10px;
-    }
-
-    .step-cards {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .step-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 15px;
-        flex: 1 1 200px;
-        max-width: 240px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.07);
-        position: relative;
-    }
-
-    .step-number {
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        background-color: var(--primary-color);
-        color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-    }
-
-    .faq-question {
-        cursor: pointer;
-        padding: 12px 15px;
-        background-color: #f5f5f5;
-        border-radius: 6px;
-        margin-top: 10px;
-        font-weight: 500;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .faq-question:hover {
-        background-color: #eaeaea;
-    }
-
-    .faq-answer {
-        padding: 15px;
-        background-color: #f9f9f9;
-        border-radius: 0 0 6px 6px;
-        margin-bottom: 10px;
-    }
-</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="language-dropzone">
-        <div class="lang-btn" id="languageToggle">
-            <i class="fas fa-globe"></i>
-            {{ languages[current_lang] }}
-            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
-        </div>
-        <div class="language-drawer" id="languageDrawer">
-            <div class="language-options" id="languageOptions">
-                {% for code, name in languages.items() %}
-                <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-                   class="language-option {% if current_lang == code %}active{% endif %}"
-                   data-lang-code="{{ code }}"
-                   draggable="true">
-                    <span class="language-flag">{{ code }}</span>
-                    {{ name }}
-                </a>
-                {% endfor %}
+    <div class="container">
+        <div class="language-dropzone">
+            <div class="lang-btn" id="languageToggle">
+                <i class="fas fa-globe"></i>
+                {{ languages[current_lang] }}
+                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+            </div>
+            <div class="language-drawer" id="languageDrawer">
+                <div class="language-options" id="languageOptions">
+                    {% for code, name in languages.items() %}
+                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                           class="language-option {% if current_lang == code %}active{% endif %}"
+                           data-lang-code="{{ code }}">
+                            <span class="language-flag">{{ code }}</span>
+                            {{ name }}
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="logo">
-        <i class="fas fa-download"></i>
-    </div>
-    <h1>{{ _('동영상 다운로더') }}</h1>
-
-    <div class="description">
-        {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다.') }}
-    </div>
-
-    <form method="post" action="{{ url_for('index', lang=current_lang) }}">
-        <div class="form-group">
-            <label for="video_url">{{ _('동영상 URL:') }}</label>
-            <input type="text" id="video_url" name="video_url" placeholder="{{ _('여기에 URL을 붙여넣으세요.') }}" required>
+        <div class="logo">
+            <i class="fas fa-download"></i>
         </div>
-        <button type="submit"><i class="fas fa-cloud-download-alt"></i> {{ _('다운로드') }}</button>
-    </form>
-    {% if error %}
-    <div class="error">
-        <i class="fas fa-exclamation-circle"></i> {{ error }}
-    </div>
-    {% endif %}
+        <h1>{{ _('동영상 다운로더') }}</h1>
 
-    <div class="benefits-section">
-        <div class="benefit-card">
-            <div class="benefit-icon"><i class="fas fa-bolt"></i></div>
-            <div class="benefit-title">{{ _('빠른 다운로드') }}</div>
-            <p>{{ _('고속 서버를 통해 빠른 속도로 원하는 동영상을 다운로드할 수 있습니다.') }}</p>
+        <div class="description">
+            {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다.') }}
         </div>
-        <div class="benefit-card">
-            <div class="benefit-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="benefit-title">{{ _('안전한 서비스') }}</div>
-            <p>{{ _('광고 없이 안전하게 사용할 수 있으며, 개인정보 수집이 없습니다.') }}</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon"><i class="fas fa-mobile-alt"></i></div>
-            <div class="benefit-title">{{ _('모바일 지원') }}</div>
-            <p>{{ _('모바일 기기에서도 완벽하게 작동하여 어디서나 동영상을 저장할 수 있습니다.') }}</p>
-        </div>
-    </div>
 
-    <div class="how-to-section">
-        <h3>{{ _('사용 방법') }}</h3>
-        <div class="step-cards">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <div class="step-icon"><i class="fas fa-copy"></i></div>
-                <p>{{ _('동영상이 있는 페이지에서 URL을 복사합니다.') }}</p>
+        <form method="post" action="{{ url_for('index', lang=current_lang) }}">
+            <div class="form-group">
+                <label for="video_url">{{ _('동영상 URL') }}</label>
+                <input type="text" id="video_url" name="video_url" placeholder="{{ _('동영상 URL을 입력하세요') }}"
+                       value="{{ video_url }}" required>
             </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <div class="step-icon"><i class="fas fa-paste"></i></div>
-                <p>{{ _('복사한 URL을 입력란에 붙여넣습니다.') }}</p>
+            <button type="submit"><i class="fas fa-cloud-download-alt"></i> {{ _('다운로드') }}</button>
+        </form>
+        {% if error %}
+            <div class="error">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
             </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <div class="step-icon"><i class="fas fa-download"></i></div>
-                <p>{{ _('다운로드 버튼을 클릭하고 파일을 저장합니다.') }}</p>
+        {% endif %}
+
+        <div class="benefits-section">
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="benefit-title">{{ _('빠른 다운로드') }}</div>
+                <p>{{ _('최적화된 서버로 빠른 다운로드 속도를 제공합니다.') }}</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="benefit-title">{{ _('안전한 사용') }}</div>
+                <p>{{ _('광고 없이 안전하게 이용할 수 있습니다.') }}</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="benefit-title">{{ _('최고 화질') }}</div>
+                <p>{{ _('가능한 최고 화질로 동영상을 다운로드합니다.') }}</p>
             </div>
         </div>
-    </div>
 
-    <div class="site-title">{{ _('지원되는 사이트') }}</div>
-    <div class="supported-sites">
-        <a href="https://www.youtube.com" target="_blank" rel="noopener">
-            <i class="fab fa-youtube site-icon" title="YouTube"></i>
-        </a>
-        <a href="https://www.instagram.com" target="_blank" rel="noopener">
-            <i class="fab fa-instagram site-icon" title="Instagram"></i>
-        </a>
-        <a href="https://www.tiktok.com" target="_blank" rel="noopener">
-            <i class="fab fa-tiktok site-icon" title="TikTok"></i>
-        </a>
-        <a href="https://www.facebook.com" target="_blank" rel="noopener">
-            <i class="fab fa-facebook site-icon" title="Facebook"></i>
-        </a>
-        <a href="https://twitter.com" target="_blank" rel="noopener">
-            <i class="fab fa-twitter site-icon" title="Twitter(X)"></i>
-        </a>
-    </div>
+        <div class="site-title">{{ _('지원되는 사이트') }}</div>
+        <div class="supported-sites">
+            <a href="https://www.youtube.com" target="_blank" rel="noopener">
+                <i class="fab fa-youtube site-icon"></i>
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener">
+                <i class="fab fa-instagram site-icon"></i>
+            </a>
+            <a href="https://www.tiktok.com" target="_blank" rel="noopener">
+                <i class="fab fa-tiktok site-icon"></i>
+            </a>
+            <a href="https://www.facebook.com" target="_blank" rel="noopener">
+                <i class="fab fa-facebook site-icon"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener">
+                <i class="fab fa-twitter site-icon"></i>
+            </a>
+        </div>
 
-    <div class="mt-4">
-        <h3>{{ _('자주 묻는 질문') }}</h3>
-        <div class="faq-section">
-            <div class="faq-item">
+        <div class="how-to-section">
+            <h3>{{ _('사용 방법') }}</h3>
+            <div class="step-cards">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon"><i class="fas fa-link"></i></div>
+                    <p>{{ _('원하는 동영상의 URL을 복사하세요') }}</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon"><i class="fas fa-paste"></i></div>
+                    <p>{{ _('URL을 입력란에 붙여넣기하세요') }}</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon"><i class="fas fa-download"></i></div>
+                    <p>{{ _('다운로드 버튼을 클릭하세요') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h3>{{ _('자주 묻는 질문') }}</h3>
+            <div class="faq-section">
                 <div class="faq-question">
-                    {{ _('어떤 형식으로 동영상이 다운로드 되나요?') }}
+                    {{ _('어떤 사이트를 지원하나요?') }}
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('동영상은 MP4 형식으로 다운로드됩니다. 이 형식은 대부분의 기기와 플레이어에서 호환됩니다.') }}
+                    {{ _('YouTube, Instagram, TikTok, Facebook, Twitter(X) 등의 주요 동영상 사이트를 지원합니다.') }}
                 </div>
-            </div>
-            <div class="faq-item">
+
                 <div class="faq-question">
-                    {{ _('다운로드한 파일은 얼마나 오래 서버에 보관되나요?') }}
+                    {{ _('다운로드 속도가 느린 이유는 무엇인가요?') }}
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('다운로드된 파일은 24시간 동안만 서버에 보관되며, 그 후에는 자동으로 삭제됩니다. 필요한 파일은 즉시 저장하시기 바랍니다.') }}
+                    {{ _('다운로드 속도는 서버 트래픽, 인터넷 연결 속도, 파일 크기에 따라 달라질 수 있습니다.') }}
                 </div>
-            </div>
-            <div class="faq-item">
+
                 <div class="faq-question">
-                    {{ _('이용 제한이 있나요?') }}
+                    {{ _('사용료는 얼마인가요?') }}
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('과도한 사용을 방지하기 위해 일일 다운로드 횟수 제한이 있을 수 있습니다. 일반적인 사용에는 문제가 없습니다.') }}
-                </div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">
-                    {{ _('저작권이 있는 동영상도 다운로드할 수 있나요?') }}
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer" style="display: none;">
-                    {{ _('저작권이 있는 콘텐츠는 개인적인 용도로만 다운로드해야 합니다. 상업적 용도나 재배포는 저작권법에 위배될 수 있습니다.') }}
+                    {{ _('모든 기능을 무료로 이용할 수 있습니다.') }}
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="footer">
-        {{ _('안전하고 빠른 비디오 다운로드 서비스') }}
+        <div class="footer">
+            {{ _('안전하고 빠른 비디오 다운로드 서비스') }}
+        </div>
     </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const languageToggle = document.getElementById('languageToggle');
-        const languageDrawer = document.getElementById('languageDrawer');
-        const languageOptions = document.getElementById('languageOptions');
-        const languages = document.querySelectorAll('.language-option');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Language dropdown functionality
+            const languageToggle = document.getElementById('languageToggle');
+            const languageDrawer = document.getElementById('languageDrawer');
 
-        // FAQ 토글 기능
-        const faqQuestions = document.querySelectorAll('.faq-question');
-        faqQuestions.forEach(question => {
-            question.addEventListener('click', function() {
-                const answer = this.nextElementSibling;
-                const icon = this.querySelector('i.fas');
+            if (languageToggle && languageDrawer) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    languageDrawer.classList.toggle('open');
+                });
 
-                if (answer.style.display === 'none' || !answer.style.display) {
-                    answer.style.display = 'block';
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
-                } else {
-                    answer.style.display = 'none';
-                    icon.classList.remove('fa-chevron-up');
-                    icon.classList.add('fa-chevron-down');
-                }
-            });
-        });
-
-        // 언어 선택 드롭다운 기능
-        languageToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            languageDrawer.classList.toggle('open');
-        });
-
-        document.addEventListener('click', function(e) {
-            if (languageDrawer.classList.contains('open') &&
-                !languageDrawer.contains(e.target) &&
-                e.target !== languageToggle) {
-                languageDrawer.classList.remove('open');
+                document.addEventListener('click', function(e) {
+                    if (languageDrawer.classList.contains('open') &&
+                        !languageDrawer.contains(e.target) &&
+                        e.target !== languageToggle) {
+                        languageDrawer.classList.remove('open');
+                    }
+                });
             }
-        });
 
-        // 언어 드래그 앤 드롭 기능
-        let draggedItem = null;
+            // FAQ section toggle
+            const faqQuestions = document.querySelectorAll('.faq-question');
 
-        // 언어 순서 저장 함수
-        function saveLanguageOrder() {
-            const langOrder = Array.from(languageOptions.children)
-                .map(option => option.getAttribute('data-lang-code'));
-            localStorage.setItem('languageOrder', JSON.stringify(langOrder));
-        }
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const isOpen = answer.style.display === 'block';
 
-        // 언어 순서 로드 함수
-        function loadLanguageOrder() {
-            const savedOrder = localStorage.getItem('languageOrder');
-            if (savedOrder) {
-                try {
-                    const order = JSON.parse(savedOrder);
-                    order.forEach(langCode => {
-                        const langElement = document.querySelector(`.language-option[data-lang-code="${langCode}"]`);
-                        if (langElement) {
-                            languageOptions.appendChild(langElement);
-                        }
+                    // Close all answers
+                    document.querySelectorAll('.faq-answer').forEach(ans => {
+                        ans.style.display = 'none';
                     });
-                } catch (e) {
-                    console.error('언어 순서 불러오기 오류:', e);
-                }
-            }
-        }
 
-        languages.forEach(lang => {
-            lang.addEventListener('dragstart', function(e) {
-                draggedItem = this;
-                this.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', this.getAttribute('data-lang-code'));
+                    document.querySelectorAll('.faq-question i').forEach(icon => {
+                        icon.className = 'fas fa-chevron-down';
+                    });
 
-                const ghostElement = document.createElement('div');
-                ghostElement.classList.add('language-option');
-                ghostElement.textContent = this.textContent;
-                ghostElement.style.opacity = '0.5';
-                document.body.appendChild(ghostElement);
-                e.dataTransfer.setDragImage(ghostElement, 0, 0);
-
-                setTimeout(() => {
-                    document.body.removeChild(ghostElement);
-                }, 0);
-            });
-
-            lang.addEventListener('dragend', function() {
-                this.classList.remove('dragging');
-                draggedItem = null;
-                saveLanguageOrder();
+                    // Open this answer if it was closed
+                    if (!isOpen) {
+                        answer.style.display = 'block';
+                        this.querySelector('i').className = 'fas fa-chevron-up';
+                    }
+                });
             });
         });
-
-        // 드래그 오버 이벤트 처리
-        languageOptions.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(languageOptions, e.clientY);
-            if (draggedItem) {
-                if (!afterElement) {
-                    languageOptions.appendChild(draggedItem);
-                } else {
-                    languageOptions.insertBefore(draggedItem, afterElement);
-                }
-            }
-        });
-
-        // 드래그 앤 드롭 위치 계산 함수
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.language-option:not(.dragging)')];
-
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // 초기화
-        loadLanguageOrder();
-    });
-</script>
+    </script>
 {% endblock %}

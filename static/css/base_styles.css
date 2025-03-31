@@ -1,0 +1,204 @@
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --background-color: #f8f9fa;
+    --card-color: #ffffff;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* 헤더 스타일 */
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.header-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo-container {
+    display: inline-block;
+}
+
+.site-logo {
+    font-size: 2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grab {
+    color: #ffffff;
+}
+
+.video {
+    color: var(--primary-color);
+}
+
+.logo-icon {
+    margin-left: 8px;
+    color: var(--primary-color);
+}
+
+.tagline {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* base_styles.css에 공통 언어 선택기 스타일 추가 */
+/* 언어 선택 드롭다운 공통 스타일 */
+.language-dropzone {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.lang-btn {
+    position: relative;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+}
+
+.lang-btn:hover {
+    background-color: #e5e5e5;
+}
+
+.lang-btn i {
+    margin-right: 5px;
+}
+
+.language-drawer {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    width: 320px;
+    display: none;
+    margin-top: 10px;
+}
+
+.language-drawer.open {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.language-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: #333;
+}
+
+.language-option:hover {
+    background-color: #f5f5f5;
+}
+
+.language-option.active {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.language-flag {
+    min-width: 32px;
+    display: inline-block;
+    margin-right: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 메인 콘텐츠 영역 */
+main {
+    padding: 2rem 0;
+}
+
+.page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 푸터 스타일 */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.footer-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .site-logo {
+        font-size: 1.8rem;
+    }
+
+    .tagline {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .site-logo {
+        font-size: 1.5rem;
+    }
+
+    .tagline {
+        font-size: 0.7rem;
+    }
+}
