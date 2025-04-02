@@ -43,24 +43,6 @@ h1 {
     margin-right: 8px;
 }
 
-.language-selector {
-    text-align: right;
-    margin-bottom: 20px;
-}
-
-.language-selector a {
-    margin-left: 10px;
-    color: #555;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.language-selector a.active {
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-/* download_waiting 페이지 스타일 */
 .status-text {
     font-size: 1.2rem;
     margin-bottom: 20px;
@@ -108,7 +90,6 @@ h1 {
     font-weight: bold;
 }
 
-/* download_result 페이지 스타일 */
 .success-icon {
     font-size: 3rem;
     color: var(--success-color);

@@ -22,7 +22,6 @@ from flask_limiter.errors import RateLimitExceeded
 import psutil
 
 load_dotenv() # 환경 변수 로드
-# TODO(2025.03.31.Mon): div container 제거, seo 최적화, 광고 문구 추가(워터마크제거)
 # Env
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
@@ -64,16 +63,18 @@ logging.basicConfig(
 
 # 언어 설정
 LANGUAGES = {
-    'en': 'English',                # 영어 - 기본 언어
-    'id': 'Bahasa Indonesia',       # 인도네시아어 - 인도네시아 공식 언어
+    'en': 'English',                # 영어
+    'id': 'Bahasa Indonesia',       # 인도네시아어
     'pt_BR': 'Português (Brasil)',  # 브라질 포르투갈어 - 브라질에서 사용되는 포르투갈어 방언
     'es_MX': 'Español (México)',    # 멕시코 스페인어 - 멕시코에서 사용되는 스페인어 방언
-    'vi': 'Tiếng Việt',             # 베트남어 - 베트남의 공식 언어
-    'fil': 'Filipino',              # 필리핀어(타갈로그어) - 필리핀의 공식 언어
-    'ko': '한국어',                   # 한국어 - 대한민국의 공식 언어
-    'ja': '日本語',                   # 일본어 - 일본의 공식 언어
-    'zh': '中文',                     # 중국어 - 중국, 대만, 홍콩 등에서 사용
-    'ur': 'اردو',                    # 우르두어 - 파키스탄의 공식 언어
+    'vi': 'Tiếng Việt',             # 베트남어
+    'fil': 'Filipino',              # 필리핀어(타갈로그어)
+    'th': 'ไทย',                    # 태국어
+    'fr': 'Français',               # 프랑스어
+    'ur': 'اردو',                   # 우르두어(파키스탄)
+    'ko': '한국어',                   # 한국어
+    'ja': '日本語',                   # 일본어
+    'zh': '中文',                    # 중국어
 }
 
 # 1. Babel 인스턴스 생성

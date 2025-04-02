@@ -3,96 +3,128 @@
 {% block title %}{{ _('오류 발생') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
-<style>
-    .error-container {
-        margin-top: 3rem;
-        margin-bottom: 3rem;
-    }
-    .error-icon {
-        font-size: 4rem;
-        color: #dc3545;
-        margin-bottom: 1rem;
-    }
-    .error-card {
-        border: none;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    .error-header {
-        background: linear-gradient(45deg, #dc3545, #f44336);
-        padding: 1.5rem;
-    }
-    .error-body {
-        padding: 2rem;
-    }
-    .error-message {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-    .home-button {
-        background: linear-gradient(45deg, #007bff, #0062cc);
-        border: none;
-        padding: 0.7rem 2rem;
-        border-radius: 50px;
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-        transition: all 0.3s ease;
-    }
-    .home-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
-        background: linear-gradient(45deg, #0062cc, #004fa3);
-    }
-</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <style>
+        .error-container {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+        .error-card {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .error-header {
+            background: linear-gradient(45deg, #dc3545, #f44336);
+            padding: 1.5rem;
+        }
+        .error-body {
+            padding: 2rem;
+        }
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .home-button {
+            background: linear-gradient(45deg, #007bff, #0062cc);
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(45deg, #0062cc, #004fa3);
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="container error-container">
-    <div class="language-selector">
-        {% for code, name in languages.items() %}
-        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-           {% if current_lang == code %}class="active"{% endif %}>
-            {{ name }}
-        </a>
-        {% endfor %}
-    </div>
-
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card error-card">
-                <div class="error-header text-center text-white">
-                    <div class="error-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <h2>{{ _('오류가 발생했습니다') }}</h2>
+    <div class="container error-container">
+        <div class="language-dropzone">
+            <div class="lang-btn" id="languageToggle">
+                <i class="fas fa-globe"></i>
+                {{ languages[current_lang] }}
+                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+            </div>
+            <div class="language-drawer" id="languageDrawer">
+                <div class="language-options" id="languageOptions">
+                    {% for code, name in languages.items() %}
+                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                           class="language-option {% if current_lang == code %}active{% endif %}"
+                           data-lang-code="{{ code }}">
+                            <span class="language-flag">{{ code }}</span>
+                            {{ name }}
+                        </a>
+                    {% endfor %}
                 </div>
-                <div class="error-body text-center">
-                    <p class="error-message">{{ error }}</p>
-                    <a href="{{ url_for('index', lang=current_lang) }}" class="btn home-button">
-                        <i class="fas fa-home"></i> {{ _('홈으로 돌아가기') }}
-                    </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="error-card card">
+                    <div class="error-header text-center text-white">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h2 class="mb-0">{{ _('오류가 발생했습니다') }}</h2>
+                    </div>
+                    <div class="error-body text-center">
+                        <div class="error-message">
+                            {{ error_message }}
+                        </div>
+                        <a href="{{ url_for('index', lang=current_lang) }}" class="btn home-button">
+                            <i class="fas fa-home me-2"></i> {{ _('메인으로 돌아가기') }}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // 페이지 로드 시 간단한 애니메이션 효과
-    document.addEventListener('DOMContentLoaded', function() {
-        const errorCard = document.querySelector('.error-card');
-        errorCard.style.opacity = '0';
-        errorCard.style.transform = 'translateY(20px)';
+    <script>
+        // Language dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageToggle = document.getElementById('languageToggle');
+            const languageDrawer = document.getElementById('languageDrawer');
 
-        setTimeout(() => {
-            errorCard.style.transition = 'all 0.5s ease';
-            errorCard.style.opacity = '1';
-            errorCard.style.transform = 'translateY(0)';
-        }, 100);
-    });
-</script>
+            if (languageToggle && languageDrawer) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    languageDrawer.classList.toggle('open');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (languageDrawer.classList.contains('open') &&
+                        !languageDrawer.contains(e.target) &&
+                        e.target !== languageToggle) {
+                        languageDrawer.classList.remove('open');
+                    }
+                });
+            }
+
+            // Animation effect
+            const errorCard = document.querySelector('.error-card');
+            errorCard.style.opacity = '0';
+            errorCard.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                errorCard.style.transition = 'all 0.5s ease';
+                errorCard.style.opacity = '1';
+                errorCard.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 {% endblock %}

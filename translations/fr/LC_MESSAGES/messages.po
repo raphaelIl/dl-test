@@ -1,4 +1,4 @@
-# Filipino translations for PROJECT.
+# French translations for PROJECT.
 # Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
@@ -8,11 +8,11 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2025-04-03 02:25+0900\n"
-"PO-Revision-Date: 2025-04-03 02:32+0900\n"
+"PO-Revision-Date: 2025-04-03 02:36+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: fil\n"
-"Language-Team: fil <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,275 +20,275 @@ msgstr ""
 
 #: app.py:201
 msgid "URL을 입력해주세요."
-msgstr "Mangyaring magpasok ng URL."
+msgstr "Veuillez entrer une URL."
 
 #: app.py:314
 msgid "유효하지 않은 파일 ID입니다."
-msgstr "Di-wastong file ID."
+msgstr "ID de fichier invalide."
 
 #: templates/base.html:6
 msgid "GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스."
-msgstr "GrabVideo: Mag-download ng mga video sa YouTube, TikTok, Instagram, Facebook sa pinakamataas na kalidad nang libre. Mabilis at ligtas na serbisyo ng online video downloader."
+msgstr "GrabVideo : Téléchargez gratuitement des vidéos YouTube, TikTok, Instagram, Facebook en qualité optimale. Un service de téléchargement vidéo en ligne rapide et sécurisé."
 
 #: templates/base.html:7
 msgid "GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드"
-msgstr "GrabVideo, video downloader, YouTube downloader, TikTok downloader, Instagram downloader, pag-download ng video, libreng pag-download ng video, pag-download sa mataas na kalidad"
+msgstr "GrabVideo, téléchargeur vidéo, téléchargeur YouTube, téléchargeur TikTok, téléchargeur Instagram, téléchargement vidéo, téléchargement vidéo gratuit, téléchargement haute qualité"
 
 #: templates/base.html:8
 msgid "최고 화질 동영상 다운로더"
-msgstr "Pinakamataas na Kalidad na Video Downloader"
+msgstr "Téléchargeur vidéo de la plus haute qualité"
 
 #: templates/base.html:9
 msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
-msgstr "Mag-download ng mga video mula sa YouTube, TikTok, Instagram, Facebook nang libre. Magagamit kaagad nang walang pagpaparehistro."
+msgstr "Téléchargez gratuitement des vidéos depuis YouTube, TikTok, Instagram, Facebook. Utilisable immédiatement sans inscription."
 
 #: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
-msgstr "Video Downloader"
+msgstr "Téléchargeur de vidéos"
 
 #: templates/base.html:38
 msgid "최고 화질의 동영상 다운로더"
-msgstr "Pinakamataas na Kalidad na Video Downloader"
+msgstr "Téléchargeur de vidéos de la plus haute qualité"
 
 #: templates/download_result.html:3
 msgid "다운로드 완료"
-msgstr "Kumpleto ang Pag-download"
+msgstr "Téléchargement terminé"
 
 #: templates/download_result.html:35
 msgid "다운로드 완료!"
-msgstr "Kumpleto ang Pag-download!"
+msgstr "Téléchargement terminé !"
 
 #: templates/download_result.html:38
 msgid "파일 이름:"
-msgstr "Pangalan ng File:"
+msgstr "Nom du fichier :"
 
 #: templates/download_result.html:39
 msgid "파일 크기:"
-msgstr "Laki ng File:"
+msgstr "Taille du fichier :"
 
 #: templates/download_result.html:40
 msgid "제목:"
-msgstr "Pamagat:"
+msgstr "Titre :"
 
 #: templates/download_result.html:41
 msgid "출처:"
-msgstr "Pinagmulan:"
+msgstr "Source :"
 
 #: templates/download_result.html:48
 msgid "파일 다운로드"
-msgstr "I-download ang File"
+msgstr "Télécharger le fichier"
 
 #: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
 msgid "메인으로 돌아가기"
-msgstr "Bumalik sa Main"
+msgstr "Retour à l'accueil"
 
 #: templates/download_waiting.html:3 templates/download_waiting.html:33
 msgid "다운로드 진행 중"
-msgstr "Nagda-download"
+msgstr "Téléchargement en cours"
 
 #: templates/download_waiting.html:34 templates/download_waiting.html:177
 msgid "다운로드가 진행 중입니다..."
-msgstr "Nagda-download..."
+msgstr "Téléchargement en cours..."
 
 #: templates/download_waiting.html:43
 msgid "잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다."
-msgstr "Mangyaring maghintay. Maaaring tumagal ito depende sa laki ng file at bilis ng internet."
+msgstr "Veuillez patienter. Cela peut prendre du temps selon la taille du fichier et la vitesse de votre connexion internet."
 
 #: templates/download_waiting.html:118
 msgid "다운로드 완료! 잠시 후 결과 페이지로 이동합니다..."
-msgstr "Kumpleto na ang pag-download! Ilalipat sa page ng resulta sa ilang sandali..."
+msgstr "Téléchargement terminé ! Redirection vers la page de résultats..."
 
 #: templates/download_waiting.html:180
 msgid "오류가 발생했습니다."
-msgstr "May naganap na error."
+msgstr "Une erreur s'est produite."
 
 #: templates/error.html:3
 msgid "오류 발생"
-msgstr "May Naganap na Error"
+msgstr "Erreur survenue"
 
 #: templates/error.html:80
 msgid "오류가 발생했습니다"
-msgstr "May naganap na error"
+msgstr "Une erreur s'est produite"
 
 #: templates/index.html:36
 msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "Pinakamataas na Kalidad na Social Media Video Downloader"
+msgstr "Téléchargeur de vidéos de réseaux sociaux de la plus haute qualité"
 
 #: templates/index.html:38
 msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr "Mag-download ng mga video sa mataas na kalidad nang mabilis at madali mula sa YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)<br> at iba pang social media platforms gamit ang GrabVideo.<br>Ito ay ganap na libre, walang sign-up o watermark.<br>Gumagana nang perpekto sa parehong PC at mobile devices."
+msgstr "Téléchargez rapidement et facilement des vidéos de haute qualité depuis YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)<br> et autres réseaux sociaux avec GrabVideo.<br>C'est entièrement gratuit, sans inscription ni filigrane.<br>Fonctionne parfaitement sur PC comme sur mobile."
 
 #: templates/index.html:49
 msgid "동영상 URL"
-msgstr "URL ng Video"
+msgstr "URL de la vidéo"
 
 #: templates/index.html:50
 msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요"
-msgstr "I-paste ang URL ng video mula sa YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), atbp."
+msgstr "Collez l'URL d'une vidéo YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), etc."
 
 #: templates/index.html:53
 msgid "다운로드 시작"
-msgstr "Simulan ang Pag-download"
+msgstr "Démarrer le téléchargement"
 
 #: templates/index.html:58
 msgid "사용 방법"
-msgstr "Paano Gamitin"
+msgstr "Comment utiliser"
 
 #: templates/index.html:65
 msgid "URL 복사"
-msgstr "Kopyahin ang URL"
+msgstr "Copier l'URL"
 
 #: templates/index.html:66
 msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
-msgstr "Kopyahin ang URL ng video na gusto mong i-download mula sa YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), atbp.<br>(I-share)"
+msgstr "Copiez l'URL de la vidéo que vous souhaitez télécharger depuis YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), etc.<br>(Partager)"
 
 #: templates/index.html:73
 msgid "URL 붙여넣기"
-msgstr "I-paste ang URL"
+msgstr "Coller l'URL"
 
 #: templates/index.html:74
 msgid "복사한 URL을 위 입력란에 붙여넣으세요."
-msgstr "I-paste ang kinopyang URL sa field sa itaas."
+msgstr "Collez l'URL copiée dans le champ ci-dessus."
 
 #: templates/index.html:81
 msgid "다운로드"
-msgstr "I-download"
+msgstr "Télécharger"
 
 #: templates/index.html:82
 msgid "다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다."
-msgstr "I-click ang button ng pag-download at maghintay sandali para ma-save ang video."
+msgstr "Cliquez sur le bouton de téléchargement et patientez un moment pour enregistrer la vidéo."
 
 #: templates/index.html:88
 msgid "GrabVideo의 특별한 기능"
-msgstr "Mga Espesyal na Katangian ng GrabVideo"
+msgstr "Fonctionnalités spéciales de GrabVideo"
 
 #: templates/index.html:94
 msgid "모바일 완벽 호환"
-msgstr "Perpektong Compatibility sa Mobile"
+msgstr "Compatibilité mobile parfaite"
 
 #: templates/index.html:95
 msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
-msgstr "Gumagana sa smartphones at tablets kagaya ng sa PC. Mag-download ng mga video kahit kailan, kahit saan."
+msgstr "Fonctionne sur smartphones et tablettes comme sur PC. Téléchargez des vidéos n'importe quand, n'importe où."
 
 #: templates/index.html:101
 msgid "완전 무료"
-msgstr "Ganap na Libre"
+msgstr "Entièrement gratuit"
 
 #: templates/index.html:102
 msgid "모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다."
-msgstr "Lahat ng features ay ibinibigay nang libre. Walang nakatagong gastos o premium plans."
+msgstr "Toutes les fonctionnalités sont gratuites. Pas de frais cachés ni de forfaits premium."
 
 #: templates/index.html:108
 msgid "브라우저 기반"
-msgstr "Browser-Based"
+msgstr "Basé sur navigateur"
 
 #: templates/index.html:109
 msgid "전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요."
-msgstr "Hindi kailangang mag-install ng dedicated programs. Mag-download nang madali gamit ang iyong browser."
+msgstr "Pas besoin d'installer de programme dédié. Téléchargez facilement via votre navigateur."
 
 #: templates/index.html:115
 msgid "워터마크 없음"
-msgstr "Walang Watermark"
+msgstr "Sans filigrane"
 
 #: templates/index.html:116
 msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
-msgstr "Walang logos o watermarks na idinaragdag sa mga na-download na videos. Ibinibigay sa orihinal na kalidad."
+msgstr "Aucun logo ou filigrane n'est ajouté aux vidéos téléchargées. Elles sont fournies dans leur qualité d'origine."
 
 #: templates/index.html:122
 msgid "최고 화질, 음질"
-msgstr "Pinakamahusay na Kalidad ng Video at Audio"
+msgstr "Meilleure qualité vidéo et audio"
 
 #: templates/index.html:123
 msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
-msgstr "Mag-download ng MP4 videos sa pinakamahusay na posibleng kalidad at tunog, kabilang ang 4K, HD, atbp. Ibinibigay nang eksakto gaya ng orihinal nang walang pagkawala ng kalidad."
+msgstr "Téléchargez des vidéos MP4 avec la meilleure qualité possible d'image et de son, y compris en 4K, HD, etc. Fournies exactement comme l'original sans perte de qualité."
 
 #: templates/index.html:129
 msgid "안전한 다운로드"
-msgstr "Ligtas na Pag-download"
+msgstr "Téléchargements sécurisés"
 
 #: templates/index.html:130
 msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
-msgstr "Gamitin nang ligtas nang walang malware. Prayoridad namin ang proteksyon ng iyong privacy."
+msgstr "Utilisez en toute sécurité sans logiciels malveillants. Nous donnons la priorité à la protection de vos données personnelles."
 
 #: templates/index.html:136
 msgid "회원가입 불필요"
-msgstr "Hindi Kailangan ang Pagpaparehistro"
+msgstr "Pas d'inscription requise"
 
 #: templates/index.html:137
 msgid "계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다."
-msgstr "Gamitin kaagad nang walang pag-create ng account o pagpasok ng personal na impormasyon. Walang mabigat na proseso."
+msgstr "Utilisez immédiatement sans créer de compte ni saisir d'informations personnelles. Aucune procédure fastidieuse."
 
 #: templates/index.html:143
 msgid "빠른 다운로드"
-msgstr "Mabilis na Pag-download"
+msgstr "Téléchargement rapide"
 
 #: templates/index.html:144
 msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
-msgstr "Kunin ang mga video nang mabilis gamit ang mga optimized algorithms. Walang hindi kinakailangang paghihintay."
+msgstr "Récupérez rapidement des vidéos grâce à des algorithmes optimisés. Pas de temps d'attente inutile."
 
 #: templates/index.html:148
 msgid "지원하는 플랫폼"
-msgstr "Mga Suportadong Platforms"
+msgstr "Plateformes prises en charge"
 
 #: templates/index.html:168
 msgid "자주 묻는 질문"
-msgstr "Mga Madalas na Tanong"
+msgstr "Questions fréquemment posées"
 
 #: templates/index.html:172
 msgid "GrabVideo는 정말 완전 무료인가요?"
-msgstr "Talaga bang ganap na libre ang GrabVideo?"
+msgstr "GrabVideo est-il vraiment entièrement gratuit ?"
 
 #: templates/index.html:176
 msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "Oo, ang GrabVideo ay ibinibigay nang ganap na libre. Walang nakatagong gastos o premium plans, at lahat ng feature ay magagamit nang libre."
+msgstr "Oui, GrabVideo est entièrement gratuit. Il n'y a pas de frais cachés ou de forfaits premium, et toutes les fonctionnalités peuvent être utilisées gratuitement."
 
 #: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
-msgstr "May watermark ba ang mga na-download na video?"
+msgstr "Y a-t-il des filigranes sur les vidéos téléchargées ?"
 
 #: templates/index.html:186
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
-msgstr "Hindi, ang GrabVideo ay hindi nagdaragdag ng anumang watermark o logo sa mga na-download na video. Ibinibigay ang mga ito sa kanilang orihinal na kalidad."
+msgstr "Non, GrabVideo n'ajoute aucun filigrane ou logo aux vidéos téléchargées. Elles sont fournies dans leur qualité d'origine."
 
 #: templates/index.html:192
 msgid "모바일에서도 사용할 수 있나요?"
-msgstr "Maaari ko bang gamitin ito sa mobile devices?"
+msgstr "Puis-je l'utiliser sur des appareils mobiles ?"
 
 #: templates/index.html:196
 msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "Oo, ang GrabVideo ay perpektong optimized para sa mobile environments. Maaari mo itong gamitin sa smartphones at tablets tulad ng paggamit mo sa PC."
+msgstr "Oui, GrabVideo est parfaitement optimisé pour les environnements mobiles. Vous pouvez l'utiliser sur smartphones et tablettes exactement comme sur un PC."
 
 #: templates/index.html:202
 msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
-msgstr "Sa anong kalidad ko maaaring i-download ang mga video?"
+msgstr "Dans quelle qualité puis-je télécharger les vidéos ?"
 
 #: templates/index.html:206
 msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
-msgstr "Dini-download ng GrabVideo ang mga video sa pinakamataas na posibleng kalidad. Kung ang orihinal na video ay nasa HD quality, maaari mong i-download ito sa parehong kalidad."
+msgstr "GrabVideo télécharge les vidéos dans la plus haute qualité possible. Si la vidéo originale est en qualité HD, vous pouvez la télécharger dans la même qualité."
 
 #: templates/index.html:212
 msgid "다운로드 속도는 어떤가요?"
-msgstr "Gaano kabilis ang download speed?"
+msgstr "Quelle est la vitesse de téléchargement ?"
 
 #: templates/index.html:216
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "Ang GrabVideo ay nagbibigay ng mabilis na download speed gamit ang mga optimized algorithm. Ang download speed ay maaaring mag-iba depende sa internet connection at kondisyon ng server."
+msgstr "GrabVideo offre des vitesses de téléchargement rapides grâce à des algorithmes optimisés. Les vitesses de téléchargement peuvent varier en fonction de votre connexion Internet et des conditions du serveur."
 
 #: templates/index.html:222
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
-msgstr "Paano ko dapat gamitin ang mga na-download na content?"
+msgstr "Comment devrais-je utiliser le contenu téléchargé ?"
 
 #: templates/index.html:226
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "Ang GrabVideo ay isang technical tool para sa iyong kaginhawaan. Inirerekomenda naming gamitin ang na-download na content para sa personal na panonood. Tandaan na ang paggalang sa gawa ng mga content creator ay humahantong sa produksyon ng mas maraming de-kalidad na content."
+msgstr "GrabVideo est un outil technique pour votre commodité. Nous recommandons d'utiliser le contenu téléchargé à des fins de visionnage personnel. N'oubliez pas que le respect du travail des créateurs de contenu mène à la production de contenu de meilleure qualité."
 
 #: templates/index.html:235
 msgid "이용 안내"
-msgstr "Gabay sa Paggamit"
+msgstr "Guide d'utilisation"
 
 #: templates/index.html:237
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "Ang GrabVideo ay nagbibigay ng maginhawang serbisyo ng pag-download ng video. Iginagalang namin ang pagsisikap ng lahat ng content creator at hinihiling namin na i-enjoy ang na-download na content para sa personal na panonood. Mangyaring sumangguni sa mga terms of service ng bawat platform at gamitin ang content ayon sa mga intensyon ng creator. Lumikha ng mas maginhawa at kasiya-siyang karanasan sa digital content sa pamamagitan ng GrabVideo."
+msgstr "GrabVideo fournit un service pratique de téléchargement de vidéos. Nous respectons les efforts de tous les créateurs de contenu et vous demandons de profiter du contenu téléchargé à des fins de visionnage personnel. Veuillez consulter les conditions d'utilisation de chaque plateforme et utiliser le contenu conformément aux intentions du créateur. Créez une expérience de contenu numérique plus pratique et agréable grâce à GrabVideo."
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"

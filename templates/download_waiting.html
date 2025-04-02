@@ -3,85 +3,207 @@
 {% block title %}{{ _('다운로드 진행 중') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="language-selector">
-        {% for code, name in languages.items() %}
-        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
-           {% if current_lang == code %}class="active"{% endif %}>
-            {{ name }}
-        </a>
-        {% endfor %}
-    </div>
+    <div class="container">
+        <div class="language-dropzone">
+            <div class="lang-btn" id="languageToggle">
+                <i class="fas fa-globe"></i>
+                {{ languages[current_lang] }}
+                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+            </div>
+            <div class="language-drawer" id="languageDrawer">
+                <div class="language-options" id="languageOptions">
+                    {% for code, name in languages.items() %}
+                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                           class="language-option {% if current_lang == code %}active{% endif %}"
+                           data-lang-code="{{ code }}">
+                            <span class="language-flag">{{ code }}</span>
+                            {{ name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
-    <h1>{{ _('다운로드 진행 중') }}</h1>
+        <div class="spinner"></div>
+        <h1>{{ _('다운로드 진행 중') }}</h1>
+        <p id="status-text" class="status-text">{{ _('다운로드가 진행 중입니다...') }}</p>
 
-    <div class="status-text" id="status-text">{{ _('다운로드가 진행 중입니다...') }}</div>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar" style="width: 0%">
+                <span id="progress-text" class="progress-text">0%</span>
+            </div>
+        </div>
 
-    <div class="spinner"></div>
+        <p class="description">
+            {{ _('잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다.') }}
+        </p>
 
-    <div class="progress-container">
-        <div class="progress-bar" id="progress-bar">
-            <span class="progress-text" id="progress-text">0%</span>
+        <div class="actions" style="margin-top: 20px;">
+            <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
         </div>
     </div>
-
-    <p>{{ _('다운로드가 완료되면 자동으로 다음 페이지로 이동합니다.') }}</p>
-    <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
-        <i class="fas fa-home"></i> {{ _('취소하고 메인으로 돌아가기') }}
-    </a>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // 주기적으로 상태 확인
-    let checkStatusInterval;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageToggle = document.getElementById('languageToggle');
+            const languageDrawer = document.getElementById('languageDrawer');
 
-    function checkStatus() {
-        fetch('/{{ current_lang }}/check-status/{{ file_id }}')
-            .then(response => response.json())
-            .then(data => {
-                const statusElement = document.getElementById('status-text');
+            if (languageToggle && languageDrawer) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    languageDrawer.classList.toggle('open');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (languageDrawer.classList.contains('open') &&
+                        !languageDrawer.contains(e.target) &&
+                        e.target !== languageToggle) {
+                        languageDrawer.classList.remove('open');
+                    }
+                });
+            }
+
+            checkStatus();
+            checkStatusInterval = setInterval(checkStatus, 2000);
+        });
+
+        let checkStatusInterval;
+
+        function checkStatus() {
+            const fileId = '{{ file_id }}';
+
+            function smoothProgress() {
                 const progressBar = document.getElementById('progress-bar');
                 const progressText = document.getElementById('progress-text');
+                const currentWidth = parseFloat(progressBar.style.width || '0');
 
-                if (data.status === 'downloading') {
-                    statusElement.innerText = '{{ _('다운로드 중입니다...') }}';
-                    progressBar.style.width = Math.min(data.progress, 100) + '%';
-                    progressText.innerText = Math.round(data.progress) + '%';
-                } else if (data.status === 'processing') {
-                    statusElement.innerText = '{{ _('파일 처리 중입니다...') }}';
-                    progressBar.style.width = '100%';
-                    progressText.innerText = '100%';
-                } else if (data.status === 'completed') {
-                    statusElement.innerText = '{{ _('다운로드 완료! 이동 중...') }}';
-                    progressBar.style.width = '100%';
-                    progressText.innerText = '100%';
-                    clearInterval(checkStatusInterval);
-                    window.location.href = data.redirect;
-                } else if (data.status === 'error') {
-                    statusElement.innerText = '{{ _('다운로드 오류:') }} ' + (data.error || '{{ _('알 수 없는 오류') }}');
-                    progressBar.style.backgroundColor = '#f44336';
-                    progressBar.style.width = '100%';
-                    clearInterval(checkStatusInterval);
+                if (currentWidth < 90) {
+                    const increment = Math.max(0.5, Math.min(2, 95 - currentWidth) / 20);
+                    const newProgress = currentWidth + increment;
+                    progressBar.style.width = `${newProgress}%`;
+                    progressText.textContent = `${Math.round(newProgress)}%`;
+
+                    setTimeout(smoothProgress, 300);
                 }
-            })
-            .catch(error => {
-                console.error('{{ _('상태 확인 중 오류:') }}', error);
-            });
-    }
+            }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // 페이지 로드 시 즉시 상태 확인
-        checkStatus();
+            if (parseFloat(document.getElementById('progress-bar').style.width || '0') < 5) {
+                setTimeout(smoothProgress, 300);
+            }
 
-        // 2초마다 상태 확인
-        checkStatusInterval = setInterval(checkStatus, 2000);
-    });
-</script>
+            fetch(`/{{ current_lang }}/check-status/${fileId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Status data:', data);
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressText = document.getElementById('progress-text');
+                    const statusText = document.getElementById('status-text');
+
+                    if (data.status === 'completed') {
+                        clearInterval(checkStatusInterval);
+                        statusText.textContent = '{{ _("다운로드 완료! 잠시 후 결과 페이지로 이동합니다...") }}';
+
+                        const currentWidth = parseFloat(progressBar.style.width || '0');
+                        const duration = 500;
+                        const start = performance.now();
+
+                        function animateToCompletion(timestamp) {
+                            const elapsed = timestamp - start;
+                            const progress = Math.min(elapsed / duration, 1);
+                            const newWidth = currentWidth + (100 - currentWidth) * progress;
+
+                            progressBar.style.width = `${newWidth}%`;
+                            progressText.textContent = `${Math.round(newWidth)}%`;
+
+                            if (progress < 1) {
+                                requestAnimationFrame(animateToCompletion);
+                            } else {
+                                setTimeout(() => {
+                                    window.location.href = `/{{ current_lang }}/result/${fileId}`;
+                                }, 1000);
+                            }
+                        }
+
+                        requestAnimationFrame(animateToCompletion);
+                    } else if (data.status === 'processing') {
+                        let targetProgress = 0;
+
+                        if (data.progress !== undefined) {
+                            targetProgress = parseFloat(data.progress);
+                        } else if (data.percent !== undefined) {
+                            targetProgress = parseFloat(data.percent);
+                        }
+
+                        if (isNaN(targetProgress)) targetProgress = 0;
+
+                        targetProgress = Math.max(10, Math.min(95, targetProgress));
+
+                        const currentWidth = parseFloat(progressBar.style.width || '0');
+
+                        if (targetProgress > currentWidth) {
+                            const duration = 1000;
+                            const start = performance.now();
+
+                            function animateProgress(timestamp) {
+                                const elapsed = timestamp - start;
+                                const progress = Math.min(elapsed / duration, 1);
+                                const newWidth = currentWidth + (targetProgress - currentWidth) * progress;
+
+                                progressBar.style.width = `${newWidth}%`;
+                                progressText.textContent = `${Math.round(newWidth)}%`;
+
+                                if (progress < 1) {
+                                    requestAnimationFrame(animateProgress);
+                                }
+                            }
+
+                            requestAnimationFrame(animateProgress);
+                        }
+
+                        statusText.textContent = data.message || '{{ _("다운로드가 진행 중입니다...") }}';
+                    } else if (data.status === 'error') {
+                        clearInterval(checkStatusInterval);
+                        statusText.textContent = data.message || '{{ _("오류가 발생했습니다.") }}';
+                        progressBar.style.width = '0%';
+                        progressText.textContent = '';
+
+                        setTimeout(() => {
+                            window.location.href = `/{{ current_lang }}/error?message=${encodeURIComponent(data.message || '알 수 없는 오류가 발생했습니다.')}`;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Status check error:', error);
+
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressText = document.getElementById('progress-text');
+                    const currentWidth = parseFloat(progressBar.style.width || '0');
+
+                    if (currentWidth < 95) {
+                        const increment = Math.max(0.2, Math.min(1, 95 - currentWidth) / 30);
+                        const newProgress = currentWidth + increment;
+                        progressBar.style.width = `${newProgress}%`;
+                        progressText.textContent = `${Math.round(newProgress)}%`;
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = `/{{ current_lang }}/result/${fileId}`;
+                        }, 5000);
+                    }
+                });
+        }
+    </script>
 {% endblock %}
