@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-30 01:07+0900\n"
-"PO-Revision-Date: 2025-03-30 01:07+0900\n"
+"POT-Creation-Date: 2025-04-03 00:03+0900\n"
+"PO-Revision-Date: 2025-04-03 00:28+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es_MX\n"
 "Language-Team: es_MX <LL@li.org>\n"
@@ -18,113 +18,277 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:194
+#: app.py:199
 msgid "URL을 입력해주세요."
-msgstr "Por favor, ingrese la URL."
+msgstr "Por favor ingresa una URL."
 
-#: app.py:307
+#: app.py:312
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "ID de archivo no válido."
 
-#: templates/download_result.html:6
-msgid "다운로드 완료"
-msgstr "Descarga completada"
+#: templates/base.html:6
+msgid "GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스."
+msgstr "GrabVideo: Descarga videos de YouTube, TikTok, Instagram, Facebook en la mejor calidad gratis. Servicio rápido y seguro de descarga de videos en línea."
 
-#: templates/download_result.html:135
-msgid "다운로드 완료!"
-msgstr "¡Descarga completada!"
+#: templates/base.html:7
+msgid "GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드"
+msgstr "GrabVideo, Descargador de videos, Descargador de YouTube, Descargador de TikTok, Descargador de Instagram, Descarga de videos, Descarga gratuita de videos, Descarga en alta calidad"
 
-#: templates/download_result.html:138
-msgid "파일 이름:"
-msgstr "Nombre del archivo:"
+#: templates/base.html:8
+msgid "최고 화질 동영상 다운로더"
+msgstr "Descargador de videos de la más alta calidad"
 
-#: templates/download_result.html:139
-msgid "파일 크기:"
-msgstr "Tamaño del archivo:"
+#: templates/base.html:9
+msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
+msgstr "Descarga videos de YouTube, TikTok, Instagram, Facebook gratis. Úsalo inmediatamente sin necesidad de registro."
 
-#: templates/download_result.html:140
-msgid "제목:"
-msgstr "Título:"
-
-#: templates/download_result.html:141
-msgid "출처:"
-msgstr "Fuente:"
-
-#: templates/download_result.html:148
-msgid "파일 다운로드"
-msgstr "Descargar archivo"
-
-#: templates/download_result.html:151
-msgid "메인으로 돌아가기"
-msgstr "Volver a la página principal"
-
-#: templates/download_waiting.html:6 templates/download_waiting.html:181
-msgid "다운로드 진행 중"
-msgstr "Descarga en progreso"
-
-#: templates/download_waiting.html:21
-msgid "다운로드 중입니다..."
-msgstr "Descargando..."
-
-#: templates/download_waiting.html:25
-msgid "파일 처리 중입니다..."
-msgstr "Procesando archivo..."
-
-#: templates/download_waiting.html:29
-msgid "다운로드 완료! 이동 중..."
-msgstr "¡Descarga completa! Redirigiendo..."
-
-#: templates/download_waiting.html:35
-msgid "다운로드 오류:"
-msgstr "Error de descarga:"
-
-#: templates/download_waiting.html:35
-msgid "알 수 없는 오류"
-msgstr "Error desconocido"
-
-#: templates/download_waiting.html:42
-msgid "상태 확인 중 오류:"
-msgstr "Error al verificar el estado:"
-
-#: templates/download_waiting.html:183
-msgid "다운로드가 진행 중입니다..."
-msgstr "La descarga está en progreso..."
-
-#: templates/download_waiting.html:193
-msgid "다운로드가 완료되면 자동으로 다음 페이지로 이동합니다."
-msgstr "Será redirigido automáticamente a la siguiente página cuando se complete la descarga."
-
-#: templates/download_waiting.html:194
-msgid "취소하고 메인으로 돌아가기"
-msgstr "Cancelar y volver a la página principal"
-
-#: templates/index.html:6 templates/index.html:180
+#: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
 msgstr "Descargador de videos"
 
-#: templates/index.html:183
-msgid "동영상 URL:"
-msgstr "URL del video:"
+#: templates/base.html:38
+msgid "최고 화질의 동영상 다운로더"
+msgstr "Descargador de videos de la más alta calidad"
 
-#: templates/index.html:184
-msgid "여기에 URL을 붙여넣으세요."
-msgstr "Pegue la URL aquí."
+#: templates/download_result.html:3
+msgid "다운로드 완료"
+msgstr "Descarga completa"
 
-#: templates/index.html:186
+#: templates/download_result.html:35
+msgid "다운로드 완료!"
+msgstr "¡Descarga completa!"
+
+#: templates/download_result.html:38
+msgid "파일 이름:"
+msgstr "Nombre del archivo:"
+
+#: templates/download_result.html:39
+msgid "파일 크기:"
+msgstr "Tamaño del archivo:"
+
+#: templates/download_result.html:40
+msgid "제목:"
+msgstr "Título:"
+
+#: templates/download_result.html:41
+msgid "출처:"
+msgstr "Fuente:"
+
+#: templates/download_result.html:48
+msgid "파일 다운로드"
+msgstr "Descargar archivo"
+
+#: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
+msgid "메인으로 돌아가기"
+msgstr "Regresar al inicio"
+
+#: templates/download_waiting.html:3 templates/download_waiting.html:33
+msgid "다운로드 진행 중"
+msgstr "Descarga en progreso"
+
+#: templates/download_waiting.html:34 templates/download_waiting.html:177
+msgid "다운로드가 진행 중입니다..."
+msgstr "La descarga está en progreso..."
+
+#: templates/download_waiting.html:43
+msgid "잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다."
+msgstr "Por favor espera un momento. Puede tomar algo de tiempo dependiendo del tamaño del archivo y la velocidad de internet."
+
+#: templates/download_waiting.html:118
+msgid "다운로드 완료! 잠시 후 결과 페이지로 이동합니다..."
+msgstr "¡Descarga completa! Redirigiendo a la página de resultados en breve..."
+
+#: templates/download_waiting.html:180
+msgid "오류가 발생했습니다."
+msgstr "Ha ocurrido un error."
+
+#: templates/error.html:3
+msgid "오류 발생"
+msgstr "Error ocurrido"
+
+#: templates/error.html:80
+msgid "오류가 발생했습니다"
+msgstr "Ha ocurrido un error"
+
+#: templates/index.html:36
+msgid "최고 화질의 SNS 동영상 다운로더"
+msgstr "Descargador de videos de redes sociales en alta calidad"
+
+#: templates/index.html:38
+msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
+msgstr "Descarga videos de alta calidad de YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)<br> y otras plataformas de redes sociales de forma rápida y sencilla con GrabVideo.<br>Completamente gratis, sin necesidad de registro ni marcas de agua.<br>Funciona perfectamente tanto en PC como en dispositivos móviles."
+
+#: templates/index.html:49
+msgid "동영상 URL"
+msgstr "URL del video"
+
+#: templates/index.html:50
+msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요"
+msgstr "Pega la URL del video de YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), etc."
+
+#: templates/index.html:53
+msgid "다운로드 시작"
+msgstr "Iniciar descarga"
+
+#: templates/index.html:58
+msgid "사용 방법"
+msgstr "Cómo usar"
+
+#: templates/index.html:65
+msgid "URL 복사"
+msgstr "Copiar URL"
+
+#: templates/index.html:66
+msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
+msgstr "Copia la URL del video que deseas descargar de YouTube, TikTok, Instagram, etc.<br>(Compartir)"
+
+#: templates/index.html:73
+msgid "URL 붙여넣기"
+msgstr "Pegar URL"
+
+#: templates/index.html:74
+msgid "복사한 URL을 위 입력란에 붙여넣으세요."
+msgstr "Pega la URL copiada en el campo de entrada de arriba."
+
+#: templates/index.html:81
 msgid "다운로드"
 msgstr "Descargar"
 
-#: templates/index.html:195
-msgid "YouTube, Instagram, TikTok, Facebook, Twitter(X) 등 다양한 플랫폼에서 동영상을 다운로드 할 수 있습니다. 원하는 사이트에서 동영상 URL을 복사하여 붙여넣기만 하면 최고 화질로 다운로드 됩니다."
-msgstr "Puede descargar videos de varias plataformas como YouTube, Instagram, TikTok, Facebook, Twitter(X) y muchos otros sitios. Simplemente copie la URL del video del sitio que desee y péguela aquí para descargar con la mejor calidad."
+#: templates/index.html:82
+msgid "다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다."
+msgstr "Haz clic en el botón de descarga y espera un momento para guardar el video."
 
-#: templates/index.html:198
-msgid "지원되는 사이트"
-msgstr "Sitios compatibles"
+#: templates/index.html:88
+msgid "GrabVideo의 특별한 기능"
+msgstr "Características especiales de GrabVideo"
 
-#: templates/index.html:218
-msgid "안전하고 빠른 비디오 다운로드 서비스"
-msgstr "Servicio de descarga de videos seguro y rápido"
+#: templates/index.html:94
+msgid "모바일 완벽 호환"
+msgstr "Compatibilidad perfecta con móviles"
+
+#: templates/index.html:95
+msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
+msgstr "Funciona igual en smartphones y tablets que en PC. Descarga videos en cualquier momento y lugar."
+
+#: templates/index.html:101
+msgid "완전 무료"
+msgstr "Completamente gratis"
+
+#: templates/index.html:102
+msgid "모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다."
+msgstr "Todas las funciones se ofrecen gratuitamente. No hay costos ocultos ni planes premium."
+
+#: templates/index.html:108
+msgid "브라우저 기반"
+msgstr "Basado en navegador"
+
+#: templates/index.html:109
+msgid "전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요."
+msgstr "No necesitas instalar ningún programa especializado. Descarga fácilmente a través de tu navegador."
+
+#: templates/index.html:115
+msgid "워터마크 없음"
+msgstr "Sin marcas de agua"
+
+#: templates/index.html:116
+msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
+msgstr "No agregamos logotipos ni marcas de agua a los videos descargados. Se proporcionan con la calidad original."
+
+#: templates/index.html:122
+msgid "최고 화질, 음질"
+msgstr "La mejor calidad de video y audio"
+
+#: templates/index.html:123
+msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
+msgstr "Descarga videos MP4 con la mejor calidad posible, incluyendo 4K y HD. Se proporcionan exactamente como el original sin pérdida de calidad."
+
+#: templates/index.html:129
+msgid "안전한 다운로드"
+msgstr "Descargas seguras"
+
+#: templates/index.html:130
+msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
+msgstr "Puedes usarlo de forma segura sin malware. Priorizamos la protección de tu privacidad."
+
+#: templates/index.html:136
+msgid "회원가입 불필요"
+msgstr "No requiere registro"
+
+#: templates/index.html:137
+msgid "계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다."
+msgstr "Úsalo inmediatamente sin crear una cuenta o ingresar información personal. No hay procedimientos complicados."
+
+#: templates/index.html:143
+msgid "빠른 다운로드"
+msgstr "Descargas rápidas"
+
+#: templates/index.html:144
+msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
+msgstr "Obtén videos rápidamente con algoritmos optimizados. No hay tiempos de espera innecesarios."
+
+#: templates/index.html:148
+msgid "지원하는 플랫폼"
+msgstr "Plataformas compatibles"
+
+#: templates/index.html:168
+msgid "자주 묻는 질문"
+msgstr "Preguntas frecuentes"
+
+#: templates/index.html:172
+msgid "GrabVideo는 정말 완전 무료인가요?"
+msgstr "¿GrabVideo es realmente completamente gratis?"
+
+#: templates/index.html:176
+msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
+msgstr "Sí, GrabVideo es completamente gratuito. No hay costos ocultos ni planes premium, y todas las funciones están disponibles gratuitamente."
+
+#: templates/index.html:182
+msgid "다운로드한 동영상에 워터마크가 있나요?"
+msgstr "¿Los videos descargados tienen marcas de agua?"
+
+#: templates/index.html:186
+msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
+msgstr "No, GrabVideo no agrega ninguna marca de agua o logo a los videos descargados. Se proporcionan con su calidad original."
+
+#: templates/index.html:192
+msgid "모바일에서도 사용할 수 있나요?"
+msgstr "¿Puedo usarlo en dispositivos móviles?"
+
+#: templates/index.html:196
+msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
+msgstr "Sí, GrabVideo está perfectamente optimizado para entornos móviles. Puedes usarlo en smartphones y tablets igual que en PC."
+
+#: templates/index.html:202
+msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
+msgstr "¿En qué calidad puedo descargar los videos?"
+
+#: templates/index.html:206
+msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
+msgstr "GrabVideo descarga videos en la mayor calidad posible. Si el video original es de calidad HD, puedes descargarlo en la misma calidad."
+
+#: templates/index.html:212
+msgid "다운로드 속도는 어떤가요?"
+msgstr "¿Qué tan rápidas son las descargas?"
+
+#: templates/index.html:216
+msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
+msgstr "GrabVideo proporciona velocidades de descarga rápidas mediante algoritmos optimizados. La velocidad de descarga puede variar según el estado de tu conexión a internet y las condiciones del servidor."
+
+#: templates/index.html:222
+msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
+msgstr "¿Cómo debo usar el contenido descargado?"
+
+#: templates/index.html:226
+msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
+msgstr "GrabVideo es una herramienta técnica para tu conveniencia. Recomendamos usar el contenido descargado solo para visualización personal. Recuerda que respetar el trabajo de los creadores originales conduce a la producción de más contenido de calidad."
+
+#: templates/index.html:235
+msgid "이용 안내"
+msgstr "Guía de uso"
+
+#: templates/index.html:237
+msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
+msgstr "GrabVideo ofrece un servicio conveniente de descarga de videos. Respetamos los esfuerzos de todos los creadores de contenido y te pedimos que disfrutes del contenido descargado para fines de visualización personal. Consulta los términos de servicio de cada plataforma y utiliza el contenido de acuerdo con las intenciones del creador. Crea una experiencia de contenido digital más conveniente y agradable con GrabVideo."
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"

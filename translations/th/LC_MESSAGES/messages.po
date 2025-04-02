@@ -1,4 +1,4 @@
-# Urdu translations for PROJECT.
+# Thai translations for PROJECT.
 # Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
@@ -8,11 +8,11 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2025-04-03 00:03+0900\n"
-"PO-Revision-Date: 2025-04-03 00:44+0900\n"
+"PO-Revision-Date: 2025-04-03 00:55+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: ur\n"
-"Language-Team: ur <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: th\n"
+"Language-Team: th <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,275 +20,276 @@ msgstr ""
 
 #: app.py:199
 msgid "URL을 입력해주세요."
-msgstr "براہ کرم URL درج کریں۔"
+msgstr "โปรดป้อน URL"
 
 #: app.py:312
 msgid "유효하지 않은 파일 ID입니다."
-msgstr "فائل ID درست نہیں ہے۔"
+msgstr "รหัสไฟล์ไม่ถูกต้อง"
 
 #: templates/base.html:6
 msgid "GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스."
-msgstr "گریب ویڈیو: یوٹیوب، ٹک ٹاک، انسٹاگرام، فیس بک ویڈیوز اعلی معیار میں مفت ڈاؤن لوڈ کریں۔ تیز اور محفوظ آن لائن ویڈیو ڈاؤن لوڈر سروس۔"
+msgstr "GrabVideo: ดาวน์โหลดวิดีโอ YouTube, TikTok, Instagram, Facebook คุณภาพสูงสุดฟรี บริการดาวน์โหลดวิดีโอออนไลน์ที่รวดเร็วและปลอดภัย"
 
 #: templates/base.html:7
 msgid "GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드"
-msgstr "گریب ویڈیو، ویڈیو ڈاؤن لوڈر، یوٹیوب ڈاؤن لوڈر، ٹک ٹاک ڈاؤن لوڈر، انسٹاگرام ڈاؤن لوڈر، ویڈیو ڈاؤن لوڈ، مفت ویڈیو ڈاؤن لوڈ، اعلی معیار کا ڈاؤن لوڈ"
+msgstr "GrabVideo, โปรแกรมดาวน์โหลดวิดีโอ, โปรแกรมดาวน์โหลด YouTube, โปรแกรมดาวน์โหลด TikTok, โปรแกรมดาวน์โหลด Instagram, ดาวน์โหลดวิดีโอ, ดาวน์โหลดวิดีโอฟรี, ดาวน์โหลดคุณภาพสูง"
 
 #: templates/base.html:8
 msgid "최고 화질 동영상 다운로더"
-msgstr "اعلی معیار کا ویڈیو ڈاؤن لوڈر"
+msgstr "โปรแกรมดาวน์โหลดวิดีโอคุณภาพสูงสุด"
 
 #: templates/base.html:9
 msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
-msgstr "یوٹیوب، ٹک ٹاک، انسٹاگرام، فیس بک سے ویڈیوز مفت ڈاؤن لوڈ کریں۔ رجسٹریشن کے بغیر فوری استعمال کریں۔"
+msgstr "ดาวน์โหลดวิดีโอจาก YouTube, TikTok, Instagram, Facebook ได้ฟรี ใช้งานได้ทันทีโดยไม่ต้องลงทะเบียน"
 
 #: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
-msgstr "ویڈیو ڈاؤن لوڈر"
+msgstr "โปรแกรมดาวน์โหลดวิดีโอ"
 
 #: templates/base.html:38
 msgid "최고 화질의 동영상 다운로더"
-msgstr "اعلی معیار کا ویڈیو ڈاؤن لوڈر"
+msgstr "โปรแกรมดาวน์โหลดวิดีโอคุณภาพสูงสุด"
 
 #: templates/download_result.html:3
 msgid "다운로드 완료"
-msgstr "ڈاؤن لوڈ مکمل"
+msgstr "ดาวน์โหลดเสร็จสิ้น"
 
 #: templates/download_result.html:35
 msgid "다운로드 완료!"
-msgstr "ڈاؤن لوڈ مکمل!"
+msgstr "ดาวน์โหลดเสร็จสิ้น!"
 
 #: templates/download_result.html:38
 msgid "파일 이름:"
-msgstr "فائل کا نام:"
+msgstr "ชื่อไฟล์:"
 
 #: templates/download_result.html:39
 msgid "파일 크기:"
-msgstr "فائل کا سائز:"
+msgstr "ขนาดไฟล์:"
 
 #: templates/download_result.html:40
 msgid "제목:"
-msgstr "عنوان:"
+msgstr "ชื่อเรื่อง:"
 
 #: templates/download_result.html:41
 msgid "출처:"
-msgstr "ماخذ:"
+msgstr "แหล่งที่มา:"
 
 #: templates/download_result.html:48
 msgid "파일 다운로드"
-msgstr "فائل ڈاؤن لوڈ کریں"
+msgstr "ดาวน์โหลดไฟล์"
 
-#: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
+#: templates/download_result.html:51 templates/download_waiting.html:48
+#: templates/error.html:87
 msgid "메인으로 돌아가기"
-msgstr "مین پیج پر واپس جائیں"
+msgstr "กลับไปหน้าหลัก"
 
 #: templates/download_waiting.html:3 templates/download_waiting.html:33
 msgid "다운로드 진행 중"
-msgstr "ڈاؤن لوڈ جاری ہے"
+msgstr "กำลังดาวน์โหลด"
 
 #: templates/download_waiting.html:34 templates/download_waiting.html:177
 msgid "다운로드가 진행 중입니다..."
-msgstr "ڈاؤن لوڈ جاری ہے..."
+msgstr "กำลังดาวน์โหลด..."
 
 #: templates/download_waiting.html:43
 msgid "잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다."
-msgstr "براہ کرم انتظار کریں۔ فائل کے سائز اور انٹرنیٹ کی رفتار کے مطابق وقت لگ سکتا ہے۔"
+msgstr "โปรดรอสักครู่ อาจใช้เวลาสักพักขึ้นอยู่กับขนาดไฟล์และความเร็วอินเทอร์เน็ต"
 
 #: templates/download_waiting.html:118
 msgid "다운로드 완료! 잠시 후 결과 페이지로 이동합니다..."
-msgstr "ڈاؤن لوڈ مکمل! کچھ دیر بعد نتائج کے صفحے پر منتقل ہو رہا ہے..."
+msgstr "ดาวน์โหลดเสร็จสิ้น! กำลังเปลี่ยนไปยังหน้าผลลัพธ์..."
 
 #: templates/download_waiting.html:180
 msgid "오류가 발생했습니다."
-msgstr "ایک خرابی پیش آگئی ہے۔"
+msgstr "เกิดข้อผิดพลาด"
 
 #: templates/error.html:3
 msgid "오류 발생"
-msgstr "خرابی پیش آگئی"
+msgstr "เกิดข้อผิดพลาด"
 
 #: templates/error.html:80
 msgid "오류가 발생했습니다"
-msgstr "ایک خرابی پیش آگئی ہے"
+msgstr "เกิดข้อผิดพลาด"
 
 #: templates/index.html:36
 msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "سوشل میڈیا ویڈیوز کا اعلی معیار کا ڈاؤن لوڈر"
+msgstr "โปรแกรมดาวน์โหลดวิดีโอโซเชียลมีเดียคุณภาพสูงสุด"
 
 #: templates/index.html:38
 msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr "گریب ویڈیو کے ذریعے یوٹیوب، ٹک ٹاک، انسٹاگرام، ٹویٹر (ایکس)، فیس بک (میٹا) وغیرہ<br> مختلف سوشل میڈیا پلیٹ فارمز سے اعلی معیار کی ویڈیوز تیزی اور آسانی سے ڈاؤن لوڈ کریں۔<br>بالکل مفت ہے، اور رجسٹریشن یا واٹر مارک کے بغیر استعمال کیا جا سکتا ہے۔<br>پی سی کے علاوہ موبائل پر بھی کامل طور پر کام کرتا ہے۔"
+msgstr "ดาวน์โหลดวิดีโอคุณภาพสูงจาก YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) และ<br>โซเชียลมีเดียอื่นๆ ได้อย่างรวดเร็วและง่ายดายด้วย GrabVideo<br>ฟรีอย่างสมบูรณ์ ไม่ต้องลงทะเบียนและไม่มีลายน้ำ<br>ทำงานได้อย่างสมบูรณ์ทั้งบน PC และอุปกรณ์มือถือ"
 
 #: templates/index.html:49
 msgid "동영상 URL"
-msgstr "ویڈیو URL"
+msgstr "URL วิดีโอ"
 
 #: templates/index.html:50
 msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요"
-msgstr "یوٹیوب، ٹک ٹاک، انسٹاگرام، ٹویٹر (ایکس)، فیس بک (میٹا) وغیرہ کی ویڈیو URL پیسٹ کریں"
+msgstr "วาง URL วิดีโอจาก YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) เป็นต้น"
 
 #: templates/index.html:53
 msgid "다운로드 시작"
-msgstr "ڈاؤن لوڈ شروع کریں"
+msgstr "เริ่มดาวน์โหลด"
 
 #: templates/index.html:58
 msgid "사용 방법"
-msgstr "استعمال کا طریقہ"
+msgstr "วิธีการใช้งาน"
 
 #: templates/index.html:65
 msgid "URL 복사"
-msgstr "URL کاپی کریں"
+msgstr "คัดลอก URL"
 
 #: templates/index.html:66
 msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
-msgstr "یوٹیوب، ٹک ٹاک، انسٹاگرام وغیرہ سے جس ویڈیو کو ڈاؤن لوڈ کرنا چاہتے ہیں اس کا URL کاپی کریں۔<br>(شیئر کریں)"
+msgstr "คัดลอก URL ของวิดีโอที่คุณต้องการดาวน์โหลดจาก YouTube, TikTok, Instagram และอื่นๆ<br>(แชร์)"
 
 #: templates/index.html:73
 msgid "URL 붙여넣기"
-msgstr "URL پیسٹ کریں"
+msgstr "วาง URL"
 
 #: templates/index.html:74
 msgid "복사한 URL을 위 입력란에 붙여넣으세요."
-msgstr "کاپی کیا ہوا URL اوپر دیے گئے خانے میں پیسٹ کریں۔"
+msgstr "วาง URL ที่คัดลอกไว้ลงในช่องข้างบน"
 
 #: templates/index.html:81
 msgid "다운로드"
-msgstr "ڈاؤن لوڈ"
+msgstr "ดาวน์โหลด"
 
 #: templates/index.html:82
 msgid "다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다."
-msgstr "ڈاؤن لوڈ بٹن پر کلک کریں اور تھوڑی دیر انتظار کرنے کے بعد ویڈیو محفوظ کر سکیں گے۔"
+msgstr "คลิกปุ่มดาวน์โหลดและรอสักครู่เพื่อบันทึกวิดีโอ"
 
 #: templates/index.html:88
 msgid "GrabVideo의 특별한 기능"
-msgstr "گریب ویڈیو کی خصوصیات"
+msgstr "คุณสมบัติพิเศษของ GrabVideo"
 
 #: templates/index.html:94
 msgid "모바일 완벽 호환"
-msgstr "موبائل کے ساتھ مکمل مطابقت"
+msgstr "รองรับมือถืออย่างสมบูรณ์"
 
 #: templates/index.html:95
 msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
-msgstr "اسمارٹ فون یا ٹیبلٹ پر بھی پی سی کی طرح کام کرتا ہے۔ کہیں بھی، کبھی بھی ویڈیوز ڈاؤن لوڈ کریں۔"
+msgstr "ทำงานได้เหมือนกันทั้งบนสมาร์ทโฟนและแท็บเล็ตเช่นเดียวกับบน PC ดาวน์โหลดวิดีโอได้ทุกที่ทุกเวลา"
 
 #: templates/index.html:101
 msgid "완전 무료"
-msgstr "بالکل مفت"
+msgstr "ฟรีทั้งหมด"
 
 #: templates/index.html:102
 msgid "모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다."
-msgstr "تمام فیچرز مفت فراہم کیے جاتے ہیں۔ کوئی چھپی ہوئی لاگت یا پریمیم پلان نہیں ہیں۔"
+msgstr "ให้บริการทุกฟีเจอร์ฟรี ไม่มีค่าใช้จ่ายซ่อนเร้นหรือแผนพรีเมียม"
 
 #: templates/index.html:108
 msgid "브라우저 기반"
-msgstr "براؤزر پر مبنی"
+msgstr "ใช้งานผ่านเบราว์เซอร์"
 
 #: templates/index.html:109
 msgid "전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요."
-msgstr "مخصوص پروگرام انسٹال کرنے کی ضرورت نہیں ہے۔ اپنے براؤزر کے ذریعے آسانی سے ڈاؤن لوڈ کریں۔"
+msgstr "ไม่จำเป็นต้องติดตั้งโปรแกรมเฉพาะ ดาวน์โหลดได้ง่ายๆ ผ่านเบราว์เซอร์ของคุณ"
 
 #: templates/index.html:115
 msgid "워터마크 없음"
-msgstr "واٹر مارک نہیں"
+msgstr "ไม่มีลายน้ำ"
 
 #: templates/index.html:116
 msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
-msgstr "ڈاؤن لوڈ کی گئی ویڈیوز میں کوئی لوگو یا واٹر مارک شامل نہیں کیا جاتا۔ اصل معیار میں فراہم کی جاتی ہیں۔"
+msgstr "ไม่มีการเพิ่มโลโก้หรือลายน้ำลงในวิดีโอที่ดาวน์โหลด ให้บริการในคุณภาพต้นฉบับ"
 
 #: templates/index.html:122
 msgid "최고 화질, 음질"
-msgstr "بہترین ویڈیو اور آڈیو کوالٹی"
+msgstr "คุณภาพวิดีโอและเสียงสูงสุด"
 
 #: templates/index.html:123
 msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
-msgstr "4K، HD وغیرہ جیسی ممکنہ اعلی ترین کوالٹی میں MP4 ویڈیوز ڈاؤن لوڈ کریں۔ کوالٹی میں کمی کے بغیر اصل کے مطابق فراہم کی جاتی ہیں۔"
+msgstr "ดาวน์โหลดวิดีโอ MP4 ในคุณภาพและเสียงที่ดีที่สุดเท่าที่เป็นไปได้ เช่น 4K, HD ให้บริการโดยไม่สูญเสียคุณภาพจากต้นฉบับ"
 
 #: templates/index.html:129
 msgid "안전한 다운로드"
-msgstr "محفوظ ڈاؤن لوڈ"
+msgstr "การดาวน์โหลดที่ปลอดภัย"
 
 #: templates/index.html:130
 msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
-msgstr "مالویئر کے بغیر محفوظ طریقے سے استعمال کیا جا سکتا ہے۔ ہم آپ کی رازداری کو اولین ترجیح دیتے ہیں۔"
+msgstr "ใช้งานได้อย่างปลอดภัยโดยไม่มีมัลแวร์ เราให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลเป็นอันดับแรก"
 
 #: templates/index.html:136
 msgid "회원가입 불필요"
-msgstr "رجسٹریشن کی ضرورت نہیں"
+msgstr "ไม่ต้องลงทะเบียน"
 
 #: templates/index.html:137
 msgid "계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다."
-msgstr "اکاؤنٹ بنانے یا ذاتی معلومات درج کیے بغیر فوری طور پر استعمال کیا جا سکتا ہے۔ کوئی پیچیدہ طریقہ کار نہیں ہے۔"
+msgstr "ใช้งานได้ทันทีโดยไม่ต้องสร้างบัญชีหรือป้อนข้อมูลส่วนบุคคล ไม่มีขั้นตอนที่ยุ่งยาก"
 
 #: templates/index.html:143
 msgid "빠른 다운로드"
-msgstr "تیز ڈاؤن لوڈ"
+msgstr "ดาวน์โหลดรวดเร็ว"
 
 #: templates/index.html:144
 msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
-msgstr "بہتر بنائے گئے الگورتھم کے ساتھ ویڈیوز تیز رفتاری سے حاصل کریں۔ غیر ضروری انتظار کی ضرورت نہیں ہے۔"
+msgstr "ดึงวิดีโอได้อย่างรวดเร็วด้วยอัลกอริทึมที่ได้รับการปรับให้เหมาะสม ไม่มีเวลารอที่ไม่จำเป็น"
 
 #: templates/index.html:148
 msgid "지원하는 플랫폼"
-msgstr "سپورٹڈ پلیٹ فارمز"
+msgstr "แพลตฟอร์มที่รองรับ"
 
 #: templates/index.html:168
 msgid "자주 묻는 질문"
-msgstr "اکثر پوچھے گئے سوالات"
+msgstr "คำถามที่พบบ่อย"
 
 #: templates/index.html:172
 msgid "GrabVideo는 정말 완전 무료인가요?"
-msgstr "کیا گریب ویڈیو واقعی بالکل مفت ہے؟"
+msgstr "GrabVideo ฟรีจริงหรือไม่?"
 
 #: templates/index.html:176
 msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "جی ہاں، گریب ویڈیو بالکل مفت فراہم کیا جاتا ہے۔ کوئی چھپی ہوئی لاگت یا پریمیم پلان نہیں ہیں، اور تمام فیچرز مفت استعمال کیے جا سکتے ہیں۔"
+msgstr "ใช่ GrabVideo ให้บริการฟรีอย่างสมบูรณ์ ไม่มีค่าใช้จ่ายซ่อนเร้นหรือแผนพรีเมียม และทุกฟีเจอร์สามารถใช้งานได้ฟรี"
 
 #: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
-msgstr "کیا ڈاؤن لوڈ کی گئی ویڈیوز میں واٹر مارک ہوتے ہیں؟"
+msgstr "มีลายน้ำในวิดีโอที่ดาวน์โหลดหรือไม่?"
 
 #: templates/index.html:186
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
-msgstr "نہیں، گریب ویڈیو ڈاؤن لوڈ کی گئی ویڈیوز میں کوئی واٹر مارک یا لوگو شامل نہیں کرتا۔ یہ اصل معیار میں فراہم کی جاتی ہیں۔"
+msgstr "ไม่ GrabVideo ไม่เพิ่มลายน้ำหรือโลโก้ใดๆ ลงในวิดีโอที่ดาวน์โหลด วิดีโอจะอยู่ในคุณภาพเดิม"
 
 #: templates/index.html:192
 msgid "모바일에서도 사용할 수 있나요?"
-msgstr "کیا میں اسے موبائل پر استعمال کر سکتا ہوں؟"
+msgstr "สามารถใช้งานบนมือถือได้หรือไม่?"
 
 #: templates/index.html:196
 msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "جی ہاں، گریب ویڈیو موبائل ماحول کے لیے مکمل طور پر بہتر بنایا گیا ہے۔ آپ اسے اسمارٹ فون یا ٹیبلٹ پر بھی پی سی کی طرح استعمال کر سکتے ہیں۔"
+msgstr "ได้ GrabVideo ได้รับการปรับให้เหมาะกับสภาพแวดล้อมมือถืออย่างสมบูรณ์ คุณสามารถใช้งานบนสมาร์ทโฟนหรือแท็บเล็ตได้เหมือนกับบน PC"
 
 #: templates/index.html:202
 msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
-msgstr "میں کس معیار میں ویڈیوز ڈاؤن لوڈ کر سکتا ہوں؟"
+msgstr "ฉันสามารถดาวน์โหลดวิดีโอในคุณภาพใดได้บ้าง?"
 
 #: templates/index.html:206
 msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
-msgstr "گریب ویڈیو ویڈیوز کو ممکنہ اعلی ترین معیار میں ڈاؤن لوڈ کرتا ہے۔ اگر اصل ویڈیو HD معیار کی ہے تو آپ اسے اسی معیار میں ڈاؤن لوڈ کر سکتے ہیں۔"
+msgstr "GrabVideo ดาวน์โหลดวิดีโอในคุณภาพสูงสุดเท่าที่เป็นไปได้ หากวิดีโอต้นฉบับเป็นคุณภาพ HD คุณก็สามารถดาวน์โหลดในคุณภาพเดียวกันได้"
 
 #: templates/index.html:212
 msgid "다운로드 속도는 어떤가요?"
-msgstr "ڈاؤن لوڈ کی رفتار کیسی ہے؟"
+msgstr "ความเร็วในการดาวน์โหลดเป็นอย่างไร?"
 
 #: templates/index.html:216
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "گریب ویڈیو بہتر بنائے گئے الگورتھم کا استعمال کرتے ہوئے تیز ڈاؤن لوڈ رفتار فراہم کرتا ہے۔ ڈاؤن لوڈ کی رفتار آپ کے انٹرنیٹ کنکشن اور سرور کی حالت پر منحصر ہو سکتی ہے۔"
+msgstr "GrabVideo ให้ความเร็วในการดาวน์โหลดที่รวดเร็วโดยใช้อัลกอริทึมที่ได้รับการปรับให้เหมาะสม ความเร็วในการดาวน์โหลดอาจแตกต่างกันไปตามการเชื่อมต่ออินเทอร์เน็ตและสถานการณ์ของเซิร์ฟเวอร์"
 
 #: templates/index.html:222
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
-msgstr "ڈاؤن لوڈ کیے گئے مواد کو کیسے استعمال کرنا چاہیے؟"
+msgstr "ฉันควรใช้เนื้อหาที่ดาวน์โหลดอย่างไร?"
 
 #: templates/index.html:226
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "گریب ویڈیو آپ کی سہولت کے لیے ایک تکنیکی ٹول ہے۔ ہم ڈاؤن لوڈ کیے گئے مواد کو صرف ذاتی دیکھنے کے لیے استعمال کرنے کی تجویز دیتے ہیں۔ یاد رکھیں کہ اصل تخلیق کاروں کے کام کا احترام کرنا مزید اچھے مواد کی تخلیق کا باعث بنتا ہے۔"
+msgstr "GrabVideo เป็นเครื่องมือทางเทคนิคเพื่อความสะดวกของคุณ เราแนะนำให้ใช้เนื้อหาที่ดาวน์โหลดเพื่อการรับชมส่วนบุคคลเท่านั้น โปรดจำไว้ว่าการเคารพงานของผู้สร้างเนื้อหาดั้งเดิมจะนำไปสู่การผลิตเนื้อหาที่ดีมากขึ้น"
 
 #: templates/index.html:235
 msgid "이용 안내"
-msgstr "استعمال کی ہدایات"
+msgstr "คำแนะนำการใช้งาน"
 
 #: templates/index.html:237
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "گریب ویڈیو ایک آسان ویڈیو ڈاؤن لوڈ سروس فراہم کرتا ہے۔ ہم تمام مواد بنانے والوں کی کوششوں کا احترام کرتے ہیں، اور آپ سے درخواست کرتے ہیں کہ ڈاؤن لوڈ کیے گئے مواد کو ذاتی دیکھنے کے مقاصد کے لیے استعمال کریں۔ ہر پلیٹ فارم کی سروس کی شرائط کو دیکھیں اور مواد کو تخلیق کار کے ارادوں کے مطابق استعمال کریں۔ گریب ویڈیو کے ساتھ اپنے ڈیجیٹل مواد کے تجربے کو زیادہ آسان اور خوشگوار بنائیں۔"
+msgstr "GrabVideo ให้บริการดาวน์โหลดวิดีโอที่สะดวก เราเคารพความพยายามของผู้สร้างเนื้อหาทุกคน และโปรดเพลิดเพลินกับเนื้อหาที่ดาวน์โหลดเพื่อวัตถุประสงค์ในการรับชมส่วนบุคคล โปรดอ้างอิงข้อกำหนดการใช้บริการของแต่ละแพลตฟอร์มและใช้เนื้อหาตามเจตนารมณ์ของผู้สร้าง สร้างประสบการณ์เนื้อหาดิจิทัลที่สะดวกและสนุกสนานยิ่งขึ้นด้วย GrabVideo"
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"
@@ -392,7 +393,6 @@ msgstr ""
 msgid "Got unexpected extra argument ({args})"
 msgid_plural "Got unexpected extra arguments ({args})"
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/core.py:1438
 #, python-brace-format
@@ -421,7 +421,6 @@ msgstr ""
 msgid "Takes {nargs} values but 1 was given."
 msgid_plural "Takes {nargs} values but {len} were given."
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/core.py:2783
 #, python-brace-format
@@ -507,7 +506,6 @@ msgstr ""
 msgid "Did you mean {possibility}?"
 msgid_plural "(Possible options: {possibilities})"
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/exceptions.py:270
 msgid "unknown error"
@@ -533,7 +531,6 @@ msgstr ""
 msgid "Option {name!r} requires an argument."
 msgid_plural "Option {name!r} requires {nargs} arguments."
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/shell_completion.py:326
 msgid "Shell completion is not supported for Bash versions older than 4.4."
@@ -580,14 +577,12 @@ msgstr ""
 msgid "{value!r} is not {choice}."
 msgid_plural "{value!r} is not one of {choices}."
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/types.py:393
 #, python-brace-format
 msgid "{value!r} does not match the format {format}."
 msgid_plural "{value!r} does not match the formats {formats}."
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/click/types.py:415
 #, python-brace-format
@@ -656,7 +651,6 @@ msgstr ""
 msgid "{len_type} values are required, but {len_value} was given."
 msgid_plural "{len_type} values are required, but {len_value} were given."
 msgstr[0] ""
-msgstr[1] ""
 
 #: venv/lib/python3.10/site-packages/tornado/locale.py:281
 msgid "January"
