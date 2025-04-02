@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-03 00:03+0900\n"
-"PO-Revision-Date: 2025-04-03 00:35+0900\n"
+"POT-Creation-Date: 2025-04-03 02:25+0900\n"
+"PO-Revision-Date: 2025-04-03 02:38+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: id\n"
 "Language-Team: id <LL@li.org>\n"
@@ -18,21 +18,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:199
+#: app.py:201
 msgid "URL을 입력해주세요."
 msgstr "Silakan masukkan URL."
 
-#: app.py:312
+#: app.py:314
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "ID file tidak valid."
 
 #: templates/base.html:6
 msgid "GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스."
-msgstr "GrabVideo: Download video YouTube, TikTok, Instagram, Facebook dengan kualitas terbaik secara gratis. Layanan pengunduh video online yang cepat dan aman."
+msgstr "GrabVideo: Unduh video YouTube, TikTok, Instagram, Facebook dengan kualitas terbaik secara gratis. Layanan pengunduh video online yang cepat dan aman."
 
 #: templates/base.html:7
 msgid "GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드"
-msgstr "GrabVideo, Pengunduh Video, Pengunduh YouTube, Pengunduh TikTok, Pengunduh Instagram, Unduh Video, Unduh Video Gratis, Unduh Kualitas Tinggi"
+msgstr "GrabVideo, pengunduh video, pengunduh YouTube, pengunduh TikTok, pengunduh Instagram, unduh video, unduh video gratis, unduh kualitas tinggi"
 
 #: templates/base.html:8
 msgid "최고 화질 동영상 다운로더"
@@ -40,7 +40,7 @@ msgstr "Pengunduh Video Kualitas Terbaik"
 
 #: templates/base.html:9
 msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
-msgstr "Unduh video dari YouTube, TikTok, Instagram, Facebook secara gratis. Bisa langsung digunakan tanpa pendaftaran."
+msgstr "Unduh video dari YouTube, TikTok, Instagram, Facebook secara gratis. Dapat langsung digunakan tanpa pendaftaran."
 
 #: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
@@ -48,7 +48,7 @@ msgstr "Pengunduh Video"
 
 #: templates/base.html:38
 msgid "최고 화질의 동영상 다운로더"
-msgstr "Pengunduh Video Kualitas Terbaik"
+msgstr "Pengunduh Video dengan Kualitas Terbaik"
 
 #: templates/download_result.html:3
 msgid "다운로드 완료"
@@ -60,11 +60,11 @@ msgstr "Unduhan Selesai!"
 
 #: templates/download_result.html:38
 msgid "파일 이름:"
-msgstr "Nama File:"
+msgstr "Nama file:"
 
 #: templates/download_result.html:39
 msgid "파일 크기:"
-msgstr "Ukuran File:"
+msgstr "Ukuran file:"
 
 #: templates/download_result.html:40
 msgid "제목:"
@@ -80,19 +80,19 @@ msgstr "Unduh File"
 
 #: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
 msgid "메인으로 돌아가기"
-msgstr "Kembali ke Beranda"
+msgstr "Kembali ke Halaman Utama"
 
 #: templates/download_waiting.html:3 templates/download_waiting.html:33
 msgid "다운로드 진행 중"
-msgstr "Sedang Mengunduh"
+msgstr "Pengunduhan Sedang Berlangsung"
 
 #: templates/download_waiting.html:34 templates/download_waiting.html:177
 msgid "다운로드가 진행 중입니다..."
-msgstr "Sedang mengunduh..."
+msgstr "Pengunduhan sedang berlangsung..."
 
 #: templates/download_waiting.html:43
 msgid "잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다."
-msgstr "Mohon tunggu sebentar. Waktu yang dibutuhkan tergantung pada ukuran file dan kecepatan internet."
+msgstr "Harap tunggu sebentar. Waktu yang diperlukan dapat bervariasi tergantung ukuran file dan kecepatan internet Anda."
 
 #: templates/download_waiting.html:118
 msgid "다운로드 완료! 잠시 후 결과 페이지로 이동합니다..."
@@ -112,11 +112,11 @@ msgstr "Terjadi kesalahan"
 
 #: templates/index.html:36
 msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "Pengunduh Video Media Sosial Kualitas Terbaik"
+msgstr "Pengunduh Video Media Sosial dengan Kualitas Terbaik"
 
 #: templates/index.html:38
 msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr "Unduh video berkualitas tinggi dari YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)<br> dan platform media sosial lainnya dengan cepat dan mudah menggunakan GrabVideo.<br>Sepenuhnya gratis, bisa digunakan tanpa pendaftaran atau watermark.<br>Berfungsi sempurna baik di PC maupun perangkat mobile."
+msgstr "Unduh video berkualitas tinggi dengan cepat dan mudah dari YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)<br> dan platform media sosial lainnya menggunakan GrabVideo.<br>Sepenuhnya gratis, tanpa pendaftaran atau watermark.<br>Bekerja dengan sempurna baik di PC maupun perangkat seluler."
 
 #: templates/index.html:49
 msgid "동영상 URL"
@@ -124,11 +124,11 @@ msgstr "URL Video"
 
 #: templates/index.html:50
 msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요"
-msgstr "Tempel URL video dari YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), dll"
+msgstr "Tempel URL video dari YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), dll."
 
 #: templates/index.html:53
 msgid "다운로드 시작"
-msgstr "Mulai Unduh"
+msgstr "Mulai Mengunduh"
 
 #: templates/index.html:58
 msgid "사용 방법"
@@ -139,8 +139,8 @@ msgid "URL 복사"
 msgstr "Salin URL"
 
 #: templates/index.html:66
-msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
-msgstr "Salin URL video yang ingin Anda unduh dari YouTube, TikTok, Instagram, dll.<br>(Bagikan)"
+msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
+msgstr "Salin URL video yang ingin Anda unduh dari YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta), dll.<br>(Bagikan)"
 
 #: templates/index.html:73
 msgid "URL 붙여넣기"
@@ -148,7 +148,7 @@ msgstr "Tempel URL"
 
 #: templates/index.html:74
 msgid "복사한 URL을 위 입력란에 붙여넣으세요."
-msgstr "Tempel URL yang telah disalin ke kolom input di atas."
+msgstr "Tempel URL yang telah disalin ke dalam kotak input di atas."
 
 #: templates/index.html:81
 msgid "다운로드"
@@ -164,11 +164,11 @@ msgstr "Fitur Khusus GrabVideo"
 
 #: templates/index.html:94
 msgid "모바일 완벽 호환"
-msgstr "Kompatibel dengan Mobile"
+msgstr "Kompatibilitas Seluler Sempurna"
 
 #: templates/index.html:95
 msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
-msgstr "Berfungsi sama baiknya di smartphone dan tablet seperti di PC. Unduh video kapan saja dan di mana saja."
+msgstr "Berfungsi sama pada smartphone dan tablet seperti pada PC. Unduh video kapan saja dan di mana saja."
 
 #: templates/index.html:101
 msgid "완전 무료"
@@ -192,15 +192,15 @@ msgstr "Tanpa Watermark"
 
 #: templates/index.html:116
 msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
-msgstr "Tidak ada logo atau watermark yang ditambahkan ke video yang diunduh. Disediakan dengan kualitas asli."
+msgstr "Tidak ada logo atau watermark yang ditambahkan pada video yang diunduh. Disediakan dalam kualitas asli."
 
 #: templates/index.html:122
 msgid "최고 화질, 음질"
-msgstr "Kualitas Video & Audio Terbaik"
+msgstr "Kualitas Video dan Audio Terbaik"
 
 #: templates/index.html:123
 msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
-msgstr "Unduh video MP4 dengan kualitas terbaik yang memungkinkan, termasuk 4K dan HD. Disediakan sama persis seperti aslinya tanpa penurunan kualitas."
+msgstr "Unduh video MP4 dengan kualitas video dan audio terbaik yang memungkinkan, termasuk 4K, HD, dll. Disediakan persis seperti aslinya tanpa penurunan kualitas."
 
 #: templates/index.html:129
 msgid "안전한 다운로드"
@@ -208,7 +208,7 @@ msgstr "Unduhan Aman"
 
 #: templates/index.html:130
 msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
-msgstr "Dapat digunakan dengan aman tanpa malware. Perlindungan privasi adalah prioritas utama kami."
+msgstr "Gunakan dengan aman tanpa malware. Kami memprioritaskan perlindungan privasi Anda."
 
 #: templates/index.html:136
 msgid "회원가입 불필요"
@@ -216,7 +216,7 @@ msgstr "Tanpa Pendaftaran"
 
 #: templates/index.html:137
 msgid "계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다."
-msgstr "Dapat langsung digunakan tanpa membuat akun atau memasukkan informasi pribadi. Tidak ada prosedur yang merepotkan."
+msgstr "Gunakan langsung tanpa membuat akun atau memasukkan informasi pribadi. Tidak ada prosedur yang rumit."
 
 #: templates/index.html:143
 msgid "빠른 다운로드"
@@ -224,7 +224,7 @@ msgstr "Unduhan Cepat"
 
 #: templates/index.html:144
 msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
-msgstr "Mengambil video dengan cepat menggunakan algoritma yang dioptimalkan. Tidak ada waktu tunggu yang tidak perlu."
+msgstr "Ambil video dengan cepat menggunakan algoritma yang dioptimalkan. Tanpa waktu tunggu yang tidak perlu."
 
 #: templates/index.html:148
 msgid "지원하는 플랫폼"
@@ -236,11 +236,11 @@ msgstr "Pertanyaan yang Sering Diajukan"
 
 #: templates/index.html:172
 msgid "GrabVideo는 정말 완전 무료인가요?"
-msgstr "Apakah GrabVideo benar-benar gratis sepenuhnya?"
+msgstr "Apakah GrabVideo benar-benar sepenuhnya gratis?"
 
 #: templates/index.html:176
 msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "Ya, GrabVideo disediakan secara gratis sepenuhnya. Tidak ada biaya tersembunyi atau paket premium, dan semua fitur dapat digunakan secara gratis."
+msgstr "Ya, GrabVideo disediakan sepenuhnya gratis. Tidak ada biaya tersembunyi atau paket premium, dan semua fitur dapat digunakan secara gratis."
 
 #: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
@@ -248,39 +248,39 @@ msgstr "Apakah ada watermark pada video yang diunduh?"
 
 #: templates/index.html:186
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
-msgstr "Tidak, GrabVideo tidak menambahkan watermark atau logo apa pun pada video yang diunduh. Disediakan dengan kualitas asli."
+msgstr "Tidak, GrabVideo tidak menambahkan watermark atau logo apa pun pada video yang diunduh. Video disediakan dalam kualitas aslinya."
 
 #: templates/index.html:192
 msgid "모바일에서도 사용할 수 있나요?"
-msgstr "Apakah bisa digunakan di perangkat mobile?"
+msgstr "Bisakah saya menggunakannya di perangkat seluler?"
 
 #: templates/index.html:196
 msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "Ya, GrabVideo sepenuhnya dioptimalkan untuk lingkungan mobile. Anda dapat menggunakannya di smartphone atau tablet sama seperti di PC."
+msgstr "Ya, GrabVideo dioptimalkan dengan sempurna untuk lingkungan seluler. Anda dapat menggunakannya di smartphone dan tablet sama seperti di PC."
 
 #: templates/index.html:202
 msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
-msgstr "Dengan kualitas apa video dapat diunduh?"
+msgstr "Dengan kualitas apa saya dapat mengunduh video?"
 
 #: templates/index.html:206
 msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
-msgstr "GrabVideo mengunduh video dengan kualitas tertinggi yang memungkinkan. Jika video asli berkualitas HD, Anda dapat mengunduhnya dengan kualitas yang sama."
+msgstr "GrabVideo mengunduh video dengan kualitas tertinggi yang memungkinkan. Jika video asli dalam kualitas HD, Anda dapat mengunduhnya dengan kualitas yang sama."
 
 #: templates/index.html:212
 msgid "다운로드 속도는 어떤가요?"
-msgstr "Seberapa cepat unduhannya?"
+msgstr "Seberapa cepat kecepatan unduhan?"
 
 #: templates/index.html:216
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "GrabVideo menggunakan algoritma yang dioptimalkan untuk kecepatan unduhan yang cepat. Kecepatan unduhan dapat bervariasi tergantung pada koneksi internet dan kondisi server."
+msgstr "GrabVideo menyediakan kecepatan unduhan yang cepat menggunakan algoritma yang dioptimalkan. Kecepatan unduhan dapat bervariasi tergantung kondisi koneksi internet dan server."
 
 #: templates/index.html:222
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
-msgstr "Bagaimana sebaiknya menggunakan konten yang diunduh?"
+msgstr "Bagaimana sebaiknya saya menggunakan konten yang diunduh?"
 
 #: templates/index.html:226
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "GrabVideo adalah alat teknis untuk kenyamanan Anda. Kami merekomendasikan untuk menggunakan konten yang diunduh hanya untuk tujuan menonton pribadi. Ingatlah bahwa menghormati karya pembuat konten asli akan mengarah pada produksi lebih banyak konten yang baik."
+msgstr "GrabVideo adalah alat teknis untuk kenyamanan Anda. Kami merekomendasikan penggunaan konten yang diunduh untuk tujuan menonton pribadi. Ingatlah bahwa menghormati karya pembuat konten mendorong produksi konten berkualitas yang lebih banyak."
 
 #: templates/index.html:235
 msgid "이용 안내"
@@ -288,7 +288,7 @@ msgstr "Panduan Penggunaan"
 
 #: templates/index.html:237
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "GrabVideo menyediakan layanan unduh video yang nyaman. Kami menghormati upaya semua pembuat konten dan meminta Anda untuk menikmati konten yang diunduh untuk tujuan menonton pribadi. Harap merujuk ke ketentuan layanan setiap platform dan gunakan konten sesuai dengan maksud pembuat. Ciptakan pengalaman konten digital yang lebih nyaman dan menyenangkan dengan GrabVideo."
+msgstr "GrabVideo menyediakan layanan unduhan video yang nyaman. Kami menghormati upaya semua pembuat konten dan meminta Anda untuk menikmati konten yang diunduh untuk tujuan menonton pribadi. Harap merujuk pada ketentuan layanan masing-masing platform dan gunakan konten sesuai dengan maksud pembuatnya. Ciptakan pengalaman konten digital yang lebih nyaman dan menyenangkan melalui GrabVideo."
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"

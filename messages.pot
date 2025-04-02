@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-03 00:03+0900\n"
+"POT-Creation-Date: 2025-04-03 02:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:199
+#: app.py:201
 msgid "URL을 입력해주세요."
 msgstr ""
 
-#: app.py:312
+#: app.py:314
 msgid "유효하지 않은 파일 ID입니다."
 msgstr ""
 
@@ -148,7 +148,9 @@ msgid "URL 복사"
 msgstr ""
 
 #: templates/index.html:66
-msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
+msgid ""
+"YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 "
+"URL을 복사하세요.<br>(공유하기)"
 msgstr ""
 
 #: templates/index.html:73

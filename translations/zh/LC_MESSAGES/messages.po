@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-03 00:03+0900\n"
-"PO-Revision-Date: 2025-04-03 00:51+0900\n"
+"POT-Creation-Date: 2025-04-03 02:25+0900\n"
+"PO-Revision-Date: 2025-04-03 02:59+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
 "Language-Team: zh <LL@li.org>\n"
@@ -18,29 +18,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:199
+#: app.py:201
 msgid "URL을 입력해주세요."
 msgstr "请输入URL。"
 
-#: app.py:312
+#: app.py:314
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "无效的文件ID。"
 
 #: templates/base.html:6
 msgid "GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스."
-msgstr "GrabVideo：免费下载最高质量的YouTube、TikTok、Instagram、Facebook视频。快速安全的在线视频下载服务。"
+msgstr "GrabVideo：免费下载YouTube、TikTok、Instagram、Facebook的高质量视频。快速安全的在线视频下载服务。"
 
 #: templates/base.html:7
 msgid "GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드"
-msgstr "GrabVideo、视频下载器、YouTube下载器、TikTok下载器、Instagram下载器、视频下载、免费视频下载、高质量下载"
+msgstr "GrabVideo、视频下载器、YouTube下载器、TikTok下载器、Instagram下载器、视频下载、免费视频下载、高清下载"
 
 #: templates/base.html:8
 msgid "최고 화질 동영상 다운로더"
-msgstr "最高质量视频下载器"
+msgstr "最高画质视频下载器"
 
 #: templates/base.html:9
 msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
-msgstr "免费从YouTube、TikTok、Instagram、Facebook下载视频。无需注册即可立即使用。"
+msgstr "从YouTube、TikTok、Instagram、Facebook免费下载视频。无需注册即可使用。"
 
 #: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
@@ -48,7 +48,7 @@ msgstr "视频下载器"
 
 #: templates/base.html:38
 msgid "최고 화질의 동영상 다운로더"
-msgstr "最高质量的视频下载器"
+msgstr "最高画质的视频下载器"
 
 #: templates/download_result.html:3
 msgid "다운로드 완료"
@@ -76,10 +76,9 @@ msgstr "来源："
 
 #: templates/download_result.html:48
 msgid "파일 다운로드"
-msgstr "下载文件"
+msgstr "文件下载"
 
-#: templates/download_result.html:51 templates/download_waiting.html:48
-#: templates/error.html:87
+#: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
 msgid "메인으로 돌아가기"
 msgstr "返回主页"
 
@@ -113,11 +112,11 @@ msgstr "发生错误"
 
 #: templates/index.html:36
 msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "最高质量的社交媒体视频下载器"
+msgstr "最高画质的社交媒体视频下载器"
 
 #: templates/index.html:38
 msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr "使用GrabVideo快速轻松地从YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)等<br>各种社交媒体下载最高质量的视频。<br>完全免费，无需注册，没有水印。<br>不仅在PC上，在移动设备上也能完美运行。"
+msgstr "使用GrabVideo从YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)等<br>各种社交媒体快速简便地下载最高画质的视频。<br>完全免费，无需注册，无水印。<br>不仅适用于PC，在移动设备上也可完美运行。"
 
 #: templates/index.html:49
 msgid "동영상 URL"
@@ -125,7 +124,7 @@ msgstr "视频URL"
 
 #: templates/index.html:50
 msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요"
-msgstr "请粘贴YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)等的视频URL"
+msgstr "请粘贴YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)等平台的视频URL"
 
 #: templates/index.html:53
 msgid "다운로드 시작"
@@ -140,8 +139,8 @@ msgid "URL 복사"
 msgstr "复制URL"
 
 #: templates/index.html:66
-msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
-msgstr "从YouTube、TikTok、Instagram等复制您要下载的视频URL。<br>（分享）"
+msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
+msgstr "从YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)等平台复制要下载的视频URL。<br>（分享）"
 
 #: templates/index.html:73
 msgid "URL 붙여넣기"
@@ -149,7 +148,7 @@ msgstr "粘贴URL"
 
 #: templates/index.html:74
 msgid "복사한 URL을 위 입력란에 붙여넣으세요."
-msgstr "将复制的URL粘贴到上面的输入框中。"
+msgstr "将复制的URL粘贴到上方输入框中。"
 
 #: templates/index.html:81
 msgid "다운로드"
@@ -157,7 +156,7 @@ msgstr "下载"
 
 #: templates/index.html:82
 msgid "다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다."
-msgstr "点击下载按钮，稍等片刻即可保存视频。"
+msgstr "点击下载按钮并稍等片刻，即可保存视频。"
 
 #: templates/index.html:88
 msgid "GrabVideo의 특별한 기능"
@@ -165,11 +164,11 @@ msgstr "GrabVideo的特色功能"
 
 #: templates/index.html:94
 msgid "모바일 완벽 호환"
-msgstr "移动设备完美兼容"
+msgstr "完美兼容移动设备"
 
 #: templates/index.html:95
 msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
-msgstr "在智能手机或平板电脑上的操作与PC相同。随时随地下载视频。"
+msgstr "在智能手机或平板电脑上也能像PC一样完美运行。随时随地下载视频。"
 
 #: templates/index.html:101
 msgid "완전 무료"
@@ -177,7 +176,7 @@ msgstr "完全免费"
 
 #: templates/index.html:102
 msgid "모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다."
-msgstr "所有功能均免费提供。没有隐藏费用或高级付费计划。"
+msgstr "所有功能均免费提供。没有隐藏费用或高级会员计划。"
 
 #: templates/index.html:108
 msgid "브라우저 기반"
@@ -193,15 +192,15 @@ msgstr "无水印"
 
 #: templates/index.html:116
 msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
-msgstr "下载的视频不会添加任何标志或水印。保持原始质量。"
+msgstr "下载的视频不会添加任何标志或水印。保持原始品质。"
 
 #: templates/index.html:122
 msgid "최고 화질, 음질"
-msgstr "最高视频和音频质量"
+msgstr "最高画质、音质"
 
 #: templates/index.html:123
 msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
-msgstr "以4K、HD等可能的最高视频和音频质量下载MP4视频。无质量损失，保持原始状态。"
+msgstr "以4K、HD等最高画质和音质下载MP4视频。无质量损失，保持原始品质。"
 
 #: templates/index.html:129
 msgid "안전한 다운로드"
@@ -209,7 +208,7 @@ msgstr "安全下载"
 
 #: templates/index.html:130
 msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
-msgstr "可安全使用，无恶意软件。我们优先考虑保护您的个人信息。"
+msgstr "无恶意软件，安全使用。将个人信息保护放在首位。"
 
 #: templates/index.html:136
 msgid "회원가입 불필요"
@@ -225,7 +224,7 @@ msgstr "快速下载"
 
 #: templates/index.html:144
 msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
-msgstr "通过优化算法快速获取视频。没有不必要的等待时间。"
+msgstr "通过优化算法快速获取视频。无不必要的等待时间。"
 
 #: templates/index.html:148
 msgid "지원하는 플랫폼"
@@ -241,7 +240,7 @@ msgstr "GrabVideo真的完全免费吗？"
 
 #: templates/index.html:176
 msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "是的，GrabVideo完全免费提供。没有隐藏费用或高级付费计划，所有功能都可以免费使用。"
+msgstr "是的，GrabVideo完全免费。没有隐藏费用或高级会员计划，所有功能都可以免费使用。"
 
 #: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
@@ -249,7 +248,7 @@ msgstr "下载的视频有水印吗？"
 
 #: templates/index.html:186
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
-msgstr "不，GrabVideo不会在下载的视频上添加任何水印或标志。以原始质量提供。"
+msgstr "不，GrabVideo不会在下载的视频上添加任何水印或标志。保持原始品质。"
 
 #: templates/index.html:192
 msgid "모바일에서도 사용할 수 있나요?"
@@ -257,15 +256,15 @@ msgstr "可以在移动设备上使用吗？"
 
 #: templates/index.html:196
 msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "是的，GrabVideo完全适配移动环境。您可以在智能手机或平板电脑上像在PC上一样使用。"
+msgstr "是的，GrabVideo完全适配移动环境。在智能手机或平板电脑上也能像PC一样使用。"
 
 #: templates/index.html:202
 msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
-msgstr "我可以下载什么质量的视频？"
+msgstr "视频可以下载什么质量？"
 
 #: templates/index.html:206
 msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
-msgstr "GrabVideo以可能的最高质量下载视频。如果原始视频是HD质量，您可以以相同质量下载。"
+msgstr "GrabVideo会以可能的最高画质下载视频。如果原视频是HD品质，可以下载相同品质。"
 
 #: templates/index.html:212
 msgid "다운로드 속도는 어떤가요?"
@@ -273,15 +272,15 @@ msgstr "下载速度如何？"
 
 #: templates/index.html:216
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "GrabVideo使用优化算法提供快速下载速度。下载速度可能会根据您的互联网连接和服务器情况而有所不同。"
+msgstr "GrabVideo使用优化算法提供快速下载速度。下载速度可能因网络连接状态和服务器情况而异。"
 
 #: templates/index.html:222
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
-msgstr "我应该如何使用下载的内容？"
+msgstr "如何使用下载的内容？"
 
 #: templates/index.html:226
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "GrabVideo是为您提供便利的技术工具。我们建议将下载的内容用于个人观看目的。请记住，尊重内容创作者的作品将带来更多优质内容的产生。"
+msgstr "GrabVideo是为您提供便利的技术工具。建议将下载的内容用于个人观赏。请记住，尊重内容创作者的作品有助于产生更多优质内容。"
 
 #: templates/index.html:235
 msgid "이용 안내"
@@ -289,7 +288,7 @@ msgstr "使用指南"
 
 #: templates/index.html:237
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "GrabVideo提供便捷的视频下载服务。我们尊重所有内容创作者的努力，请将下载的内容用于个人观赏目的。请参考各平台的服务条款，并按照内容创作者的创作意图使用内容。通过GrabVideo，创造更便捷、愉快的数字内容体验。"
+msgstr "GrabVideo提供便捷的视频下载服务。我们尊重所有内容创作者的努力，请将下载的内容用于个人观赏。请参考各平台的使用条款，按照内容创作者的意图使用内容。通过GrabVideo创造更便捷愉快的数字内容体验。"
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-03 00:03+0900\n"
-"PO-Revision-Date: 2025-04-03 00:38+0900\n"
+"POT-Creation-Date: 2025-04-03 02:25+0900\n"
+"PO-Revision-Date: 2025-04-03 02:41+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
 "Language-Team: ja <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:199
+#: app.py:201
 msgid "URL을 입력해주세요."
 msgstr "URLを入力してください。"
 
-#: app.py:312
+#: app.py:314
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "無効なファイルIDです。"
 
@@ -36,11 +36,11 @@ msgstr "GrabVideo、動画ダウンローダー、YouTubeダウンローダー�
 
 #: templates/base.html:8
 msgid "최고 화질 동영상 다운로더"
-msgstr "最高画質動画ダウンローダー"
+msgstr "最高画質の動画ダウンローダー"
 
 #: templates/base.html:9
 msgid "YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다."
-msgstr "YouTube、TikTok、Instagram、Facebookから動画を無料でダウンロード。登録なしですぐに利用可能です。"
+msgstr "YouTube、TikTok、Instagram、Facebookから動画を無料でダウンロードしましょう。登録なしですぐに利用できます。"
 
 #: templates/base.html:11 templates/base.html:51 templates/index.html:3
 msgid "동영상 다운로더"
@@ -72,7 +72,7 @@ msgstr "タイトル："
 
 #: templates/download_result.html:41
 msgid "출처:"
-msgstr "出典："
+msgstr "ソース："
 
 #: templates/download_result.html:48
 msgid "파일 다운로드"
@@ -80,7 +80,7 @@ msgstr "ファイルダウンロード"
 
 #: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
 msgid "메인으로 돌아가기"
-msgstr "メインに戻る"
+msgstr "メインページに戻る"
 
 #: templates/download_waiting.html:3 templates/download_waiting.html:33
 msgid "다운로드 진행 중"
@@ -88,15 +88,15 @@ msgstr "ダウンロード進行中"
 
 #: templates/download_waiting.html:34 templates/download_waiting.html:177
 msgid "다운로드가 진행 중입니다..."
-msgstr "ダウンロードが進行中です..."
+msgstr "ダウンロードを進行中です..."
 
 #: templates/download_waiting.html:43
 msgid "잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다."
-msgstr "少々お待ちください。ファイルサイズとインターネット速度によって時間がかかる場合があります。"
+msgstr "しばらくお待ちください。ファイルサイズとインターネット速度によって時間がかかる場合があります。"
 
 #: templates/download_waiting.html:118
 msgid "다운로드 완료! 잠시 후 결과 페이지로 이동합니다..."
-msgstr "ダウンロード完了！間もなく結果ページに移動します..."
+msgstr "ダウンロード完了！まもなく結果ページに移動します..."
 
 #: templates/download_waiting.html:180
 msgid "오류가 발생했습니다."
@@ -116,7 +116,7 @@ msgstr "最高画質のSNS動画ダウンローダー"
 
 #: templates/index.html:38
 msgid "GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr "GrabVideoを使用してYouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)など<br>各種SNSから最高画質の動画を素早く簡単にダウンロードしましょう。<br>完全無料で、会員登録やウォーターマークなしでご利用いただけます。<br>PCだけでなくモバイルでも完璧に動作します。"
+msgstr "GrabVideoを使用して、YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)など<br>各種SNSから最高画質の動画を素早く簡単にダウンロードしましょう。<br>完全無料で、会員登録やウォーターマークなしで利用できます。<br>PCだけでなくモバイルでも完璧に動作します。"
 
 #: templates/index.html:49
 msgid "동영상 URL"
@@ -136,15 +136,15 @@ msgstr "使用方法"
 
 #: templates/index.html:65
 msgid "URL 복사"
-msgstr "URLコピー"
+msgstr "URLをコピー"
 
 #: templates/index.html:66
-msgid "YouTube, TikTok, Instagram 등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
-msgstr "YouTube、TikTok、Instagramなどからダウンロードしたい動画のURLをコピーしてください。<br>（共有）"
+msgid "YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)"
+msgstr "YouTube、TikTok、Instagram、Twitter(X)、Facebook(Meta)などからダウンロードしたい動画のURLをコピーしてください。<br>（共有）"
 
 #: templates/index.html:73
 msgid "URL 붙여넣기"
-msgstr "URL貼り付け"
+msgstr "URLを貼り付け"
 
 #: templates/index.html:74
 msgid "복사한 URL을 위 입력란에 붙여넣으세요."
@@ -164,7 +164,7 @@ msgstr "GrabVideoの特別な機能"
 
 #: templates/index.html:94
 msgid "모바일 완벽 호환"
-msgstr "モバイル完全互換"
+msgstr "モバイル完全対応"
 
 #: templates/index.html:95
 msgid "스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요."
@@ -176,7 +176,7 @@ msgstr "完全無料"
 
 #: templates/index.html:102
 msgid "모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다."
-msgstr "すべての機能を無料で提供します。隠れた費用やプレミアムプランはありません。"
+msgstr "すべての機能を無料で提供しています。隠れたコストやプレミアムプランはありません。"
 
 #: templates/index.html:108
 msgid "브라우저 기반"
@@ -184,7 +184,7 @@ msgstr "ブラウザベース"
 
 #: templates/index.html:109
 msgid "전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요."
-msgstr "専用プログラムのインストールが不要です。ブラウザを通して簡単にダウンロードしましょう。"
+msgstr "専用プログラムのインストールは必要ありません。ブラウザを通じて簡単にダウンロードできます。"
 
 #: templates/index.html:115
 msgid "워터마크 없음"
@@ -192,7 +192,7 @@ msgstr "ウォーターマークなし"
 
 #: templates/index.html:116
 msgid "다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다."
-msgstr "ダウンロードした動画にロゴやウォーターマークを追加しません。オリジナルの品質のままで提供します。"
+msgstr "ダウンロードした動画にロゴやウォーターマークを追加しません。元の品質そのままで提供します。"
 
 #: templates/index.html:122
 msgid "최고 화질, 음질"
@@ -200,7 +200,7 @@ msgstr "最高画質、音質"
 
 #: templates/index.html:123
 msgid "4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다."
-msgstr "4K、HDなど可能な最高画質と音質でMP4動画をダウンロードします。品質低下なしでオリジナルのままで提供します。"
+msgstr "4K、HDなど可能な最高画質と音質でMP4動画をダウンロードします。品質低下なしに元のままに提供します。"
 
 #: templates/index.html:129
 msgid "안전한 다운로드"
@@ -208,7 +208,7 @@ msgstr "安全なダウンロード"
 
 #: templates/index.html:130
 msgid "악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다."
-msgstr "悪意のあるソフトウェアなしで安全に使用できます。個人情報保護を最優先します。"
+msgstr "悪意のあるソフトウェアなしで安全に使用できます。個人情報保護を最優先しています。"
 
 #: templates/index.html:136
 msgid "회원가입 불필요"
@@ -224,7 +224,7 @@ msgstr "高速ダウンロード"
 
 #: templates/index.html:144
 msgid "최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다."
-msgstr "最適化されたアルゴリズムで高速に動画を取得します。不必要な待ち時間はありません。"
+msgstr "最適化されたアルゴリズムで高速に動画を取得します。不要な待ち時間はありません。"
 
 #: templates/index.html:148
 msgid "지원하는 플랫폼"
@@ -240,7 +240,7 @@ msgstr "GrabVideoは本当に完全無料ですか？"
 
 #: templates/index.html:176
 msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "はい、GrabVideoは完全無料で提供されます。隠れた費用やプレミアムプランはなく、すべての機能を無料で使用できます。"
+msgstr "はい、GrabVideoは完全無料で提供されています。隠れたコストやプレミアムプランはなく、すべての機能を無料で使用できます。"
 
 #: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
@@ -248,7 +248,7 @@ msgstr "ダウンロードした動画にウォーターマークはあります
 
 #: templates/index.html:186
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
-msgstr "いいえ、GrabVideoはダウンロードした動画にいかなるウォーターマークやロゴも追加しません。オリジナルのままの品質で提供されます。"
+msgstr "いいえ、GrabVideoはダウンロードした動画にいかなるウォーターマークやロゴも追加しません。元の品質そのままで提供されます。"
 
 #: templates/index.html:192
 msgid "모바일에서도 사용할 수 있나요?"
@@ -256,7 +256,7 @@ msgstr "モバイルでも使用できますか？"
 
 #: templates/index.html:196
 msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "はい、GrabVideoはモバイル環境に完璧に最適化されています。スマートフォンやタブレットでもPCと同じように使用できます。"
+msgstr "はい、GrabVideoはモバイル環境に完全に最適化されています。スマートフォンやタブレットでもPCと同じように使用できます。"
 
 #: templates/index.html:202
 msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
@@ -272,7 +272,7 @@ msgstr "ダウンロード速度はどうですか？"
 
 #: templates/index.html:216
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "GrabVideoは最適化されたアルゴリズムを使用して高速なダウンロード速度を提供します。ダウンロード速度はインターネット接続状態とサーバー状況によって異なる場合があります。"
+msgstr "GrabVideoは最適化されたアルゴリズムを使用して高速ダウンロード速度を提供します。ダウンロード速度はインターネット接続状態とサーバー状況によって異なる場合があります。"
 
 #: templates/index.html:222
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
@@ -280,15 +280,15 @@ msgstr "ダウンロードしたコンテンツはどのように使用すれば
 
 #: templates/index.html:226
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "GrabVideoはあなたの利便性のための技術的ツールです。ダウンロードしたコンテンツは個人的な視聴目的で使用することをお勧めします。コンテンツの原作者の作品を尊重する文化がより多くの良いコンテンツ制作につながることを覚えておいてください。"
+msgstr "GrabVideoはあなたの利便性のための技術的ツールです。ダウンロードしたコンテンツは個人的な鑑賞目的で使用することをお勧めします。コンテンツ作者の創作物を尊重する文化が、より多くの良いコンテンツ制作につながることを覚えておいてください。"
 
 #: templates/index.html:235
 msgid "이용 안내"
-msgstr "ご利用案内"
+msgstr "利用案内"
 
 #: templates/index.html:237
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "GrabVideoは便利な動画ダウンロードサービスを提供しています。私たちはすべてのコンテンツクリエイターの努力を尊重し、ダウンロードしたコンテンツは個人的な視聴目的でお楽しみください。各プラットフォームの利用規約をご参照の上、コンテンツ制作者の創作意図に沿ってご活用ください。GrabVideoでより便利で楽しいデジタルコンテンツ体験を作り上げましょう。"
+msgstr "GrabVideoは便利な動画ダウンロードサービスを提供しています。私たちはすべてのコンテンツクリエイターの努力を尊重し、ダウンロードしたコンテンツは個人的な鑑賞目的で楽しんでいただきますようお願いします。各プラットフォームの利用規約を参照し、コンテンツ制作者の創作意図に合わせて活用してください。GrabVideoを通じてより便利で楽しいデジタルコンテンツ体験を作り上げていきましょう。"
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"
