@@ -26,13 +26,13 @@ load_dotenv() # 환경 변수 로드
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
-# STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 300)) # 5mins
-STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 5mins
+STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
 # DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
+DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'
 
 app = Flask(__name__)
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
@@ -404,7 +404,7 @@ def inject_languages():
 @app.route('/health')
 def health_check():
     client_ip = get_remote_address()
-    logging.info(f"헬스체크 요청 IP: {client_ip}")
+    # logging.info(f"헬스체크 요청 IP: {client_ip}")
     if not check_ip_allowed(client_ip):
         logging.warning(f"허용되지 않은 IP({client_ip})에서 health 엔드포인트 접근 시도")
         abort(403)
@@ -413,123 +413,129 @@ def health_check():
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
-            "version": os.getenv('APP_VERSION', '1.0.0'),
-            "components": {}
+            "version": os.getenv('APP_VERSION', '1.0.0')
         }
 
-        # 파일 시스템 상태 확인
         try:
             with fs_lock:
                 fs_writeable = os.access(DOWNLOAD_FOLDER, os.W_OK)
                 available_space = shutil.disk_usage(DOWNLOAD_FOLDER).free
 
-            health_data["components"]["filesystem"] = {
+            health_data["filesystem"] = {
                 "status": "healthy" if fs_writeable else "degraded",
                 "available_space_gb": round(available_space / (1024**3), 2),
                 "writable": fs_writeable
             }
+
+            # 파일 시스템 문제가 있으면 전체 상태도 수정
+            if not fs_writeable:
+                health_data["status"] = "degraded"
         except Exception as e:
-            health_data["components"]["filesystem"] = {
+            health_data["filesystem"] = {
                 "status": "unhealthy",
                 "error": str(e)
             }
             health_data["status"] = "degraded"
 
-        # 스레드 풀 상태 확인
-        try:
-            queue_size = executor._work_queue.qsize() # 현재 대기 중인 작업 수
-            total_tasks = sum(1 for s in download_status.values() if s.get('status') == 'downloading' or s.get('status') == 'processing') # 전체 작업 추적을 위한 변수들 추가
-            active_workers = min(total_tasks - queue_size, executor._max_workers) if total_tasks > queue_size else 0 # 실제 실행 중인 작업자 수 (전체 작업 - 대기 중인 작업)
-            available_workers = executor._max_workers - active_workers # 사용 가능한 작업자 수
-            health_data["components"]["thread_pool"] = {
-                "status": "healthy",
-                "max_workers": executor._max_workers,
-                "available_workers": available_workers,
-                "active_workers": active_workers,
-                "waiting_tasks": queue_size,
-                "total_tasks": total_tasks,
-                "utilization_percent": round((active_workers / executor._max_workers) * 100, 2) if active_workers > 0 else 0
-            }
-        except Exception as e:
-            health_data["components"]["thread_pool"] = {
-                "status": "unknown",
-                "error": str(e)
-            }
+        # DISABLE_HEALTH_METRICS가 false일 때만 추가 정보 수집
+        if not DISABLE_HEALTH_METRICS:
+            health_data["components"] = {}
 
-        # 다운로드 상태 통계
-        try:
-            with status_lock:
-                total = len(download_status)
-                completed = sum(1 for s in download_status.values() if s.get('status') == 'completed')
-                downloading = sum(1 for s in download_status.values() if s.get('status') == 'downloading')
-                errors = sum(1 for s in download_status.values() if s.get('status') == 'error')
-
-            health_data["components"]["downloads"] = {
-                "status": "healthy",
-                "total": total,
-                "completed": completed,
-                "in_progress": downloading,
-                "errors": errors
-            }
-        except Exception as e:
-            health_data["components"]["downloads"] = {
-                "status": "unknown",
-                "error": str(e)
-            }
-
-        # Gunicorn 워커/스레드 상태 추정
-        try:
-            process = psutil.Process()
-            connections = len(process.connections(kind='inet'))
-            cpu_percent = process.cpu_percent(interval=0.1)
-            system_load = os.getloadavg()[0]  # 1분 평균 로드
-
-            # 실시간 연결 수 vs. 최대 처리 가능 연결 수
-            workers = int(os.environ.get('GUNICORN_WORKERS', 1))
-            threads = int(os.environ.get('GUNICORN_THREADS', 4))
-
-            # 최대 동시 처리 가능 요청 수 계산
-            gunicorn_capacity = workers * threads
-            connections = len(process.connections(kind='inet'))
-
-            gunicorn_usage = min(100, (connections / gunicorn_capacity) * 100)
-            gunicorn_queue_estimate = max(0, connections - gunicorn_capacity)
-
-            # 스레드풀 대기열 크기 가져오기
-            threadpool_queue = health_data["components"]["thread_pool"]["waiting_tasks"]
-
-            health_data["components"]["gunicorn_stats"] = {
-                "status": "healthy" if gunicorn_usage < 80 else "warning",
-                "capacity": {
-                    "workers": workers,
-                    "threads_per_worker": threads,
-                    "max_concurrent_requests": gunicorn_capacity
-                },
-                "usage": {
-                    "active_connections": connections,
-                    "usage_percent": round(gunicorn_usage, 1),
-                    "estimated_queue": gunicorn_queue_estimate
-                },
-                "system": {
-                    "cpu_percent": round(cpu_percent, 1),
-                    "system_load": round(system_load, 2)
+            # 스레드 풀 상태 확인
+            try:
+                queue_size = executor._work_queue.qsize()
+                total_tasks = sum(1 for s in download_status.values() if s.get('status') == 'downloading' or s.get('status') == 'processing')
+                active_workers = min(total_tasks - queue_size, executor._max_workers) if total_tasks > queue_size else 0
+                available_workers = executor._max_workers - active_workers
+                health_data["components"]["thread_pool"] = {
+                    "status": "healthy",
+                    "max_workers": executor._max_workers,
+                    "available_workers": available_workers,
+                    "active_workers": active_workers,
+                    "waiting_tasks": queue_size,
+                    "total_tasks": total_tasks,
+                    "utilization_percent": round((active_workers / executor._max_workers) * 100, 2) if active_workers > 0 else 0
                 }
-            }
+            except Exception as e:
+                health_data["components"]["thread_pool"] = {
+                    "status": "unknown",
+                    "error": str(e)
+                }
 
-            # 전체 병목 상태 평가
-            health_data["components"]["bottleneck_analysis"] = {
-                "http_layer_pressure": "high" if gunicorn_usage > 80 else "moderate" if gunicorn_usage > 60 else "low",
-                "worker_pool_pressure": "high" if threadpool_queue > 0 else "low",
-                "primary_bottleneck": "gunicorn_threads" if gunicorn_usage > 80 and (threadpool_queue == 0) else
-                "worker_pool" if threadpool_queue > 0 and gunicorn_usage < 80 else
-                "both" if gunicorn_usage > 80 and threadpool_queue > 0 else "none",
-                "scaling_recommendation": get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent)
-            }
-        except Exception as e:
-            health_data["components"]["gunicorn_stats"] = {
-                "status": "unknown",
-                "error": str(e)
-            }
+            # 다운로드 상태 통계
+            try:
+                with status_lock:
+                    total = len(download_status)
+                    completed = sum(1 for s in download_status.values() if s.get('status') == 'completed')
+                    downloading = sum(1 for s in download_status.values() if s.get('status') == 'downloading')
+                    errors = sum(1 for s in download_status.values() if s.get('status') == 'error')
+
+                health_data["components"]["downloads"] = {
+                    "status": "healthy",
+                    "total": total,
+                    "completed": completed,
+                    "in_progress": downloading,
+                    "errors": errors
+                }
+            except Exception as e:
+                health_data["components"]["downloads"] = {
+                    "status": "unknown",
+                    "error": str(e)
+                }
+
+            # Gunicorn 워커/스레드 상태 추정
+            try:
+                process = psutil.Process()
+                connections = len(process.connections(kind='inet'))
+                cpu_percent = process.cpu_percent(interval=0.1)
+                system_load = os.getloadavg()[0]  # 1분 평균 로드
+
+                # 실시간 연결 수 vs. 최대 처리 가능 연결 수
+                workers = int(os.environ.get('GUNICORN_WORKERS', 1))
+                threads = int(os.environ.get('GUNICORN_THREADS', 4))
+
+                # 최대 동시 처리 가능 요청 수 계산
+                gunicorn_capacity = workers * threads
+                connections = len(process.connections(kind='inet'))
+
+                gunicorn_usage = min(100, (connections / gunicorn_capacity) * 100)
+                gunicorn_queue_estimate = max(0, connections - gunicorn_capacity)
+
+                # 스레드풀 대기열 크기 가져오기
+                threadpool_queue = health_data["components"]["thread_pool"]["waiting_tasks"]
+
+                health_data["components"]["gunicorn_stats"] = {
+                    "status": "healthy" if gunicorn_usage < 80 else "warning",
+                    "capacity": {
+                        "workers": workers,
+                        "threads_per_worker": threads,
+                        "max_concurrent_requests": gunicorn_capacity
+                    },
+                    "usage": {
+                        "active_connections": connections,
+                        "usage_percent": round(gunicorn_usage, 1),
+                        "estimated_queue": gunicorn_queue_estimate
+                    },
+                    "system": {
+                        "cpu_percent": round(cpu_percent, 1),
+                        "system_load": round(system_load, 2)
+                    }
+                }
+
+                # 전체 병목 상태 평가
+                health_data["components"]["bottleneck_analysis"] = {
+                    "http_layer_pressure": "high" if gunicorn_usage > 80 else "moderate" if gunicorn_usage > 60 else "low",
+                    "worker_pool_pressure": "high" if threadpool_queue > 0 else "low",
+                    "primary_bottleneck": "gunicorn_threads" if gunicorn_usage > 80 and (threadpool_queue == 0) else
+                    "worker_pool" if threadpool_queue > 0 and gunicorn_usage < 80 else
+                    "both" if gunicorn_usage > 80 and threadpool_queue > 0 else "none",
+                    "scaling_recommendation": get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent)
+                }
+            except Exception as e:
+                health_data["components"]["gunicorn_stats"] = {
+                    "status": "unknown",
+                    "error": str(e)
+                }
 
         return health_data, 200
     except Exception as e:
@@ -613,18 +619,60 @@ def handle_unexpected_error(e):
 
 def init_app():
     global executor
-    executor = ThreadPoolExecutor(max_workers=MAX_WORKERS) # 스레드 풀 초기화
+    executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
-    status_cleaning_thread = threading.Thread(target=clean_status_dict) # 상태정보, 디스크 정리
+    # 시작 정보 로깅 추가
+    try:
+        process = psutil.Process()
+        cpu_count = psutil.cpu_count(logical=False) or 1  # 물리적 CPU 코어 수
+        logical_cpus = psutil.cpu_count(logical=True) or 1  # 논리적 CPU 코어 수
+        total_memory = round(psutil.virtual_memory().total / (1024**3), 2)  # GB 단위
+
+        # 설정값 추출
+        gunicorn_workers = int(os.environ.get('GUNICORN_WORKERS', 1))
+        gunicorn_threads = int(os.environ.get('GUNICORN_THREADS', 4))
+
+        startup_info = {
+            "app_version": os.getenv('APP_VERSION', '1.0.0'),
+            "system": {
+                "physical_cpus": cpu_count,
+                "logical_cpus": logical_cpus,
+                "total_memory_gb": total_memory,
+                "process_id": process.pid,
+                "parent_id": process.ppid()
+            },
+            "config": {
+                "max_workers": MAX_WORKERS,
+                "gunicorn_workers": gunicorn_workers,
+                "gunicorn_threads": gunicorn_threads,
+                "max_file_size_mb": round(MAX_FILE_SIZE/(1024*1024), 2),
+                "download_folder": DOWNLOAD_FOLDER,
+                "status_max_age": STATUS_MAX_AGE,
+                "download_limits": DOWNLOAD_LIMITS
+            }
+        }
+
+        logging.info(f"애플리케이션 시작 정보:")
+        logging.info(f"CPU: 물리적 {cpu_count}코어, 논리적 {logical_cpus}코어")
+        logging.info(f"메모리: {total_memory}GB")
+        logging.info(f"다운로드 워커: {MAX_WORKERS}")
+        logging.info(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
+        logging.info(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
+
+    except Exception as e:
+        logging.error(f"시작 정보 로깅 중 오류 발생: {str(e)}")
+
+    # 기존 코드
+    status_cleaning_thread = threading.Thread(target=clean_status_dict)
     status_cleaning_thread.daemon = True
     status_cleaning_thread.start()
 
-    atexit.register(cleanup_on_exit) # 앱 종료시 한번 더
+    atexit.register(cleanup_on_exit)
 
 init_app()
 
 if __name__ == '__main__': # local
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('FLASK_PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
     app.run(host=host, port=port, debug=debug)
