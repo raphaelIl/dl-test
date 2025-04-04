@@ -42,21 +42,6 @@ COPY . .
 # 번역 파일 컴파일
 RUN pybabel compile -d translations
 
-# 환경 변수 설정
-#ENV FLASK_ENV=production \
-#    FLASK_HOST=0.0.0.0 \
-#    FLASK_PORT=5000 \
-#    FLASK_DEBUG=false \
-#    PYTHONUNBUFFERED=1 \
-#    DOWNLOAD_FOLDER="/app/downloads" \
-#    MAX_WORKERS=3 \
-#    GUNICORN_WORKERS=1 \
-#    GUNICORN_THREADS=4 \
-#    MAX_FILE_AGE=14 \
-#    MAX_FILE_SIZE=1073741824 \
-#    ALLOWED_HEALTH_IPS="127.0.0.1,125.177.83.187,172.31.0.0/16,192.168.219.0/24" \
-#    DOWNLOAD_LIMITS="300 per hour, 20 per minute"
-
 # 환경 변수 설정 - 필수 기본값만 유지
 ENV PYTHONUNBUFFERED=1 \
     FLASK_ENV=production \
@@ -78,6 +63,3 @@ CMD sh -c 'gunicorn --bind 0.0.0.0:5000 \
            --access-logfile /app/logs/access.log \
            --error-logfile /app/logs/error.log \
            app:app'
-
-# 2코어 서버에 최적화된 설정
-#CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "--threads", "4", "--timeout", "300", "--max-requests", "1000", "--max-requests-jitter", "100", "--access-logfile", "/app/logs/access.log", "--error-logfile", "/app/logs/error.log", "app:app"]

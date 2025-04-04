@@ -2,7 +2,8 @@ version: '3.8'
 services:
   web:
     build: .
-    image: raphael1021/dl-test:latest
+#    image: raphael1021/dl-test:latest
+    image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${VERSION}
     container_name: video-downloader
     restart: always
     ports:
@@ -12,7 +13,7 @@ services:
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_SIZE=314572800 # 300MB
+      - MAX_FILE_SIZE_MB=350
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
       - MAX_WORKERS=2

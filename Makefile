@@ -1,18 +1,18 @@
-VERSION = latest
+VERSION = $(shell date +%Y%m%d)
 DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
 
-.PHONY: start
+.PHONY: start clean
 
 start:
-	@echo "docker-compose down"
-	docker-compose down
 	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
 	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) .
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+	@echo "docker-compose down"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down
 	@echo "docker-compose up -d"
-	docker-compose up -d
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose up -d
 
 clean:
 	@echo "docker-compose down"
