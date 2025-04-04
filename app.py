@@ -26,8 +26,10 @@ load_dotenv() # 환경 변수 로드
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
-MAX_FILE_AGE = int(os.getenv('MAX_FILE_AGE', 14))  # 일 단위
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024))
+# STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 300)) # 5mins
+STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 5mins
+STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
 # DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
@@ -148,6 +150,7 @@ def download_video(video_url, file_id, download_path):
             'max_filesize': MAX_FILE_SIZE,
             'noprogress': True,
             'buffersize': 1024,
+            # 'nocheckcertificate': True,  # 인증서 검사 비활성화로 메모리 사용 감소
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             },
@@ -166,7 +169,7 @@ def download_video(video_url, file_id, download_path):
                 'url': video_url,
                 'timestamp': datetime.now().timestamp()
             })
-            logging.info(f"다운로드 성공: {info.get('title')} ({video_url})")
+            # logging.info(f"서버 다운로드 성공: {info.get('title')} ({video_url})")
             return info
     except Exception as e:
         update_status(file_id, {
@@ -353,31 +356,6 @@ def download_file(lang, file_id):
 def robots_txt():
     return send_from_directory(app.static_folder, 'robots.txt')
 
-def clean_old_files():
-    try:
-        now = datetime.now()
-        cleaned_count = 0
-
-        # 디렉토리 목록 가져올 때 락 사용
-        with fs_lock:
-            folder_names = os.listdir(DOWNLOAD_FOLDER)
-
-        for folder_name in folder_names:
-            # 각 폴더 작업할 때마다 락 사용
-            with fs_lock:
-                folder_path = safe_path_join(DOWNLOAD_FOLDER, folder_name)
-                if os.path.isdir(folder_path):
-                    folder_creation_time = datetime.fromtimestamp(os.path.getctime(folder_path))
-                    days_old = (now - folder_creation_time).days
-
-                    if days_old > MAX_FILE_AGE:
-                        shutil.rmtree(folder_path)
-                        cleaned_count += 1
-
-        logging.info(f"파일 정리 완료: {cleaned_count}개 폴더 삭제됨")
-    except Exception as e:
-        logging.error(f"파일 정리 실행 중 오류 발생: {str(e)}", exc_info=True)
-
 def clean_status_dict():
     while True:
         try:
@@ -389,25 +367,27 @@ def clean_status_dict():
                     status = download_status[file_id]
                     if status['status'] in ['completed', 'error']:
                         timestamp = status.get('timestamp', 0)
-                        if (now - datetime.fromtimestamp(timestamp)).total_seconds() > 3600:  # 1시간
+                        if (now - datetime.fromtimestamp(timestamp)).total_seconds() > STATUS_MAX_AGE:
                             to_delete.append(file_id)
 
+                # 상태 정보 삭제 및 파일 시스템 정리
                 for file_id in to_delete:
                     del download_status[file_id]
+                    logging.info(f"상태 정보 정리됨: {file_id}")
 
-            time.sleep(3600)  # 1시간
+                    # 파일 시스템에서 폴더 삭제
+                    folder_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
+                    try:
+                        if os.path.exists(folder_path):
+                            shutil.rmtree(folder_path)
+                            logging.info(f"다운로드 파일 정리됨: {file_id}")
+                    except Exception as e:
+                        logging.error(f"폴더 삭제 중 오류 발생: {file_id}, {str(e)}", exc_info=True)
+
+            time.sleep(STATUS_CLEANUP_INTERVAL)
         except Exception as e:
             logging.error(f"상태 정보 정리 중 오류: {str(e)}")
-            time.sleep(600)  # 10분 후 재시도
-
-def schedule_cleaning():
-    while True:
-        try:
-            clean_old_files()
-            time.sleep(86400)  # 24시간
-        except Exception as e:
-            logging.error(f"예약된 파일 정리 중 오류: {str(e)}")
-            time.sleep(3600)  # 1시간 후 재시도
+            time.sleep(STATUS_CLEANUP_INTERVAL)
 
 def cleanup_on_exit():
     executor.shutdown(wait=True)
@@ -560,32 +540,32 @@ def get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent):
     if gunicorn_usage > 80 and threadpool_queue > 0:
         return {
             "action": "increase_both",
-            "reason": "HTTP 요청과 작업 처리 모두 병목 발생",
-            "recommendation": "Gunicorn threads와 MAX_WORKERS 모두 증가 필요"
+            "reason": "Bottlenecks in both HTTP requests and task processing",
+            "recommendation": "Increase both Gunicorn threads and MAX_WORKERS"
         }
     elif gunicorn_usage > 80:
         return {
             "action": "increase_threads",
-            "reason": "HTTP 요청 처리 병목 발생",
-            "recommendation": "Gunicorn threads 증가 또는 workers 증가 필요"
+            "reason": "Bottleneck in HTTP request processing",
+            "recommendation": "Increase Gunicorn threads or workers"
         }
     elif threadpool_queue > 0:
         return {
             "action": "increase_max_workers",
-            "reason": "다운로드 작업 처리 병목 발생",
-            "recommendation": "ThreadPool MAX_WORKERS 증가 필요"
+            "reason": "Bottleneck in download task processing",
+            "recommendation": "Increase ThreadPool MAX_WORKERS"
         }
     elif cpu_percent > 80:
         return {
             "action": "increase_workers",
-            "reason": "CPU 사용률 높음",
-            "recommendation": "Gunicorn workers 증가로 CPU 활용도 향상 필요"
+            "reason": "High CPU utilization",
+            "recommendation": "Increase Gunicorn workers to improve CPU utilization"
         }
     else:
         return {
             "action": "none",
-            "reason": "현재 모든 지표가 정상 범위",
-            "recommendation": "현재 설정 유지"
+            "reason": "All metrics within normal range",
+            "recommendation": "Maintain current configuration"
         }
 
 def check_ip_allowed(ip_str):
@@ -635,17 +615,11 @@ def init_app():
     global executor
     executor = ThreadPoolExecutor(max_workers=MAX_WORKERS) # 스레드 풀 초기화
 
-    clean_old_files()
-
-    cleaning_thread = threading.Thread(target=schedule_cleaning)
-    cleaning_thread.daemon = True
-    cleaning_thread.start()
-
-    status_cleaning_thread = threading.Thread(target=clean_status_dict)
+    status_cleaning_thread = threading.Thread(target=clean_status_dict) # 상태정보, 디스크 정리
     status_cleaning_thread.daemon = True
     status_cleaning_thread.start()
 
-    atexit.register(cleanup_on_exit)
+    atexit.register(cleanup_on_exit) # 앱 종료시 한번 더
 
 init_app()
 
