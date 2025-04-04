@@ -28,7 +28,8 @@ MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
+# MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 350)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
 # DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
@@ -59,9 +60,13 @@ if not os.path.exists('logs'):
 # 로깅 설정
 logging.basicConfig(
     filename='logs/app.log',
-    level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+werkzeug_logger = logging.getLogger('werkzeug')
+werkzeug_logger.setLevel(logging.WARNING)
+app.logger.setLevel(logging.WARNING)
 
 # 언어 설정
 LANGUAGES = {
@@ -169,7 +174,7 @@ def download_video(video_url, file_id, download_path):
                 'url': video_url,
                 'timestamp': datetime.now().timestamp()
             })
-            # logging.info(f"서버 다운로드 성공: {info.get('title')} ({video_url})")
+            logging.info(f"서버 다운로드 성공: {info.get('title')} ({video_url})")
             return info
     except Exception as e:
         update_status(file_id, {
@@ -391,7 +396,7 @@ def clean_status_dict():
 
 def cleanup_on_exit():
     executor.shutdown(wait=True)
-    logging.info("애플리케이션 종료: 리소스 정리 완료")
+    logging.warning("애플리케이션 종료: 리소스 정리 완료")
 
 @app.context_processor
 def inject_languages():
@@ -404,7 +409,7 @@ def inject_languages():
 @app.route('/health')
 def health_check():
     client_ip = get_remote_address()
-    # logging.info(f"헬스체크 요청 IP: {client_ip}")
+    logging.info(f"헬스체크 요청 IP: {client_ip}")
     if not check_ip_allowed(client_ip):
         logging.warning(f"허용되지 않은 IP({client_ip})에서 health 엔드포인트 접근 시도")
         abort(403)
@@ -652,12 +657,12 @@ def init_app():
             }
         }
 
-        logging.info(f"애플리케이션 시작 정보:")
-        logging.info(f"CPU: 물리적 {cpu_count}코어, 논리적 {logical_cpus}코어")
-        logging.info(f"메모리: {total_memory}GB")
-        logging.info(f"다운로드 워커: {MAX_WORKERS}")
-        logging.info(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
-        logging.info(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
+        logging.warning(f"애플리케이션 시작 정보:")
+        logging.warning(f"CPU: 물리적 {cpu_count}코어, 논리적 {logical_cpus}코어")
+        logging.warning(f"메모리: {total_memory}GB")
+        logging.warning(f"다운로드 워커: {MAX_WORKERS}")
+        logging.warning(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
+        logging.warning(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
 
     except Exception as e:
         logging.error(f"시작 정보 로깅 중 오류 발생: {str(e)}")
