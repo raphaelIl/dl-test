@@ -12,11 +12,13 @@ services:
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_AGE=7
-      - MAX_FILE_SIZE=1073741824
+      - MAX_FILE_SIZE=314572800 # 300MB
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
-      - MAX_WORKERS=3
+      - MAX_WORKERS=2
+      - STATUS_MAX_AGE=180
+      - STATUS_CLEANUP_INTERVAL=60
+      - DISABLE_HEALTH_METRICS=true
       - DOWNLOAD_LIMITS=300 per hour, 20 per minute
       - PYTHONUNBUFFERED=1
       - ALLOWED_HEALTH_IPS=127.0.0.1,125.177.83.187,172.16.0.0/12,192.168.0.0/16

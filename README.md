@@ -53,11 +53,11 @@ sequenceDiagram
     Web->>User: 파일 전송
 
     par 백그라운드 작업
-        loop 24시간마다
+        loop STATUS_MAX_AGE(3분)마다
             Thread->>FS: 오래된 파일 정리(fs_lock)
         end
 
-        loop 1시간마다
+        loop STATUS_CLEANUP_INTERVAL(1분)마다
             Thread->>Status: 오래된 상태 정리(status_lock)
         end
     end
