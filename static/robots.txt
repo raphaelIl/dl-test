@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Allow: /*/
+Sitemap: https://video.devgrabs.com/sitemap.xml
 
 Disallow: /*/check-status/
 Disallow: /*/download-file/
