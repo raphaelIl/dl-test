@@ -1,22 +1,25 @@
-version: '3.8'
+# local + cloudflare 조합
+version: '2.4'
 services:
-  web:
+  grab-video:
     build: .
-#    image: raphael1021/dl-test:latest
-    image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${VERSION}
-    container_name: video-downloader
+    image: raphael1021/dl-test:latest
+#    image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${VERSION}
+    container_name: grab-video
     restart: always
+#    cpus: 1
+#    mem_limit: 2G
     ports:
-      - "8080:5000"
+      - "80:5000"
     volumes:
       - ./downloads:/app/downloads
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_SIZE_MB=400
+      - MAX_FILE_SIZE_MB=1024
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
-      - MAX_WORKERS=2
+      - MAX_WORKERS=3
       - STATUS_MAX_AGE=180
       - STATUS_CLEANUP_INTERVAL=60
       - DISABLE_HEALTH_METRICS=true
@@ -28,3 +31,9 @@ services:
       interval: 60s
       timeout: 10s
       retries: 3
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}

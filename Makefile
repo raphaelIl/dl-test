@@ -1,6 +1,7 @@
 VERSION = $(shell date +%Y%m%d)
 DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
+CONTAINER_NAME = video-downloader
 
 .PHONY: start clean clean-image
 
@@ -12,9 +13,9 @@ start:
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 	@echo "docker-compose down"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down --remove-orphans || true
 	@echo "docker-compose up -d"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose up -d
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose --compatibility up -d
 
 clean:
 	@echo "docker-compose down"
