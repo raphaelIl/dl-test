@@ -3,27 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{ _('GrabVideo: 최고 화질의 YouTube, TikTok, Instagram, Facebook 동영상을 무료로 다운로드. 빠르고 안전한 온라인 비디오 다운로더 서비스.') }}">
-    <meta name="keywords" content="{{ _('GrabVideo, 동영상 다운로더, YouTube 다운로더, TikTok 다운로더, Instagram 다운로더, 비디오 다운로드, 무료 동영상 다운로드, 고화질 다운로드') }}">
-    <meta property="og:title" content="GrabVideo - {{ _('최고 화질 동영상 다운로더') }}">
+    <meta name="description" content="Grab videos from TikTok, YouTube, Instagram, Facebook, and more. Fast, free video downloads in HD MP4 – no watermark, no login required.">
+    <meta name="keywords" content="{{ _('GrabVideo, download video, free video downloader, social media video downloader, YouTube downloader, youtube download, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, Instagram video downloader, instagram download, Twitter video downloader, twitter video download, Facebook video downloader, facebook video download, download videos online, HD video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, 동영상 다운로드, SNS 동영상 다운로드') }}">
+    <meta name="author" content="GrabVideo">
+    <meta name="robots" content="index, follow">
+    <title>GrabVideo | SNS {% block title %}{{ _('동영상 다운로더') }}{% endblock %}</title>
+
+    <meta property="og:title" content="GrabVideo - {{ _('SNS video downloader, No watermark') }}">
     <meta property="og:description" content="{{ _('YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다.') }}">
     <meta property="og:type" content="website">
-    <title>GrabVideo - {% block title %}{{ _('동영상 다운로더') }}{% endblock %}</title>
+    <meta property="og:url" content="https://video.devgrabs.com/">
+    <meta property="og:image" content="{{ request.url_root.rstrip('/') + url_for('static', filename='img/og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta property="twitter:title" content="GrabVideo - {{ _('SNS video downloader, No watermark') }}">
+    <meta property="twitter:description" content="{{ _('YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다.') }}">
+    <meta property="twitter:image" content="{{ request.url_root.rstrip('/') + url_for('static', filename='img/og-image.png') }}">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base_styles.css') }}">
+
     <!-- SEO - Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "GrabVideo",
-        "description": "YouTube, Instagram, TikTok, Twitter(X), Facebook(Meta) 등 다양한 소셜 미디어 플랫폼에서 영상을 다운로드할 수 있는 서비스입니다.",
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Web"
-    }
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "GrabVideo",
+            "url": "https://video.devgrabs.com/",
+            "description": "Grab videos from TikTok, YouTube, Instagram, Facebook, and more. Fast, free video downloads in HD MP4 – no watermark, no login required.",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "Web",
+            "browserRequirements": "Requires JavaScript",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+            }
+        }
     </script>
     {% block extra_css %}{% endblock %}
 </head>
