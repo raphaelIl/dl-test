@@ -5,6 +5,40 @@
 {% block extra_css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 20px;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .solution-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin: 1.5rem auto;
+            border-radius: 4px;
+            text-align: left;
+            max-width: 500px;
+        }
+
+        .solution-box ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -29,25 +63,49 @@
             </div>
         </div>
 
-        <div class="spinner"></div>
-        <h1>{{ _('다운로드 진행 중') }}</h1>
-        <p id="status-text" class="status-text">{{ _('다운로드가 진행 중입니다...') }}</p>
+        {% if status and status.status == 'error' %}
+            <div class="error-container">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <h1>{{ _('Download Fail') }}</h1>
+                <p class="error-message">{{ status.error }}</p>
 
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar" style="width: 0%">
-                <span id="progress-text" class="progress-text">0%</span>
+                {% if "This video is too big." in status.error %}
+                <div class="solution-box">
+                    <p><strong>{{ _('Solutions:') }}</strong></p>
+                    <ul>
+                        <li>{{_('Select shorter quality video.') }}</li>
+                        <li>{{_('Select lower quality video.') }}</li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="actions">
+                    <a href="{{ url_for('index', lang=current_lang) }}" class="btn btn-primary">
+                        <i class="fas fa-redo"></i> {{ _('메인으로 돌아가기') }}
+                    </a>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="spinner"></div>
+            <h1>{{ _('다운로드 진행 중') }}</h1>
+            <p id="status-text" class="status-text">{{ _('다운로드가 진행 중입니다...') }}</p>
 
-        <p class="description">
-            {{ _('잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다.') }}
-        </p>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar" style="width: 0%">
+                    <span id="progress-text" class="progress-text">0%</span>
+                </div>
+            </div>
 
-        <div class="actions" style="margin-top: 20px;">
-            <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
-                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
-            </a>
-        </div>
+            <p class="description">
+                {{ _('잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다.') }}
+            </p>
+
+            <div class="actions" style="margin-top: 20px;">
+                <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
+                    <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+                </a>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
 
@@ -72,8 +130,10 @@
                 });
             }
 
+            {% if not status or status.status != 'error' %}
             checkStatus();
             checkStatusInterval = setInterval(checkStatus, 2000);
+            {% endif %}
         });
 
         let checkStatusInterval;
@@ -177,13 +237,9 @@
                         statusText.textContent = data.message || '{{ _("다운로드가 진행 중입니다...") }}';
                     } else if (data.status === 'error') {
                         clearInterval(checkStatusInterval);
-                        statusText.textContent = data.message || '{{ _("오류가 발생했습니다.") }}';
-                        progressBar.style.width = '0%';
-                        progressText.textContent = '';
 
-                        setTimeout(() => {
-                            window.location.href = `/{{ current_lang }}/error?message=${encodeURIComponent(data.message || '알 수 없는 오류가 발생했습니다.')}`;
-                        }, 2000);
+                        // 오류 발생 시 페이지 새로고침 (상태 데이터와 함께)
+                        window.location.href = `/{{ current_lang }}/download-waiting/${fileId}`;
                     }
                 })
                 .catch(error => {

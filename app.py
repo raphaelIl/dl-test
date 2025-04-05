@@ -29,7 +29,7 @@ DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 350)) * 1024 * 1024
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 400)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
 # DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
@@ -132,14 +132,49 @@ def download_video(video_url, file_id, download_path):
         def progress_hook(d):
             if d['status'] == 'downloading':
                 if 'total_bytes' in d and d['total_bytes'] > 0:
+                    # 파일 크기 제한 체크 추가
+                    if d['total_bytes'] > MAX_FILE_SIZE:
+                        update_status(file_id, {
+                            'status': 'error',
+                            'error': "This video is too big.",
+                            # 'error': f'파일 크기 제한 초과: {d["total_bytes"]/(1024*1024):.1f}MB (최대 {MAX_FILE_SIZE/(1024*1024)}MB)',
+                            'timestamp': datetime.now().timestamp()
+                        })
+                        return
                     progress = (d['downloaded_bytes'] / d['total_bytes']) * 100
                 elif 'total_bytes_estimate' in d and d['total_bytes_estimate'] > 0:
+                    # 파일 크기 제한 예상치 체크 추가
+                    if d['total_bytes_estimate'] > MAX_FILE_SIZE:
+                        update_status(file_id, {
+                            'status': 'error',
+                            'error': f'파일 크기 제한 초과: {d["total_bytes_estimate"]/(1024*1024):.1f}MB (최대 {MAX_FILE_SIZE/(1024*1024)}MB)',
+                            'timestamp': datetime.now().timestamp()
+                        })
+                        return
                     progress = (d['downloaded_bytes'] / d['total_bytes_estimate']) * 100
                 else:
                     progress = 0
                 update_status(file_id, {'status': 'downloading', 'progress': progress})
             elif d['status'] == 'finished':
                 update_status(file_id, {'status': 'processing', 'progress': 100})
+            elif d['status'] == 'error':
+                update_status(file_id, {
+                    'status': 'error',
+                    'error': d.get('error', '알 수 없는 오류'),
+                    'timestamp': datetime.now().timestamp()
+                })
+
+        # def progress_hook(d):
+        #     if d['status'] == 'downloading':
+        #         if 'total_bytes' in d and d['total_bytes'] > 0:
+        #             progress = (d['downloaded_bytes'] / d['total_bytes']) * 100
+        #         elif 'total_bytes_estimate' in d and d['total_bytes_estimate'] > 0:
+        #             progress = (d['downloaded_bytes'] / d['total_bytes_estimate']) * 100
+        #         else:
+        #             progress = 0
+        #         update_status(file_id, {'status': 'downloading', 'progress': progress})
+        #     elif d['status'] == 'finished':
+        #         update_status(file_id, {'status': 'processing', 'progress': 100})
 
         ydl_opts = {
             # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
@@ -177,9 +212,13 @@ def download_video(video_url, file_id, download_path):
             logging.info(f"서버 다운로드 성공: {info.get('title')} ({video_url})")
             return info
     except Exception as e:
+        error_msg = str(e)
+        if "File is larger than max-filesize" in error_msg:
+            error_msg = "이 영상은 너무 큽니다. 더 짧은 영상이나 화질을 낮추어 다시 시도해주세요."
+            logging.warning(f"파일 크기 제한 초과 (URL: {video_url}): {str(e)}")
         update_status(file_id, {
             'status': 'error',
-            'error': str(e),
+            'error': error_msg,
             'timestamp': datetime.now().timestamp()
         })
         if os.path.exists(download_path):
@@ -239,7 +278,8 @@ def download_waiting(lang, file_id):
     if status['status'] == 'completed':
         return redirect(url_for('result', lang=lang, file_id=file_id))
 
-    return render_template('download_waiting.html', file_id=file_id, status=status)
+    return render_template('download_waiting.html', file_id=file_id, status=status,
+                           current_lang=lang, languages=LANGUAGES)
 
 @app.route('/<lang>/check-status/<file_id>')
 def check_status(lang, file_id):
