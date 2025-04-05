@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-03 02:25+0900\n"
+"POT-Creation-Date: 2025-04-05 07:53+0900\n"
 "PO-Revision-Date: 2025-04-03 02:36+0900\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:201
+#: app.py:209
 msgid "URL을 입력해주세요."
 msgstr "Veuillez entrer une URL."
 
-#: app.py:314
+#: app.py:322
 msgid "유효하지 않은 파일 ID입니다."
 msgstr "ID de fichier invalide."
 
@@ -78,7 +78,8 @@ msgstr "Source :"
 msgid "파일 다운로드"
 msgstr "Télécharger le fichier"
 
-#: templates/download_result.html:51 templates/download_waiting.html:48 templates/error.html:87
+#: templates/download_result.html:51 templates/download_waiting.html:48
+#: templates/error.html:87
 msgid "메인으로 돌아가기"
 msgstr "Retour à l'accueil"
 
@@ -235,60 +236,68 @@ msgid "자주 묻는 질문"
 msgstr "Questions fréquemment posées"
 
 #: templates/index.html:172
-msgid "GrabVideo는 정말 완전 무료인가요?"
-msgstr "GrabVideo est-il vraiment entièrement gratuit ?"
-
-#: templates/index.html:176
-msgid "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 사용할 수 있습니다."
-msgstr "Oui, GrabVideo est entièrement gratuit. Il n'y a pas de frais cachés ou de forfaits premium, et toutes les fonctionnalités peuvent être utilisées gratuitement."
-
-#: templates/index.html:182
 msgid "다운로드한 동영상에 워터마크가 있나요?"
 msgstr "Y a-t-il des filigranes sur les vidéos téléchargées ?"
 
-#: templates/index.html:186
+#: templates/index.html:176
 msgid "아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다."
 msgstr "Non, GrabVideo n'ajoute aucun filigrane ou logo aux vidéos téléchargées. Elles sont fournies dans leur qualité d'origine."
 
-#: templates/index.html:192
+#: templates/index.html:182
 msgid "모바일에서도 사용할 수 있나요?"
-msgstr "Puis-je l'utiliser sur des appareils mobiles ?"
+msgstr "Puis-je l'utiliser sur mobile ?"
+
+#: templates/index.html:186
+msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
+msgstr "Oui, GrabVideo est parfaitement optimisé pour l'environnement mobile. Vous pouvez l'utiliser sur smartphone ou tablette exactement comme sur PC."
+
+#: templates/index.html:192
+msgid "다운로드 링크가 접속이 안돼요."
+msgstr "Je ne peux pas accéder au lien de téléchargement."
 
 #: templates/index.html:196
-msgid "네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다."
-msgstr "Oui, GrabVideo est parfaitement optimisé pour les environnements mobiles. Vous pouvez l'utiliser sur smartphones et tablettes exactement comme sur un PC."
+msgid "리소스 관리를 위해 다운로드 링크는 영구적이지 않습니다. 이 경우 메인 페이지로 돌아가 URL을 다시 입력하여 새로운 다운로드 링크를 받으세요."
+msgstr "Pour la gestion des ressources, les liens de téléchargement ne sont pas permanents. Dans ce cas, retournez à la page principale et entrez à nouveau l'URL pour obtenir un nouveau lien de téléchargement."
 
 #: templates/index.html:202
-msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
-msgstr "Dans quelle qualité puis-je télécharger les vidéos ?"
+msgid "다운 가능한 파일 사이즈는 어떻게 되나요?"
+msgstr "Quelle est la taille des fichiers téléchargeables ?"
 
 #: templates/index.html:206
-msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
-msgstr "GrabVideo télécharge les vidéos dans la plus haute qualité possible. Si la vidéo originale est en qualité HD, vous pouvez la télécharger dans la même qualité."
+msgid "보통 30분 이내 길이의 동영상을 안정적으로 다운로드 할 수 있습니다. 파일 크기는 화질에 따라 다르지만 더 큰 용량이나 긴 파일 지원은 추후 지원할 예정입니다."
+msgstr "Vous pouvez généralement télécharger de manière stable des vidéos d'une durée maximale de 30 minutes. La taille du fichier varie selon la qualité, mais nous prévoyons de prendre en charge des fichiers plus volumineux ou plus longs à l'avenir."
 
 #: templates/index.html:212
+msgid "어떤 품질로 동영상을 다운로드할 수 있나요?"
+msgstr "En quelle qualité puis-je télécharger les vidéos ?"
+
+#: templates/index.html:216
+msgid "GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다."
+msgstr "GrabVideo télécharge les vidéos dans la meilleure qualité possible. Si la vidéo originale est en qualité HD, vous pouvez la télécharger dans la même qualité."
+
+#: templates/index.html:222
 msgid "다운로드 속도는 어떤가요?"
 msgstr "Quelle est la vitesse de téléchargement ?"
 
-#: templates/index.html:216
+#: templates/index.html:226
 msgid "GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다."
-msgstr "GrabVideo offre des vitesses de téléchargement rapides grâce à des algorithmes optimisés. Les vitesses de téléchargement peuvent varier en fonction de votre connexion Internet et des conditions du serveur."
+msgstr "GrabVideo offre une vitesse de téléchargement rapide grâce à des algorithmes optimisés. La vitesse de téléchargement peut varier en fonction de votre connexion internet et de l'état du serveur."
 
-#: templates/index.html:222
+#: templates/index.html:232
 msgid "다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?"
 msgstr "Comment devrais-je utiliser le contenu téléchargé ?"
 
-#: templates/index.html:226
+#: templates/index.html:236
 msgid "GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요."
-msgstr "GrabVideo est un outil technique pour votre commodité. Nous recommandons d'utiliser le contenu téléchargé à des fins de visionnage personnel. N'oubliez pas que le respect du travail des créateurs de contenu mène à la production de contenu de meilleure qualité."
+msgstr "GrabVideo est un outil technique pour votre commodité. Nous vous recommandons d'utiliser le contenu téléchargé à des fins de visionnage personnel. N'oubliez pas que respecter le travail des créateurs de contenu encourage la production de plus de contenu de qualité."
 
-#: templates/index.html:235
+#: templates/index.html:244
 msgid "이용 안내"
 msgstr "Guide d'utilisation"
 
-#: templates/index.html:237
+#: templates/index.html:246
 msgid "GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요."
-msgstr "GrabVideo fournit un service pratique de téléchargement de vidéos. Nous respectons les efforts de tous les créateurs de contenu et vous demandons de profiter du contenu téléchargé à des fins de visionnage personnel. Veuillez consulter les conditions d'utilisation de chaque plateforme et utiliser le contenu conformément aux intentions du créateur. Créez une expérience de contenu numérique plus pratique et agréable grâce à GrabVideo."
+msgstr "GrabVideo offre un service pratique de téléchargement de vidéos. Nous respectons les efforts de tous les créateurs de contenu et vous invitons à profiter du contenu téléchargé pour un visionnage personnel. Veuillez consulter les conditions d'utilisation de chaque plateforme et utiliser le contenu conformément aux intentions du créateur. Créez une expérience de contenu numérique plus pratique et agréable grâce à GrabVideo."
 
 #: venv/lib/python3.10/site-packages/IPython/core/tests/test_completer.py:420
 msgid "open('foo"
@@ -822,3 +831,17 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
+
+#~ msgid "GrabVideo는 정말 완전 무료인가요?"
+#~ msgstr "GrabVideo est-il vraiment entièrement gratuit ?"
+
+#~ msgid ""
+#~ "네, GrabVideo는 완전 무료로 제공됩니다. 숨겨진 "
+#~ "비용이나 프리미엄 요금제가 없으며, 모든 기능을 무료로 "
+#~ "사용할 수 있습니다."
+#~ msgstr ""
+#~ "Oui, GrabVideo est entièrement gratuit. "
+#~ "Il n'y a pas de frais cachés "
+#~ "ou de forfaits premium, et toutes "
+#~ "les fonctionnalités peuvent être utilisées "
+#~ "gratuitement."
