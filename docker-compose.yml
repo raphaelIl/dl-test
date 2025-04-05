@@ -13,7 +13,7 @@ services:
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_SIZE_MB=350
+      - MAX_FILE_SIZE_MB=400
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
       - MAX_WORKERS=2
