@@ -445,6 +445,7 @@ def inject_languages():
         'current_lang': get_locale()
     }
 
+# TODO(2025.04.5.Sat): docker limit 제한 감지
 # health check endpoint
 @app.route('/health')
 def health_check():
