@@ -448,6 +448,10 @@ def inject_languages():
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
+#
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory('static', 'ads.txt')
 
 # TODO(2025.04.5.Sat): docker limit 제한 감지
 # health check endpoint

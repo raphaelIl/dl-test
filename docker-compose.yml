@@ -32,11 +32,22 @@ services:
       timeout: 10s
       retries: 3
 
-  cloudflared:
+  cloudflared-video:
     image: cloudflare/cloudflared:latest
-    container_name: cloudflared
+    container_name: cloudflared-video
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    command: tunnel --no-autoupdate run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://grab-video:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  cloudflared-root:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-root
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://grab-video:5000/health"]
       interval: 30s

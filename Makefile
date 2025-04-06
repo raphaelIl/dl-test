@@ -6,13 +6,13 @@ CONTAINER_NAME = video-downloader
 .PHONY: start clean clean-image
 
 start:
-#	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
-#	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
-#	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
-#	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
-#	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
-#	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
-#	@echo "docker-compose down"
+	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
+	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
+	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+	@echo "docker-compose down"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down --remove-orphans || true
 	@echo "docker-compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose --compatibility up -d
