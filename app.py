@@ -34,6 +34,11 @@ DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").sp
 # DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'
+CACHE_CONFIG = {
+    'css_js': os.getenv('CACHE_CSS_JS', '31536000,604800'),      # 브라우저 1년, CDN 1주일
+    'media': os.getenv('CACHE_MEDIA', '31536000,31536000'),      # 브라우저/CDN 모두 1년
+    'default': os.getenv('CACHE_DEFAULT', '86400,86400')         # 브라우저/CDN 모두 1일
+}
 
 app = Flask(__name__)
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
@@ -227,6 +232,27 @@ def download_video(video_url, file_id, download_path):
         return None
     finally:
         gc.collect()
+
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static/'):
+        path = request.path
+
+        if path.endswith(('.css', '.js')):
+            cache_key = 'css_js'
+        elif path.endswith(('.ico', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.woff', '.woff2')):
+            cache_key = 'media'
+        else:
+            cache_key = 'default'
+
+        try:
+            browser_ttl, cdn_ttl = map(int, CACHE_CONFIG[cache_key].split(','))
+        except (ValueError, AttributeError):
+            browser_ttl, cdn_ttl = 86400, 86400
+
+        response.headers['Cache-Control'] = f'public, max-age={browser_ttl}, s-maxage={cdn_ttl}'
+
+    return response
 
 @app.route('/')
 def index_redirect():
