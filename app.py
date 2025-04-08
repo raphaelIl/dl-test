@@ -10,7 +10,6 @@ import gc
 from datetime import datetime
 from dotenv import load_dotenv
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 import atexit
@@ -20,9 +19,10 @@ from ipaddress import ip_network, ip_address
 from flask import send_from_directory
 from flask_limiter.errors import RateLimitExceeded
 import psutil
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+# Enviornment Variables
 load_dotenv() # 환경 변수 로드
-# Env
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
@@ -30,8 +30,7 @@ STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 400)) * 1024 * 1024
-DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "300 per hour, 20 per minute").split(',')
-# DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
+DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'
 CACHE_CONFIG = {
@@ -44,14 +43,30 @@ app = Flask(__name__)
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,      # X-Forwarded-For 헤더에서 처음 항목을 클라이언트 IP로 사용
+    x_proto=1,    # X-Forwarded-Proto 헤더 처리
+    x_host=1,     # X-Forwarded-Host 헤더 처리
+    x_port=1      # X-Forwarded-Port 헤더 처리
+)
+
 status_lock = threading.Lock() # 전역 변수로 락 추가
 download_status = {} # 다운로드 상태를 저장할 딕셔너리
 fs_lock = threading.Lock() # 파일 시스템 접근을 위한 락
 executor = None  # ThreadPoolExecutor 전역 변수
 
+# X-Forwarded-For 헤더가 있으면 첫 번째 IP 사용 (CloudFlare에 의해 설정됨)
+def get_client_ip():
+    if request.headers.get('CF-Connecting-IP'):
+        return request.headers.get('CF-Connecting-IP')
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    return request.remote_addr
+
 # 요청 제한 설정
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=get_client_ip,
     default_limits=None,
 )
 limiter.init_app(app)
@@ -168,18 +183,6 @@ def download_video(video_url, file_id, download_path):
                     'error': d.get('error', '알 수 없는 오류'),
                     'timestamp': datetime.now().timestamp()
                 })
-
-        # def progress_hook(d):
-        #     if d['status'] == 'downloading':
-        #         if 'total_bytes' in d and d['total_bytes'] > 0:
-        #             progress = (d['downloaded_bytes'] / d['total_bytes']) * 100
-        #         elif 'total_bytes_estimate' in d and d['total_bytes_estimate'] > 0:
-        #             progress = (d['downloaded_bytes'] / d['total_bytes_estimate']) * 100
-        #         else:
-        #             progress = 0
-        #         update_status(file_id, {'status': 'downloading', 'progress': progress})
-        #     elif d['status'] == 'finished':
-        #         update_status(file_id, {'status': 'processing', 'progress': 100})
 
         ydl_opts = {
             # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
@@ -483,7 +486,7 @@ def ads_txt():
 # health check endpoint
 @app.route('/health')
 def health_check():
-    client_ip = get_remote_address()
+    client_ip = get_client_ip()
     logging.info(f"헬스체크 요청 IP: {client_ip}")
     if not check_ip_allowed(client_ip):
         logging.warning(f"허용되지 않은 IP({client_ip})에서 health 엔드포인트 접근 시도")
@@ -689,7 +692,7 @@ def bad_request(e):
 @app.errorhandler(429)
 @app.errorhandler(RateLimitExceeded)
 def ratelimit_handler(e):
-    logging.warning(f"Rate limit exceeded: {get_remote_address()}")
+    logging.warning(f"Rate limit exceeded: {get_client_ip()}")
     return render_template('error.html', error="Too many download requests. Please try again later."), 429
 
 @app.errorhandler(Exception)

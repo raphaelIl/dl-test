@@ -55,6 +55,7 @@ EXPOSE 5000
 # 1코어 서버에 최적화된 설정
 # 환경 변수를 확장하기 위해 sh -c 사용
 CMD sh -c 'gunicorn --bind 0.0.0.0:5000 \
+           --forwarded-allow-ips='*' \
            --workers ${GUNICORN_WORKERS} \
            --threads ${GUNICORN_THREADS} \
            --timeout 300 \
