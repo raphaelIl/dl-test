@@ -25,6 +25,7 @@ services:
       - DISABLE_HEALTH_METRICS=true
 #      - DOWNLOAD_LIMITS=60 per 5 minutes
       - DOWNLOAD_LIMITS=20 per minute
+      - TZ=Asia/Seoul
       - PYTHONUNBUFFERED=1
       - ALLOWED_HEALTH_IPS=127.0.0.1,125.177.83.187,172.16.0.0/12,192.168.0.0/16
     healthcheck:
