@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Allow: /*/
+Allow: /static/
 
 Disallow: /*/check-status/
 Disallow: /*/download-file/
