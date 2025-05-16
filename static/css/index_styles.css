@@ -457,6 +457,62 @@ form button i {
     margin: 0;
 }
 
+.share-guide-images {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 30px auto;
+    gap: 25px;
+    background-color: #0a0a0a;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    max-width: 800px;
+    width: 100%;
+}
+
+.share-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc((100% - 60px) / 2);
+}
+
+.share-image {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.share-image:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 28px rgba(255, 255, 255, 0.15);
+}
+
+.share-step p {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.share-arrow {
+    color: #ffcc00;
+    font-size: 28px;
+    margin: 0 10px;
+    text-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+}
+
+.share-step:nth-child(3) .share-image {
+    border-color: rgba(255, 204, 0, 0.7);
+    box-shadow: 0 0 25px rgba(255, 204, 0, 0.4);
+}
+
 @media (max-width: 1200px) {
     .container {
         padding: 30px;
@@ -490,6 +546,31 @@ form button i {
         position: absolute;
         right: 0;
     }
+
+    form {
+        max-width: 90%;
+    }
+
+    .share-guide-images {
+        flex-direction: column;
+        padding: 25px;
+        gap: 20px;
+        max-width: 90%;
+    }
+
+    .share-step {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .share-image {
+        width: 100%;
+    }
+
+    .share-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
 }
 
 @media (max-width: 768px) {
@@ -503,5 +584,16 @@ form button i {
 
     .legal-notice p {
         font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .share-step {
+        width: 100%;
+        max-width: 220px;
+    }
+
+    .share-image {
+        width: 100%;
     }
 }

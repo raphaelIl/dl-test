@@ -29,7 +29,8 @@ DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
 STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 400)) * 1024 * 1024
+# MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 400)) * 1024 * 1024
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'

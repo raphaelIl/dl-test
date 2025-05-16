@@ -48,7 +48,7 @@
     <form method="post">
         <div class="form-group">
             <label for="video_url">{{ _('동영상 URL') }}</label>
-            <input type="text" id="video_url" name="video_url" placeholder="{{ _('YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등의 동영상 URL을 붙여넣으세요') }}" required>
+            <input type="text" id="video_url" name="video_url" placeholder="{{ _('원하는 동영상 공유 Link를 붙여넣으세요.') }}" required>
         </div>
         <button type="submit">
             <i class="fas fa-download"></i> {{ _('다운로드 시작') }}
@@ -63,16 +63,16 @@
                 <div class="step-icon">
                     <i class="fas fa-copy"></i>
                 </div>
-                <h4>{{ _('URL 복사') }}</h4>
-                <p>{{ _('YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta)등에서 다운로드하려는 동영상의 URL을 복사하세요.<br>(공유하기)') }}</p>
+                <h4>{{ _('공유 Link 복사') }}</h4>
+                <p>{{ _('각 플랫폼의 동영상 아래 또는 메뉴에 있는 \'공유\' 버튼을 클릭하여 생성된 URL을 복사하세요.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-number">2</div>
                 <div class="step-icon">
                     <i class="fas fa-paste"></i>
                 </div>
-                <h4>{{ _('URL 붙여넣기') }}</h4>
-                <p>{{ _('복사한 URL을 위 입력란에 붙여넣으세요.') }}</p>
+                <h4>{{ _('공유 Link 붙여넣기') }}</h4>
+                <p>{{ _('복사한 공유 Link을 위 입력란에 붙여넣으세요.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-number">3</div>
@@ -81,6 +81,17 @@
                 </div>
                 <h4>{{ _('다운로드') }}</h4>
                 <p>{{ _('다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다.') }}</p>
+            </div>
+            <div class="share-guide-images">
+                <div class="share-step">
+                    <img src="{{ url_for('static', filename='img/shareLink_1.png') }}" alt="{{ _('공유 버튼') }}" class="share-image">
+                    <p>{{ _('1. 동영상 아래 \'공유\' 버튼 클릭') }}</p>
+                </div>
+                <div class="share-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="share-step">
+                    <img src="{{ url_for('static', filename='img/shareLink_2.png') }}" alt="{{ _('링크 복사') }}" class="share-image">
+                    <p>{{ _('2. \'복사\' 버튼으로 링크 복사') }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -175,6 +186,16 @@
                 </div>
                 <div class="faq-answer" style="display: none;">
                     {{ _('아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다.') }}
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ _('공유 Link란 무엇인가요?') }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer" style="display: none;">
+                    {{ _('브라우저 주소창의 일반 URL은 플랫폼마다 구조가 달라 다운로드가 어려울 수 있습니다. 반면 \'공유하기\' 기능으로 생성된 URL은 동영상 정보를 정확하게 포함하고 있어 성공적인 다운로드가 가능합니다. 항상 각 플랫폼의 공유하기 기능을 통해 URL을 복사해주세요.') }}
                 </div>
             </div>
 
