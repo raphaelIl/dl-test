@@ -21,6 +21,8 @@ from flask_limiter.errors import RateLimitExceeded
 import psutil
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+# TODO(2025.05.17.Sat): download count만 보면 되지 않을까?
+
 # Enviornment Variables
 load_dotenv() # 환경 변수 로드
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
@@ -224,7 +226,11 @@ def download_video(video_url, file_id, download_path):
         error_msg = str(e)
         if "File is larger than max-filesize" in error_msg:
             error_msg = "이 영상은 너무 큽니다. 더 짧은 영상이나 화질을 낮추어 다시 시도해주세요."
-            logging.warning(f"파일 크기 제한 초과 (URL: {video_url}): {str(e)}")
+        elif "Video unavailable" in error_msg:
+            error_msg = "The video could not be downloaded."
+        elif "Private video" in error_msg:
+            error_msg = "Private video cannot be downloaded."
+
         update_status(file_id, {
             'status': 'error',
             'error': error_msg,
@@ -758,5 +764,5 @@ init_app()
 if __name__ == '__main__': # local
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('FLASK_PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    debug = os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
     app.run(host=host, port=port, debug=debug)
