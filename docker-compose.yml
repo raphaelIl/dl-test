@@ -16,13 +16,14 @@ services:
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_SIZE_MB=1024
+#      - MAX_FILE_SIZE_MB=1024
+      - MAX_FILE_SIZE_MB=1536
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
       - MAX_WORKERS=3
       - STATUS_MAX_AGE=300
       - STATUS_CLEANUP_INTERVAL=60
-      - DISABLE_HEALTH_METRICS=true
+      - DISABLE_HEALTH_METRICS=false
 #      - DOWNLOAD_LIMITS=60 per 5 minutes
       - DOWNLOAD_LIMITS=20 per minute
       - TZ=Asia/Seoul
