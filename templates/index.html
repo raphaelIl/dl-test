@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <meta name="google-adsense-account" content="ca-pub-7433898198535486">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="preload" href="{{ url_for('static', filename='css/index_styles.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
 {% endblock %}
 
@@ -88,12 +88,12 @@
             </div>
             <div class="share-guide-images">
                 <div class="share-step">
-                    <img src="{{ url_for('static', filename='img/sharelink-1.png') }}" alt="{{ _('공유 버튼') }}" class="share-image">
+                    <img src="{{ url_for('static', filename='img/sharelink-1.png') }}" alt="{{ _('공유 버튼') }}" class="share-image" loading="lazy">
                     <p>{{ _('1. 동영상 아래 \'공유\' 버튼 클릭') }}</p>
                 </div>
                 <div class="share-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="share-step">
-                    <img src="{{ url_for('static', filename='img/sharelink-2.png') }}" alt="{{ _('링크 복사') }}" class="share-image">
+                    <img src="{{ url_for('static', filename='img/sharelink-2.png') }}" alt="{{ _('링크 복사') }}" class="share-image" loading="lazy">
                     <p>{{ _('2. \'복사\' 버튼으로 링크 복사') }}</p>
                 </div>
             </div>
