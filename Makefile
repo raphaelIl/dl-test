@@ -3,23 +3,16 @@ DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
 CONTAINER_NAME = video-downloader
 
-.PHONY: start clean clean-image
+.PHONY: start clean-all clean-image
 
-start:
-	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
-	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
-	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
-	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
-	@echo "docker-compose down"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down --remove-orphans || true
+start: light-build clean
+#start: clean
 	@echo "docker-compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose --compatibility up -d
 	@echo "caffeinate -i docker compose up"
 	caffeinate -i docker compose up
 
-clean:
+clean-all:
 	@echo "docker-compose down"
 	docker-compose down
 	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
@@ -36,6 +29,23 @@ clean:
 clean-image:
 	docker rmi -f $(docker images | sed 1d | awk '{print $3}')
 
+clean:
+	@echo "docker-compose down --remove-orphans"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down --remove-orphans || true
+
+light-build:
+	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
+	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
+	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+
+build:
+	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
+	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
+	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 
 #
 #VERSION = $(shell date +%Y%m%d)
