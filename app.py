@@ -33,7 +33,7 @@ STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 400)) * 1024 * 1024
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
-DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 1 per minute").split(',')
+DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 100 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'
 CACHE_CONFIG = {
@@ -224,21 +224,54 @@ def download_video(video_url, file_id, download_path):
             return info
     except Exception as e:
         error_msg = str(e)
+        error_id = generate_error_id()
+
+        # log details
+        logging.error(f"다운로드 오류 (ID: {error_id}, URL: {video_url}): {error_msg}", exc_info=True)
+
+        # friendly error message
+        user_friendly_msg = _("An error occurred during video download. Please try again later.")
+
+        # 주요 에러 패턴 인식 및 사용자 친화적인 메시지 설정
         if "File is larger than max-filesize" in error_msg:
-            error_msg = "이 영상은 너무 큽니다. 더 짧은 영상이나 화질을 낮추어 다시 시도해주세요."
+            user_friendly_msg = _("This video is too large. Please try a shorter video or lower quality.")
         elif "Video unavailable" in error_msg:
-            error_msg = "The video could not be downloaded."
+            user_friendly_msg = _("The video could not be downloaded. It may be unavailable.")
         elif "Private video" in error_msg:
-            error_msg = "Private video cannot be downloaded."
+            user_friendly_msg = _("Private videos cannot be downloaded.")
+        elif "This video is available for premium users only" in error_msg or "paywall" in error_msg.lower():
+            user_friendly_msg = _("This video requires a premium account and cannot be downloaded.")
+        elif "Sign in to confirm your age" in error_msg or "age" in error_msg.lower():
+            user_friendly_msg = _("Age-restricted videos cannot be downloaded.")
+        elif "requested format not available" in error_msg.lower():
+            user_friendly_msg = _("The requested video format is not available.")
+        elif "ffmpeg not found" in error_msg.lower() or "ffmpeg" in error_msg.lower():
+            user_friendly_msg = _("Server configuration error. Please contact support.")
+            logging.critical(f"FFmpeg 관련 오류 (ID: {error_id}): {error_msg}")
+        elif "copyright" in error_msg.lower() or "blocked" in error_msg.lower():
+            user_friendly_msg = _("This video cannot be accessed due to copyright restrictions.")
+        elif "429" in error_msg or "too many requests" in error_msg.lower():
+            user_friendly_msg = _("Service temporarily unavailable due to high traffic. Please try again later.")
+        elif "network error" in error_msg.lower() or "connection" in error_msg.lower():
+            user_friendly_msg = _("A network error occurred. Please check your internet connection or try again later.")
+        elif "timeout" in error_msg.lower():
+            user_friendly_msg = _("The download timed out. Please try again later.")
+        elif "quota" in error_msg.lower():
+            user_friendly_msg = _("Download quota exceeded. Please try again later.")
+        elif "not a valid URL" in error_msg:
+            user_friendly_msg = _("Please enter a valid video URL.")
+        elif "unsupported url" in error_msg.lower():
+            user_friendly_msg = _("This URL is not supported for downloading.")
 
         update_status(file_id, {
             'status': 'error',
-            'error': error_msg,
+            'error': user_friendly_msg,
+            'error_id': error_id,
             'timestamp': datetime.now().timestamp()
         })
+
         if os.path.exists(download_path):
             shutil.rmtree(download_path)
-        logging.error(f"다운로드 오류 (URL: {video_url}): {str(e)}")
         return None
     finally:
         gc.collect()
@@ -679,33 +712,46 @@ def check_ip_allowed(ip_str):
         return False
 
 # error handler
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('error.html', error="The page you requested was not found."), 404
-
-@app.errorhandler(500)
-def server_error(e):
-    logging.error(f"Server error occurred: {str(e)}", exc_info=True)
-    return render_template('error.html', error="An internal server error occurred. Please try again later."), 500
-
 @app.errorhandler(403)
 def forbidden(e):
-    return render_template('error.html', error="You don't have permission to access this resource."), 403
+    error_id = generate_error_id()
+    logging.warning(f"403 Forbidden access - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+    return render_template('error.html', error="You don't have permission to access this resource.", error_id=error_id), 403
 
 @app.errorhandler(400)
 def bad_request(e):
-    return render_template('error.html', error="Invalid request."), 400
+    error_id = generate_error_id()
+    logging.warning(f"400 Bad request - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+    return render_template('error.html', error="Invalid request.", error_id=error_id), 400
+
+@app.errorhandler(404)
+def not_found(e):
+    error_id = generate_error_id()
+    logging.info(f"404 Not found - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+    return render_template('error.html', error="The requested resource could not be found.", error_id=error_id), 404
 
 @app.errorhandler(429)
 @app.errorhandler(RateLimitExceeded)
 def ratelimit_handler(e):
-    logging.warning(f"Rate limit exceeded: {get_client_ip()}")
-    return render_template('error.html', error="Too many download requests. Please try again later."), 429
+    error_id = generate_error_id()
+    logging.warning(f"429 Rate limit exceeded - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+    return render_template('error.html', error="Too many download requests. Please try again later.", error_id=error_id), 429
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(e):
-    logging.error(f"Unexpected error: {str(e)}", exc_info=True)
-    return render_template('error.html', error="An unexpected error occurred. Please try again later."), 500
+    error_id = generate_error_id()
+
+    # 에러 유형에 따라 사용자 메시지 정의
+    user_message = "An unexpected error occurred. Please try again later."
+
+    # 실제 에러 정보는 로그에만 기록
+    logging.error(f"Unexpected error - ID: {error_id}, Type: {type(e).__name__}, Message: {str(e)}, IP: {get_client_ip()}, Path: {request.path}, Method: {request.method}, User-Agent: {request.headers.get('User-Agent', 'Unknown')}", exc_info=True)
+
+    return render_template('error.html', error=user_message, error_id=error_id), 500
+
+def generate_error_id():
+    """고유한 에러 추적 ID를 생성합니다."""
+    return f"{int(time.time())}-{uuid.uuid4().hex[:8]}"
 
 def init_app():
     global executor

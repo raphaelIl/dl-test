@@ -81,8 +81,13 @@
                     </div>
                     <div class="error-body text-center">
                         <div class="error-message">
-                            {{ error_message }}
+                            {{ error }}
                         </div>
+                        {% if error_id %}
+                        <div class="error-id text-muted mb-3">
+                            <small>{{ _('에러 코드') }}: {{ error_id }}</small>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('index', lang=current_lang) }}" class="btn home-button">
                             <i class="fas fa-home me-2"></i> {{ _('메인으로 돌아가기') }}
                         </a>
