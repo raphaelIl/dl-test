@@ -48,7 +48,11 @@
     <form method="post">
         <div class="form-group">
             <label for="video_url">{{ _('동영상 URL') }}</label>
-            <input type="text" id="video_url" name="video_url" placeholder="{{ _('원하는 동영상 공유 Link를 붙여넣으세요.') }}" required>
+            <input type="text" id="video_url" name="video_url"
+                   placeholder="{{ _('원하는 동영상 공유 Link를 붙여넣으세요.') }}"
+                   required
+                   oninvalid="this.setCustomValidity('Please fill out this field')"
+                   oninput="this.setCustomValidity('')">
         </div>
         <button type="submit">
             <i class="fas fa-download"></i> {{ _('다운로드 시작') }}
