@@ -5,16 +5,16 @@ CONTAINER_NAME = video-downloader
 
 .PHONY: start clean-all clean-image
 
-start: light-build clean
+start: latest-build clean
 #start: clean
-	@echo "docker-compose up -d"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose --compatibility up -d
+	@echo "docker compose up -d"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
 	@echo "caffeinate -i docker compose up"
 	caffeinate -i docker compose up
 
 clean-all:
-	@echo "docker-compose down"
-	docker-compose down
+	@echo "docker compose down"
+	docker compose down
 	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
 	docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
@@ -30,10 +30,10 @@ clean-image:
 	docker rmi -f $(docker images | sed 1d | awk '{print $3}')
 
 clean:
-	@echo "docker-compose down --remove-orphans"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down --remove-orphans || true
+	@echo "docker compose down --remove-orphans"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose down --remove-orphans || true
 
-light-build:
+latest-build:
 	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
 	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
@@ -74,14 +74,14 @@ build:
 #		-t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) \
 #		-t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest \
 #		--push .
-#	@echo "docker-compose down"
-#	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose down
-#	@echo "docker-compose up -d"
-#	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker-compose up -d
+#	@echo "docker compose down"
+#	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose down
+#	@echo "docker compose up -d"
+#	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
 #
 #clean:
-#	@echo "docker-compose down"
-#	docker-compose down
+#	@echo "docker compose down"
+#	docker compose down
 #	@echo "로컬 이미지 정리"
 #	-docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) 2>/dev/null || true
 #	-docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest 2>/dev/null || true
