@@ -6,8 +6,6 @@ services:
 #    image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${VERSION}
     container_name: grab-video
     restart: always
-#    cpus: 1
-#    mem_limit: 2G
     ports:
       - "80:5000"
     volumes:
@@ -35,31 +33,13 @@ services:
       retries: 3
       start_period: 20s
     depends_on:
-      - cloudflared-root
-      - cloudflared-video
+      - cloudflared
 
-  cloudflared-video:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-video
+  cloudflared: # https://one.dash.cloudflare.com/588918288e7fa323754ce6357381199f/networks/tunnels
+    image: cloudflare/cloudflared:latest # https://hub.docker.com/r/cloudflare/cloudflared/tags
+    container_name: cloudflared
     restart: unless-stopped
-    command: tunnel run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
-    environment:
-      - TUNNEL_TRANSPORT_PROTOCOL=quic
-      - TUNNEL_ORIGIN_ENABLE_HTTP2=true
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ready > /dev/null 2>&1 || exit 1"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-
-  cloudflared-root:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-root
-    restart: unless-stopped
-    command: tunnel run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
-    environment:
-      - TUNNEL_TRANSPORT_PROTOCOL=quic
-      - TUNNEL_ORIGIN_ENABLE_HTTP2=true
+    command: tunnel --no-autoupdate run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ready > /dev/null 2>&1 || exit 1"]
       interval: 60s
