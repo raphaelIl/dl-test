@@ -197,7 +197,7 @@ def download_video(video_url, file_id, download_path):
             'noplaylist': True,
             'retries': 3,
             'fragment_retries': 3,
-            'socket_timeout': 15,
+            'socket_timeout': 30,
             'max_filesize': MAX_FILE_SIZE,
             'noprogress': True,
             'buffersize': 1024,

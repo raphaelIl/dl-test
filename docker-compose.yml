@@ -12,7 +12,7 @@ services:
       - ./logs:/app/logs
     environment:
       - DOWNLOAD_FOLDER=downloads
-      - MAX_FILE_SIZE_MB=1536
+      - MAX_FILE_SIZE_MB=2048
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=4
       - MAX_WORKERS=3
@@ -44,7 +44,7 @@ services:
 # https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes
 # https://github.com/cloudflare/cloudflared/issues/1176#issuecomment-2993329228
   cloudflared:
-    image: cloudflare/cloudflared:latest # https://hub.docker.com/r/cloudflare/cloudflared/tags
+    image: cloudflare/cloudflared:latest-arm64 # https://hub.docker.com/r/cloudflare/cloudflared/tags
     container_name: cloudflared
     restart: always
-    command: tunnel --no-autoupdate run --token ${DEVGRAB_CLOUDFLARED_TOKEN}
+    command: tunnel --proxy-connect-timeout 5m --proxy-tls-timeout 2m --proxy-tcp-keepalive 1m --proxy-keepalive-timeout 10m --grace-period 3m --no-autoupdate run --token ${DEVGRAB_CLOUDFLARED_TOKEN}

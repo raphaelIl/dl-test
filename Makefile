@@ -5,7 +5,7 @@ CONTAINER_NAME = video-downloader
 
 .PHONY: start clean-all clean-image
 
-#start: latest-build clean
+# start: latest-build clean
 start: clean
 	@echo "docker compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
