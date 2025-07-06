@@ -24,8 +24,8 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
 RUN mkdir -p /app/downloads /app/logs /app/static && \
-    touch /app/logs/access.log /app/logs/error.log /app/logs/app.log && \
-    chmod 777 /app/downloads /app/logs /app/logs/access.log /app/logs/error.log /app/logs/app.log
+    touch /app/logs/error.log /app/logs/app.log && \
+    chmod 777 /app/downloads /app/logs /app/logs/error.log /app/logs/app.log
 
 COPY . .
 
@@ -42,8 +42,8 @@ EXPOSE 5000
 
 # 환경 변수를 확장하기 위해 sh -c 사용
 CMD sh -c 'mkdir -p /app/logs && \
-           touch /app/logs/access.log /app/logs/error.log /app/logs/app.log && \
-           chmod 777 /app/logs /app/logs/access.log /app/logs/error.log /app/logs/app.log && \
+           touch /app/logs/error.log /app/logs/app.log && \
+           chmod 777 /app/logs /app/logs/error.log /app/logs/app.log && \
            gunicorn --bind 0.0.0.0:5000 \
            --forwarded-allow-ips='*' \
            --workers ${GUNICORN_WORKERS} \
@@ -51,6 +51,7 @@ CMD sh -c 'mkdir -p /app/logs && \
            --timeout 300 \
            --max-requests 1000 \
            --max-requests-jitter 100 \
-           --access-logfile /app/logs/access.log \
-           --error-logfile /app/logs/error.log \
+           --error-logfile ${GUNICORN_ERROR_LOGFILE:-/app/logs/error.log} \
+           --access-logfile ${GUNICORN_ACCESS_LOGFILE:-/dev/null} \
+           --log-level ${GUNICORN_LOG_LEVEL:-error} \
            app:app'

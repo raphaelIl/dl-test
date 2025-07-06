@@ -20,6 +20,8 @@ gunicorn --bind 127.0.0.1:5000 \
          --threads ${GUNICORN_THREADS} \
          --timeout 300 \
          --access-logfile logs/access.log \
+         --access-logformat '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s' \
          --error-logfile logs/error.log \
+         --log-level warning \
          --reload \
          app:app

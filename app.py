@@ -83,13 +83,13 @@ if not os.path.exists('logs'):
 # 로깅 설정
 logging.basicConfig(
     filename='logs/app.log',
-    level=logging.WARNING,
+    level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
 werkzeug_logger = logging.getLogger('werkzeug')
-werkzeug_logger.setLevel(logging.WARNING)
-app.logger.setLevel(logging.WARNING)
+werkzeug_logger.setLevel(logging.ERROR)
+app.logger.setLevel(logging.ERROR)
 
 # 언어 설정
 LANGUAGES = {
