@@ -10,6 +10,7 @@ services:
     volumes:
       - ./downloads:/app/downloads
       - ./logs:/app/logs
+      - ./download_stats.json:/app/download_stats.json
     environment:
       - DOWNLOAD_FOLDER=downloads
       - MAX_FILE_SIZE_MB=2048
@@ -18,7 +19,6 @@ services:
       - MAX_WORKERS=3
       - STATUS_MAX_AGE=1800
       - STATUS_CLEANUP_INTERVAL=60
-      - DISABLE_HEALTH_METRICS=false
 #      - DOWNLOAD_LIMITS=60 per 5 minutes
       - DOWNLOAD_LIMITS=30 per minute
       - TZ=Asia/Seoul
@@ -28,12 +28,6 @@ services:
       - GUNICORN_ACCESS_LOGFILE=None # GUNICORN_ACCESS_LOGFILE=/app/logs/access.log
 #      - GUNICORN_ACCESS_LOG_FORMAT=%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s %(L)s
       - GUNICORN_ERROR_LOGFILE=/app/logs/error.log
-#    healthcheck:
-#      test: ["CMD-SHELL", "curl -s -f http://localhost:5000/health > /dev/null || exit 1"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 20s
     logging:
       driver: "json-file"
       options:
@@ -57,8 +51,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: "5m"
-#        max-file: "3"

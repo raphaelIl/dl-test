@@ -7,6 +7,7 @@ import time
 import logging
 import shutil
 import gc
+import json
 from datetime import datetime
 from dotenv import load_dotenv
 from flask_limiter import Limiter
@@ -21,13 +22,12 @@ from flask_limiter.errors import RateLimitExceeded
 import psutil
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# TODO(2025.05.17.Sat): download count만 보면 되지 않을까?
-
 # Enviornment Variables
 load_dotenv() # 환경 변수 로드
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',') # 환경 변수에서 허용할 IP 목록 가져오기 (쉼표로 구분된 IP 또는 CIDR)
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3)) # 환경변수에서 max_workers 값 가져오기 (코어당 스레드 수 기준으로 설정 가능)
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
+DOWNLOAD_STATS_FILE = os.getenv('DOWNLOAD_STATS_FILE', 'download_stats.json')
 STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120)) # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 # MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 1 * 1024 * 1024 * 1024)) # 1GB
@@ -35,7 +35,6 @@ STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60)) # 1min
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 100 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
-DISABLE_HEALTH_METRICS = os.getenv('DISABLE_HEALTH_METRICS', 'false').lower() == 'true'
 CACHE_CONFIG = {
     'css_js': os.getenv('CACHE_CSS_JS', '31536000,604800'),      # 브라우저 1년, CDN 1주일
     'media': os.getenv('CACHE_MEDIA', '31536000,31536000'),      # 브라우저/CDN 모두 1년
@@ -58,6 +57,48 @@ status_lock = threading.Lock() # 전역 변수로 락 추가
 download_status = {} # 다운로드 상태를 저장할 딕셔너리
 fs_lock = threading.Lock() # 파일 시스템 접근을 위한 락
 executor = None  # ThreadPoolExecutor 전역 변수
+
+# 다운로드 통계를 파일에 저장하고 관리하는 기능
+download_stats_lock = threading.Lock()
+
+def load_download_stats():
+    """파일에서 다운로드 통계를 로드합니다."""
+    try:
+        if os.path.exists(DOWNLOAD_STATS_FILE):
+            with open(DOWNLOAD_STATS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        logging.error(f"다운로드 통계 로드 중 오류: {str(e)}")
+
+    return {
+        'total': 0,
+        'completed': 0,
+        'errors': 0,
+        'last_updated': datetime.now().isoformat()
+    }
+
+def save_download_stats(stats):
+    """다운로드 통계를 파일에 저장합니다."""
+    try:
+        with download_stats_lock:
+            stats['last_updated'] = datetime.now().isoformat()
+            with open(DOWNLOAD_STATS_FILE, 'w') as f:
+                json.dump(stats, f, indent=2)
+    except Exception as e:
+        logging.error(f"다운로드 통계 저장 중 오류: {str(e)}")
+
+def update_download_stats(status):
+    """다운로드 상태 변경 시 통계를 업데이트합니다."""
+    stats = load_download_stats()
+
+    if status == 'started':
+        stats['total'] += 1
+    elif status == 'completed':
+        stats['completed'] += 1
+    elif status == 'error':
+        stats['errors'] += 1
+
+    save_download_stats(stats)
 
 # X-Forwarded-For 헤더가 있으면 첫 번째 IP 사용 (CloudFlare에 의해 설정됨)
 def get_client_ip():
@@ -223,6 +264,7 @@ def download_video(video_url, file_id, download_path):
                 'timestamp': datetime.now().timestamp()
             })
             logging.info(f"서버 다운로드 성공: {info.get('title')} ({video_url})")
+            update_download_stats('completed')
             return info
     except Exception as e:
         error_msg = str(e)
@@ -271,6 +313,7 @@ def download_video(video_url, file_id, download_path):
             'error_id': error_id,
             'timestamp': datetime.now().timestamp()
         })
+        update_download_stats('error')
 
         if os.path.exists(download_path):
             shutil.rmtree(download_path)
@@ -326,6 +369,7 @@ def index(lang):
                 os.makedirs(download_path)
 
             executor.submit(download_video, video_url, file_id, download_path)
+            update_download_stats('started')  # 다운로드 시작 시 통계 업데이트
             return redirect(url_for('download_waiting', lang=lang, file_id=file_id))
 
         except Exception as e:
@@ -524,8 +568,6 @@ def sitemap():
 def ads_txt():
     return send_from_directory('static', 'ads.txt')
 
-# TODO(2025.04.5.Sat): docker limit 제한 감지
-# health check endpoint
 @app.route('/health')
 def health_check():
     client_ip = get_client_ip()
@@ -535,132 +577,25 @@ def health_check():
         abort(403)
 
     try:
+        # 파일에서 다운로드 통계 로드
+        stats = load_download_stats()
+
+        # 현재 진행 중인 다운로드 수 계산
+        with status_lock:
+            in_progress = sum(1 for s in download_status.values()
+                            if s.get('status') in ['downloading', 'processing'])
+
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
-            "version": os.getenv('APP_VERSION', '1.0.0')
+            "version": os.getenv('APP_VERSION', '1.0.0'),
+            "downloads": {
+                "total": stats.get('total', 0),
+                "completed": stats.get('completed', 0),
+                "in_progress": in_progress,
+                "errors": stats.get('errors', 0)
+            }
         }
-
-        try:
-            with fs_lock:
-                fs_writeable = os.access(DOWNLOAD_FOLDER, os.W_OK)
-                available_space = shutil.disk_usage(DOWNLOAD_FOLDER).free
-
-            health_data["filesystem"] = {
-                "status": "healthy" if fs_writeable else "degraded",
-                "available_space_gb": round(available_space / (1024**3), 2),
-                "writable": fs_writeable
-            }
-
-            # 파일 시스템 문제가 있으면 전체 상태도 수정
-            if not fs_writeable:
-                health_data["status"] = "degraded"
-        except Exception as e:
-            health_data["filesystem"] = {
-                "status": "unhealthy",
-                "error": str(e)
-            }
-            health_data["status"] = "degraded"
-
-        # DISABLE_HEALTH_METRICS가 false일 때만 추가 정보 수집
-        if not DISABLE_HEALTH_METRICS:
-            health_data["components"] = {}
-
-            # 스레드 풀 상태 확인
-            try:
-                queue_size = executor._work_queue.qsize()
-                total_tasks = sum(1 for s in download_status.values() if s.get('status') == 'downloading' or s.get('status') == 'processing')
-                active_workers = min(total_tasks - queue_size, executor._max_workers) if total_tasks > queue_size else 0
-                available_workers = executor._max_workers - active_workers
-                health_data["components"]["thread_pool"] = {
-                    "status": "healthy",
-                    "max_workers": executor._max_workers,
-                    "available_workers": available_workers,
-                    "active_workers": active_workers,
-                    "waiting_tasks": queue_size,
-                    "total_tasks": total_tasks,
-                    "utilization_percent": round((active_workers / executor._max_workers) * 100, 2) if active_workers > 0 else 0
-                }
-            except Exception as e:
-                health_data["components"]["thread_pool"] = {
-                    "status": "unknown",
-                    "error": str(e)
-                }
-
-            # 다운로드 상태 통계
-            try:
-                with status_lock:
-                    total = len(download_status)
-                    completed = sum(1 for s in download_status.values() if s.get('status') == 'completed')
-                    downloading = sum(1 for s in download_status.values() if s.get('status') == 'downloading')
-                    errors = sum(1 for s in download_status.values() if s.get('status') == 'error')
-
-                health_data["components"]["downloads"] = {
-                    "status": "healthy",
-                    "total": total,
-                    "completed": completed,
-                    "in_progress": downloading,
-                    "errors": errors
-                }
-            except Exception as e:
-                health_data["components"]["downloads"] = {
-                    "status": "unknown",
-                    "error": str(e)
-                }
-
-            # Gunicorn 워커/스레드 상태 추정
-            try:
-                process = psutil.Process()
-                connections = len(process.connections(kind='inet'))
-                cpu_percent = process.cpu_percent(interval=0.1)
-                system_load = os.getloadavg()[0]  # 1분 평균 로드
-
-                # 실시간 연결 수 vs. 최대 처리 가능 연결 수
-                workers = int(os.environ.get('GUNICORN_WORKERS', 1))
-                threads = int(os.environ.get('GUNICORN_THREADS', 4))
-
-                # 최대 동시 처리 가능 요청 수 계산
-                gunicorn_capacity = workers * threads
-                connections = len(process.connections(kind='inet'))
-
-                gunicorn_usage = min(100, (connections / gunicorn_capacity) * 100)
-                gunicorn_queue_estimate = max(0, connections - gunicorn_capacity)
-
-                # 스레드풀 대기열 크기 가져오기
-                threadpool_queue = health_data["components"]["thread_pool"]["waiting_tasks"]
-
-                health_data["components"]["gunicorn_stats"] = {
-                    "status": "healthy" if gunicorn_usage < 80 else "warning",
-                    "capacity": {
-                        "workers": workers,
-                        "threads_per_worker": threads,
-                        "max_concurrent_requests": gunicorn_capacity
-                    },
-                    "usage": {
-                        "active_connections": connections,
-                        "usage_percent": round(gunicorn_usage, 1),
-                        "estimated_queue": gunicorn_queue_estimate
-                    },
-                    "system": {
-                        "cpu_percent": round(cpu_percent, 1),
-                        "system_load": round(system_load, 2)
-                    }
-                }
-
-                # 전체 병목 상태 평가
-                health_data["components"]["bottleneck_analysis"] = {
-                    "http_layer_pressure": "high" if gunicorn_usage > 80 else "moderate" if gunicorn_usage > 60 else "low",
-                    "worker_pool_pressure": "high" if threadpool_queue > 0 else "low",
-                    "primary_bottleneck": "gunicorn_threads" if gunicorn_usage > 80 and (threadpool_queue == 0) else
-                    "worker_pool" if threadpool_queue > 0 and gunicorn_usage < 80 else
-                    "both" if gunicorn_usage > 80 and threadpool_queue > 0 else "none",
-                    "scaling_recommendation": get_scaling_recommendation(gunicorn_usage, threadpool_queue, cpu_percent)
-                }
-            except Exception as e:
-                health_data["components"]["gunicorn_stats"] = {
-                    "status": "unknown",
-                    "error": str(e)
-                }
 
         return health_data, 200
     except Exception as e:
@@ -758,6 +693,25 @@ def generate_error_id():
 def init_app():
     global executor
     executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+
+    # 다운로드 통계 파일 초기화
+    try:
+        # 통계 파일이 없으면 초기 파일 생성
+        if not os.path.exists(DOWNLOAD_STATS_FILE):
+            initial_stats = {
+                'total': 0,
+                'completed': 0,
+                'errors': 0,
+                'last_updated': datetime.now().isoformat()
+            }
+            save_download_stats(initial_stats)
+            logging.warning(f"다운로드 통계 파일 초기화: {DOWNLOAD_STATS_FILE}")
+        else:
+            # 기존 통계 파일 로드 및 검증
+            stats = load_download_stats()
+            logging.warning(f"기존 다운로드 통계 로드: total={stats.get('total', 0)}, completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}")
+    except Exception as e:
+        logging.error(f"다운로드 통계 초기화 중 오류: {str(e)}")
 
     # 시작 정보 로깅 추가
     try:

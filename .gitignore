@@ -3,3 +3,4 @@
 /venv/
 /logs/*
 /.env
+/download_stats.json
