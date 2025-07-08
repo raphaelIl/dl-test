@@ -158,8 +158,15 @@ def get_locale():
     if len(path_parts) > 1 and path_parts[1] in LANGUAGES:
         return path_parts[1]
 
-    # 브라우저 언어 설정 확인
-    return request.accept_languages.best_match(LANGUAGES.keys(), default='en')
+    # 브라우저 언어 설정 확인 - 기본값을 영어로 설정
+    browser_lang = request.accept_languages.best_match(LANGUAGES.keys())
+    return browser_lang if browser_lang else 'en'
+
+def get_browser_preferred_language():
+    """브라우저의 선호 언어를 감지하되, 기본값은 영어"""
+    # Accept-Language 헤더에서 언어 감지
+    browser_lang = request.accept_languages.best_match(LANGUAGES.keys())
+    return browser_lang if browser_lang else 'en'
 
 # 3. Babel 초기화 (get_locale 함수 정의 후에)
 babel.init_app(app, locale_selector=get_locale)
@@ -344,9 +351,25 @@ def add_cache_headers(response):
 
 @app.route('/')
 def index_redirect():
-    # 브라우저 언어에 따라 적절한 언어 URL로 리다이렉트
-    lang = get_locale()
-    return redirect(f'/{lang}/')
+    # SEO 최적화: 검색엔진 크롤러는 기본 영어 페이지로 제공
+    user_agent = request.headers.get('User-Agent', '').lower()
+
+    # 검색엔진 크롤러 감지
+    search_engines = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'facebookexternalhit', 'twitterbot']
+    is_crawler = any(bot in user_agent for bot in search_engines)
+
+    if is_crawler:
+        # 검색엔진 크롤러에게는 영어 페이지 직접 제공 (리다이렉트 없이)
+        return index('en')
+    else:
+        # 일반 사용자에게는 브라우저 언어에 따라 리다이렉트
+        preferred_lang = get_browser_preferred_language()
+        return redirect(f'/{preferred_lang}/', code=302)
+
+# 검색엔진을 위한 기본 영어 라우트 추가
+@app.route('/en')
+def english_redirect():
+    return redirect('/en/', code=301)
 
 @app.route('/<lang>/', methods=['GET', 'POST'])
 def index(lang):
