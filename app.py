@@ -249,9 +249,9 @@ def download_video(video_url, file_id, download_path):
             'max_filesize': MAX_FILE_SIZE,
             'noprogress': True,
             'buffersize': 1024,
-            # 'nocheckcertificate': True,  # 인증서 검사 비활성화로 메모리 사용 감소
+            'nocheckcertificate': True,
             'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.158 Safari/537.36',
             },
             # 'downloader': 'ffmpeg',
             # 'hls_use_mpegts': True,
@@ -453,17 +453,17 @@ def result(lang, file_id):
 
     if not status or status.get('status') != 'completed':
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
-        return redirect(url_for('index'))
+        return redirect(url_for('index', lang=lang))
 
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.")
+        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=lang, languages=LANGUAGES)
 
     files = safely_access_files(download_path)
     if not files:
         logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-        return render_template('index.html', error="다운로드된 파일이 없습니다.")
+        return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=lang, languages=LANGUAGES)
 
     file_name = files[0]
     with fs_lock:
@@ -497,19 +497,19 @@ def download_file(lang, file_id):
 
         if not re.match(r'^[0-9a-f\-]+$', file_id):
             logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
-            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."))
+            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=lang, languages=LANGUAGES)
 
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
 
         with fs_lock:
             if not os.path.exists(download_path):
                 logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-                return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.")
+                return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=lang, languages=LANGUAGES)
 
         files = safely_access_files(download_path)
         if not files:
             logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-            return render_template('index.html', error="다운로드된 파일이 없습니다.")
+            return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=lang, languages=LANGUAGES)
 
         filename = files[0]
         file_path = safe_path_join(download_path, filename)
@@ -517,7 +517,7 @@ def download_file(lang, file_id):
         with fs_lock:
             if not os.path.isfile(file_path):
                 logging.error(f"파일이 아닌 경로: {file_path}")
-                return render_template('index.html', error="유효하지 않은 파일입니다.")
+                return render_template('index.html', error="유효하지 않은 파일입니다.", current_lang=lang, languages=LANGUAGES)
 
         safe_filename = f"download-{file_id}.mp4"
 
@@ -533,7 +533,7 @@ def download_file(lang, file_id):
         return response
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}")
+        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}", current_lang=lang, languages=LANGUAGES)
 
 @app.route('/robots.txt')
 def robots_txt():
