@@ -18,7 +18,7 @@
             <div class="language-drawer" id="languageDrawer">
                 <div class="language-options" id="languageOptions">
                     {% for code, name in languages.items() %}
-                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                        <a href="{{ url_for('set_language', language=code) }}"
                            class="language-option {% if current_lang == code %}active{% endif %}"
                            data-lang-code="{{ code }}">
                             <span class="language-flag">{{ code }}</span>
@@ -44,12 +44,16 @@
         </div>
 
         <div class="actions">
-            <a href="{{ url_for('download_file', lang=current_lang, file_id=file_id) }}" class="btn btn-success">
+            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success">
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
-            <a href="{{ url_for('index', lang=current_lang) }}" class="btn btn-primary">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
+        </div>
+
+        <div class="download-notice">
+            <p>{{ _('The download link will expire in a certain amount of time. Download it now!') }}</p>
         </div>
     </div>
 {% endblock %}

@@ -6,65 +6,14 @@
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
 <url>
-  <loc>https://video.devgrabs.com/en/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
+  <loc>https://devgrabs.com/</loc>
+  <lastmod>2025-09-03T10:00:00+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://video.devgrabs.com/id/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
+  <loc>https://video.devgrabs.com/</loc>
+  <lastmod>2025-09-03T10:00:00+00:00</lastmod>
+  <priority>1.00</priority>
 </url>
-<url>
-  <loc>https://video.devgrabs.com/pt_BR/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/es_MX/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/vi/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/fil/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/th/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/fr/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/ur/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/ko/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/ja/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://video.devgrabs.com/zh/</loc>
-  <lastmod>2025-04-05T17:26:37+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
 
 </urlset>

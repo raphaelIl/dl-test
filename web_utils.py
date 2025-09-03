@@ -15,11 +15,11 @@ def get_client_ip():
 
 
 def get_locale():
-    """현재 로케일 감지"""
-    # URL 경로에서 언어 코드 확인 (예: /ko/, /en/ 등)
-    path_parts = request.path.split('/')
-    if len(path_parts) > 1 and path_parts[1] in LANGUAGES:
-        return path_parts[1]
+    """현재 로케일 감지 - 쿠키 우선, 그 다음 브라우저 설정"""
+    # 쿠키에서 언어 설정 확인
+    cookie_lang = request.cookies.get('language')
+    if cookie_lang and cookie_lang in LANGUAGES:
+        return cookie_lang
 
     # 브라우저 언어 설정 확인 - 기본값을 영어로 설정
     browser_lang = request.accept_languages.best_match(LANGUAGES.keys())

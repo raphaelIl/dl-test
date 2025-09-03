@@ -1,5 +1,5 @@
 """
-Flask 애플리케이션 메인 파일 - 리팩토링된 버전
+Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전
 """
 import os
 import re
@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 from datetime import datetime
 
-from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response
 from flask_babel import Babel, gettext as _
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
@@ -68,82 +68,75 @@ def after_request(response):
 
 
 @app.route('/')
-def index_redirect():
-    """메인 페이지 리다이렉트"""
-    user_agent = request.headers.get('User-Agent', '').lower()
-
-    # 검색엔진 크롤러 감지
-    search_engines = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'facebookexternalhit', 'twitterbot']
-    is_crawler = any(bot in user_agent for bot in search_engines)
-
-    if is_crawler:
-        return index('en')
-    else:
-        preferred_lang = get_browser_preferred_language()
-        return redirect(f'/{preferred_lang}/', code=302)
-
-
-@app.route('/en')
-def english_redirect():
-    return redirect('/en/', code=301)
-
-
-@app.route('/<lang>/', methods=['GET', 'POST'])
-def index(lang):
+def index():
     """메인 페이지"""
-    if lang not in LANGUAGES:
-        return redirect('/')
-
-    if request.method == 'POST':
-        for limit in DOWNLOAD_LIMITS:
-            limiter.limit(limit)(lambda: None)()
-        video_url = request.form['video_url']
-
-        if not video_url:
-            return render_template('index.html', error=_('URL을 입력해주세요.'))
-
-        try:
-            file_id = str(uuid.uuid4())
-            download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
-
-            if not os.path.exists(download_path):
-                os.makedirs(download_path)
-
-            executor.submit(download_video, video_url, file_id, download_path, update_status)
-            update_download_stats('started')
-            return redirect(url_for('download_waiting', lang=lang, file_id=file_id))
-
-        except Exception as e:
-            logging.error(f"예상치 못한 오류 (URL: {video_url}): {str(e)}", exc_info=True)
-            return render_template('index.html', error=f'{_("다운로드 중 오류가 발생했습니다")}: {str(e)}')
+    if request.method == 'GET':
+        # 쿠키에 언어 설정이 없으면 브라우저 언어로 설정
+        if not request.cookies.get('language'):
+            preferred_lang = get_browser_preferred_language()
+            response = make_response(render_template('index.html', max_file_size_gb=MAX_FILE_SIZE/(1024*1024*1024)))
+            response.set_cookie('language', preferred_lang, max_age=30*24*60*60)  # 30일
+            return response
 
     return render_template('index.html', max_file_size_gb=MAX_FILE_SIZE/(1024*1024*1024))
 
 
-@app.route('/<lang>/download-waiting/<file_id>')
-def download_waiting(lang, file_id):
-    """다운로드 대기 페이지"""
-    if lang not in LANGUAGES:
-        return redirect('/')
+@app.route('/download', methods=['POST'])
+def download():
+    """다운로드 요청 처리"""
+    for limit in DOWNLOAD_LIMITS:
+        limiter.limit(limit)(lambda: None)()
 
+    video_url = request.form['video_url']
+
+    if not video_url:
+        return render_template('index.html', error=_('URL을 입력해주세요.'))
+
+    try:
+        file_id = str(uuid.uuid4())
+        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
+
+        if not os.path.exists(download_path):
+            os.makedirs(download_path)
+
+        executor.submit(download_video, video_url, file_id, download_path, update_status)
+        update_download_stats('started')
+        return redirect(url_for('download_waiting', file_id=file_id))
+
+    except Exception as e:
+        logging.error(f"예상치 못한 오류 (URL: {video_url}): {str(e)}", exc_info=True)
+        return render_template('index.html', error=f'{_("다운로드 중 오류가 발생했습니다")}: {str(e)}')
+
+
+@app.route('/set-language/<language>')
+def set_language(language):
+    """언어 설정"""
+    if language not in LANGUAGES:
+        return redirect(url_for('index'))
+
+    response = make_response(redirect(request.referrer or url_for('index')))
+    response.set_cookie('language', language, max_age=30*24*60*60)  # 30일
+    return response
+
+
+@app.route('/download-waiting/<file_id>')
+def download_waiting(file_id):
+    """다운로드 대기 페이지"""
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
-        return redirect(url_for('index', lang=lang))
+        return redirect(url_for('index'))
 
     status = get_status(file_id)
     if status['status'] == 'completed':
-        return redirect(url_for('result', lang=lang, file_id=file_id))
+        return redirect(url_for('result', file_id=file_id))
 
     return render_template('download_waiting.html', file_id=file_id, status=status,
-                           current_lang=lang, languages=LANGUAGES)
+                           current_lang=get_locale(), languages=LANGUAGES)
 
 
-@app.route('/<lang>/check-status/<file_id>')
-def check_status(lang, file_id):
+@app.route('/check-status/<file_id>')
+def check_status(file_id):
     """다운로드 상태 확인"""
-    if lang not in LANGUAGES:
-        return {'status': 'error', 'error': '지원하지 않는 언어입니다'}
-
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 상태 확인 시도: {file_id}")
         return {'status': 'error', 'error': '유효하지 않은 파일 ID'}
@@ -152,36 +145,33 @@ def check_status(lang, file_id):
     if status.get('status') == 'completed':
         return {
             'status': 'completed',
-            'redirect': url_for('result', lang=lang, file_id=file_id)
+            'redirect': url_for('result', file_id=file_id)
         }
 
     return status
 
 
-@app.route('/<lang>/result/<file_id>')
-def result(lang, file_id):
+@app.route('/result/<file_id>')
+def result(file_id):
     """다운로드 결과 페이지"""
-    if lang not in LANGUAGES:
-        return redirect('/')
-
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
-        return redirect(url_for('index', lang=lang))
+        return redirect(url_for('index'))
 
     status = get_status(file_id)
     if not status or status.get('status') != 'completed':
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
-        return redirect(url_for('index', lang=lang))
+        return redirect(url_for('index'))
 
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=lang, languages=LANGUAGES)
+        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
     files = safely_access_files(download_path)
     if not files:
         logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-        return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=lang, languages=LANGUAGES)
+        return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
     file_name = files[0]
     file_path = safe_path_join(download_path, file_name)
@@ -195,35 +185,32 @@ def result(lang, file_id):
                            file_size=readable_size(file_size))
 
 
-@app.route('/<lang>/download-file/<file_id>')
-def download_file(lang, file_id):
+@app.route('/download-file/<file_id>')
+def download_file(file_id):
     """파일 다운로드"""
-    if lang not in LANGUAGES:
-        return redirect('/')
-
     try:
         logging.info(f"파일 다운로드 시작: {file_id}")
 
         if not re.match(r'^[0-9a-f\-]+$', file_id):
             logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
-            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=lang, languages=LANGUAGES)
+            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=get_locale(), languages=LANGUAGES)
 
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         if not os.path.exists(download_path):
             logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-            return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=lang, languages=LANGUAGES)
+            return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
         files = safely_access_files(download_path)
         if not files:
             logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-            return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=lang, languages=LANGUAGES)
+            return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
         filename = files[0]
         file_path = safe_path_join(download_path, filename)
 
         if not os.path.isfile(file_path):
             logging.error(f"파일이 아닌 경로: {file_path}")
-            return render_template('index.html', error="유효하지 않은 파일입니다.", current_lang=lang, languages=LANGUAGES)
+            return render_template('index.html', error="유효하지 않은 파일입니다.", current_lang=get_locale(), languages=LANGUAGES)
 
         safe_filename = f"download-{file_id}.mp4"
         response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
@@ -233,7 +220,7 @@ def download_file(lang, file_id):
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}", current_lang=lang, languages=LANGUAGES)
+        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}", current_lang=get_locale(), languages=LANGUAGES)
 
 
 @app.route('/robots.txt')

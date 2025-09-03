@@ -160,7 +160,7 @@
                 setTimeout(smoothProgress, 300);
             }
 
-            fetch(`/{{ current_lang }}/check-status/${fileId}`)
+            fetch(`/check-status/${fileId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response error');
@@ -193,7 +193,7 @@
                                 requestAnimationFrame(animateToCompletion);
                             } else {
                                 setTimeout(() => {
-                                    window.location.href = `/{{ current_lang }}/result/${fileId}`;
+                                    window.location.href = `/result/${fileId}`;
                                 }, 1000);
                             }
                         }
@@ -239,7 +239,7 @@
                         clearInterval(checkStatusInterval);
 
                         // 오류 발생 시 페이지 새로고침 (상태 데이터와 함께)
-                        window.location.href = `/{{ current_lang }}/download-waiting/${fileId}`;
+                        window.location.href = `/download-waiting/${fileId}`;
                     }
                 })
                 .catch(error => {
@@ -256,7 +256,7 @@
                         progressText.textContent = `${Math.round(newProgress)}%`;
                     } else {
                         setTimeout(() => {
-                            window.location.href = `/{{ current_lang }}/result/${fileId}`;
+                            window.location.href = `/result/${fileId}`;
                         }, 5000);
                     }
                 });

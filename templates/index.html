@@ -19,7 +19,7 @@
         <div class="language-drawer" id="languageDrawer">
             <div class="language-options" id="languageOptions">
                 {% for code, name in languages.items() %}
-                <a href="/{{ code }}/"
+                <a href="{{ url_for('set_language', language=code) }}"
                    class="language-option {% if current_lang == code %}active{% endif %}"
                    data-lang-code="{{ code }}">
                     <span class="language-flag">{{ code }}</span>
@@ -45,7 +45,7 @@
     </div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" action="{{ url_for('download') }}">
         <div class="form-group">
             <label for="video_url">{{ _('동영상 URL') }}</label>
             <input type="text" id="video_url" name="video_url"
