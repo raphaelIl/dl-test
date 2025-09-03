@@ -4,3 +4,4 @@
 /logs/*
 /.env
 /download_stats.json
+/app_monolithic_backup.py
