@@ -14,4 +14,4 @@ Disallow: /downloads/
 Disallow: /health
 Disallow: /result/
 
-Sitemap: https://video.devgrabs.com/sitemap.xml
+Sitemap: https://devgrabs.com/sitemap.xml

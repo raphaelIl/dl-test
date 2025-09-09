@@ -232,7 +232,6 @@ def robots_txt():
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
 
-
 @app.route('/ads.txt')
 def ads_txt():
     return send_from_directory('static', 'ads.txt')
