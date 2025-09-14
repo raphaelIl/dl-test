@@ -145,6 +145,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                     'title': title,
                     'url': video_url,
                     'is_direct_link': False,
+                    'thumbnail': get_video_info(video_url).get('thumbnail') if video_info else None,
                     'timestamp': datetime.now().timestamp()
                 })
 

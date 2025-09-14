@@ -203,7 +203,7 @@ def result(file_id):
                               current_lang=get_locale(),
                               languages=LANGUAGES)
 
-    # 기존 방식: 서버에서 다운로드한 파일
+    # 기��� 방식: 서버에서 다운로드한 파일
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
@@ -225,6 +225,7 @@ def result(file_id):
                            file_name=file_name,
                            file_size=readable_size(file_size),
                            is_direct_link=False,
+                           thumbnail=status.get('thumbnail', ''),
                            current_lang=get_locale(),
                            languages=LANGUAGES)
 
@@ -258,7 +259,7 @@ def download_file(file_id):
 
         files = safely_access_files(download_path)
         if not files:
-            logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
+            logging.error(f"다운로드 폴더에 파일이 ��음: {download_path}")
             return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
         filename = files[0]
