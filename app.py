@@ -125,12 +125,6 @@ def set_language(language):
             # 호스트 URL 제거하여 경로만 추출
             path = referrer[len(host_url):]
 
-            # 경로에서 언어 코드 패턴이 있는지 확인하고 제거
-            for lang in LANGUAGES:
-                if path.startswith(f'/{lang}/'):
-                    path = path[len(lang)+1:]
-                    break
-
             # 경로 분석
             if '/result/' in path:
                 match = re.search(r'/result/([0-9a-f\-]+)', path)
@@ -152,7 +146,7 @@ def set_language(language):
 
 @app.route('/download-waiting/<file_id>')
 def download_waiting(file_id):
-    """다운로드 대��� 페이지"""
+    """다운로드 대기 페이지"""
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))

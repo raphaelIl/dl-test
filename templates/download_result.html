@@ -74,16 +74,20 @@
             const languageToggle = document.getElementById('languageToggle');
             const languageDrawer = document.getElementById('languageDrawer');
 
-            languageToggle.addEventListener('click', function() {
-                languageDrawer.classList.toggle('active');
-            });
+            if (languageToggle && languageDrawer) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    languageDrawer.classList.toggle('open');
+                });
 
-            document.addEventListener('click', function(event) {
-                const isClickInside = languageToggle.contains(event.target) || languageDrawer.contains(event.target);
-                if (!isClickInside) {
-                    languageDrawer.classList.remove('active');
-                }
-            });
+                document.addEventListener('click', function(e) {
+                    if (languageDrawer.classList.contains('open') &&
+                        !languageDrawer.contains(e.target) &&
+                        e.target !== languageToggle) {
+                        languageDrawer.classList.remove('open');
+                    }
+                });
+            }
         });
     </script>
 {% endblock %}
