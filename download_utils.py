@@ -10,6 +10,7 @@ import yt_dlp
 from yt_dlp import YoutubeDL, DownloadError
 from urllib.parse import urlsplit, urljoin, unquote
 from config import MAX_FILE_SIZE
+import logging
 
 
 def build_headers_for(url: str, *, ua: str | None = None, referer_mode: str = "root") -> dict:
@@ -104,7 +105,7 @@ def find_m3u8_candidates(detail_url: str, text: str) -> list[str]:
             m = urljoin(base, html.unescape(m))
         cands.append(m)
 
-    # 3) 1단계 iframe 따라가서 재검색
+    # 3) iframe 따라가서 재검색
     m = _iframe.search(text)
     if m:
         iframe_url = urljoin(base, html.unescape(m.group(1)))
@@ -148,7 +149,7 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
     """
     base = base_ydl_opts(detail_url, download_dir, use_cookies)
 
-    # 전역 헤더(루��� Origin/Referer)
+    # 전역 헤더(루트 Origin/Referer)
     hdr_root = build_headers_for(detail_url, referer_mode="root")
     hdr_page = build_headers_for(detail_url, referer_mode="page")
     hdr_root_ua = build_headers_for(
@@ -249,7 +250,8 @@ def extract_direct_download_link(url):
                 'source': info.get('extractor', '').lower()
             }
     except Exception as e:
-        print(f"직접 다운로드 링크 추출 중 오류: {str(e)}")
+        # print 대신 logging 사용
+        logging.warning(f"직접 다운로드 링크 추출 중 오류: {str(e)}")
         return None
 
 

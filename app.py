@@ -285,7 +285,7 @@ def download_file(file_id):
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_error(f"{_('파일 다운로드 중 오류가 발생했습니다')}: {str(e)}")
+        return render_error(_("파일 다운로드 중 오류가 발생했습니다"), debug_message=str(e))
 
 
 @app.route('/robots.txt')

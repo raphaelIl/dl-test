@@ -68,7 +68,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
         # 1. 먼저 직접 다운로드 링크 추출 시도
         direct_link_info = extract_direct_download_link(video_url)
 
-        # 직접 다운로드 링크가 추출되었으면 유효성 검증
+        # 직접 다운로드 ���크가 추출되었으면 유효성 검증
         if direct_link_info:
             direct_url = direct_link_info['url']
             validation_result = validate_direct_download_link(direct_url)
@@ -99,18 +99,22 @@ def download_video(video_url, file_id, download_path, update_status_callback):
             if d['status'] == 'downloading':
                 if 'total_bytes' in d and d['total_bytes'] > 0:
                     if d['total_bytes'] > MAX_FILE_SIZE:
+                        error_id = generate_error_id()
+                        logging.warning(f"파일 크기 제한 초과 (ID: {error_id}): {d['total_bytes']/(1024*1024):.1f}MB")
                         update_status_callback(file_id, {
                             'status': 'error',
-                            'error': _("This video is too big."),
+                            'error': _("파일 크기가 제한을 초과했습니다."),
                             'timestamp': datetime.now().timestamp()
                         })
                         return
                     progress = (d['downloaded_bytes'] / d['total_bytes']) * 100
                 elif 'total_bytes_estimate' in d and d['total_bytes_estimate'] > 0:
                     if d['total_bytes_estimate'] > MAX_FILE_SIZE:
+                        error_id = generate_error_id()
+                        logging.warning(f"파일 크기 제한 초과 (ID: {error_id}): {d['total_bytes_estimate']/(1024*1024):.1f}MB")
                         update_status_callback(file_id, {
                             'status': 'error',
-                            'error': f'{_("파일 크기 제한 초과")}: {d["total_bytes_estimate"]/(1024*1024):.1f}MB (최대 {MAX_FILE_SIZE/(1024*1024)}MB)',
+                            'error': _("파일 크기가 제한을 초과했습니다."),
                             'timestamp': datetime.now().timestamp()
                         })
                         return
@@ -121,9 +125,12 @@ def download_video(video_url, file_id, download_path, update_status_callback):
             elif d['status'] == 'finished':
                 update_status_callback(file_id, {'status': 'processing', 'progress': 100})
             elif d['status'] == 'error':
+                error_id = generate_error_id()
+                error_detail = d.get('error', '알 수 없는 오류')
+                logging.error(f"다운로드 진행 중 오류 (ID: {error_id}): {error_detail}")
                 update_status_callback(file_id, {
                     'status': 'error',
-                    'error': d.get('error', _('알 수 없는 오류')),
+                    'error': _('다운로드 중 오류가 발생했습니다'),
                     'timestamp': datetime.now().timestamp()
                 })
 
