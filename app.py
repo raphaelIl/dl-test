@@ -114,14 +114,45 @@ def set_language(language):
     if language not in LANGUAGES:
         return redirect(url_for('index'))
 
-    response = make_response(redirect(request.referrer or url_for('index')))
+    # 리퍼러에서 돌아갈 페이지 결정
+    referrer = request.referrer
+    next_url = url_for('index')
+
+    # 리퍼러가 있으면 URL 분석
+    if referrer:
+        host_url = request.host_url.rstrip('/')
+        if referrer.startswith(host_url):
+            # 호스트 URL 제거하여 경로만 추출
+            path = referrer[len(host_url):]
+
+            # 경로에서 언어 코드 패턴이 있는지 확인하고 제거
+            for lang in LANGUAGES:
+                if path.startswith(f'/{lang}/'):
+                    path = path[len(lang)+1:]
+                    break
+
+            # 경로 분석
+            if '/result/' in path:
+                match = re.search(r'/result/([0-9a-f\-]+)', path)
+                if match:
+                    file_id = match.group(1)
+                    next_url = url_for('result', file_id=file_id, _t=datetime.now().timestamp())
+
+            elif '/download-waiting/' in path:
+                match = re.search(r'/download-waiting/([0-9a-f\-]+)', path)
+                if match:
+                    file_id = match.group(1)
+                    next_url = url_for('download_waiting', file_id=file_id)
+
+    # 언어 쿠키 설정 및 리디렉션
+    response = make_response(redirect(next_url))
     response.set_cookie('language', language, max_age=30*24*60*60)  # 30일
     return response
 
 
 @app.route('/download-waiting/<file_id>')
 def download_waiting(file_id):
-    """다운로드 대기 페이지"""
+    """다운로드 대��� 페이지"""
     if not re.match(r'^[0-9a-f\-]+$', file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
@@ -163,6 +194,22 @@ def result(file_id):
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
         return redirect(url_for('index'))
 
+    # 직접 다운로드 링크가 있는 경우
+    if status.get('is_direct_link', False) and status.get('direct_url'):
+        return render_template('download_result.html',
+                              title=status.get('title', '알 수 없는 제목'),
+                              file_id=file_id,
+                              url=status.get('url', ''),
+                              direct_url=status.get('direct_url', ''),
+                              is_direct_link=True,
+                              thumbnail=status.get('thumbnail', ''),
+                              duration=status.get('duration'),
+                              uploader=status.get('uploader', ''),
+                              source=status.get('source', ''),
+                              current_lang=get_locale(),
+                              languages=LANGUAGES)
+
+    # 기존 방식: 서버에서 다운로드한 파일
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
@@ -182,7 +229,10 @@ def result(file_id):
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
-                           file_size=readable_size(file_size))
+                           file_size=readable_size(file_size),
+                           is_direct_link=False,
+                           current_lang=get_locale(),
+                           languages=LANGUAGES)
 
 
 @app.route('/download-file/<file_id>')
@@ -195,6 +245,18 @@ def download_file(file_id):
             logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
             return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=get_locale(), languages=LANGUAGES)
 
+        # 상태 확인
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            logging.error(f"완료되지 않은 다운로드에 대한 다운로드 시도: {file_id}")
+            return render_template('index.html', error="다운로드가 완료되지 않았습니다.", current_lang=get_locale(), languages=LANGUAGES)
+
+        # 직접 다운로드 링크가 있는 경우 리다이렉트
+        if status.get('is_direct_link', False) and status.get('direct_url'):
+            logging.info(f"직접 다운로드 링크로 리다이렉트: {status.get('direct_url')}")
+            return redirect(status.get('direct_url'))
+
+        # 기존 방식: 서버에서 다운로드한 파일 제공
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         if not os.path.exists(download_path):
             logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
@@ -276,7 +338,7 @@ def health_check():
 @app.errorhandler(403)
 def forbidden(e):
     error_id = generate_error_id()
-    logging.warning(f"403 Forbidden access - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
+    """다운로드 대기 페이지"""
     return render_template('error.html', error="You don't have permission to access this resource.", error_id=error_id), 403
 
 

@@ -10,7 +10,7 @@ from datetime import datetime
 from flask_babel import gettext as _
 
 from config import MAX_FILE_SIZE
-from download_utils import try_download_enhanced, build_headers_for, get_video_info
+from download_utils import try_download_enhanced, build_headers_for, get_video_info, extract_direct_download_link, validate_direct_download_link
 from utils import safely_access_files, generate_error_id
 from stats import update_download_stats
 
@@ -19,6 +19,39 @@ def download_video(video_url, file_id, download_path, update_status_callback):
     """메인 다운로드 함수 - 향상된 다운로드 로직 적용"""
     try:
         update_status_callback(file_id, {'status': 'downloading', 'progress': 0})
+
+        # 1. 먼저 직접 다운로드 링크 추출 시도
+        direct_link_info = extract_direct_download_link(video_url)
+
+        # 직접 다운로드 링크가 추출되었으면 유효성 검증
+        if direct_link_info:
+            direct_url = direct_link_info['url']
+            validation_result = validate_direct_download_link(direct_url)
+
+            # 유효한 직접 다운로드 링크인 경우
+            if validation_result['valid']:
+                logging.info(f"직접 다운로드 링크 발견: {video_url} -> {direct_url}")
+
+                # 상태 업데이트 (직접 다운로드 링크 사용)
+                update_status_callback(file_id, {
+                    'status': 'completed',
+                    'progress': 100,
+                    'title': direct_link_info['title'],
+                    'url': video_url,
+                    'direct_url': direct_url,
+                    'is_direct_link': True,
+                    'thumbnail': direct_link_info.get('thumbnail'),
+                    'duration': direct_link_info.get('duration'),
+                    'uploader': direct_link_info.get('uploader'),
+                    'source': direct_link_info.get('source'),
+                    'timestamp': datetime.now().timestamp()
+                })
+
+                update_download_stats('completed')
+                return
+
+        # 2. 직접 다운로드 링크가 없거나 유효하지 않으면 기존 방식으로 다운로드
+        logging.info(f"직접 다운로드 링크를 사용할 수 없음. 기존 방식으로 다운로드: {video_url}")
 
         def progress_hook(d):
             if d['status'] == 'downloading':
@@ -52,126 +85,111 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                     'timestamp': datetime.now().timestamp()
                 })
 
-        # 향상된 다운로드 시도 사용
-        try:
-            default_ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
-
-            # 1차: 향상된 다운로드 함수 사용 (강제 Referer + m3u8 구출 폴백 포함)
-            logging.info(f"향상된 다운로드 시도 시작: {video_url}")
-            if try_download_enhanced(video_url, download_path, ua=default_ua):
-                files = safely_access_files(download_path)
-                if files:
-                    try:
-                        info = get_video_info(video_url)
-                        title = info.get('title', '알 수 없는 제목')
-                    except:
-                        title = files[0].rsplit('.', 1)[0] if '.' in files[0] else files[0]
-
-                    update_status_callback(file_id, {
-                        'status': 'completed',
-                        'title': title,
-                        'url': video_url,
-                        'timestamp': datetime.now().timestamp()
-                    })
-                    logging.info(f"향상된 다운로드 성공: {title} ({video_url})")
-                    update_download_stats('completed')
-                    return {'title': title}
-        except Exception as e:
-            logging.warning(f"향상된 다운로드 실패, 기본 방식으로 시도: {str(e)}")
-
-        # 2차 폴백: 기본 yt-dlp 방식 (하위 호환성)
-        logging.info(f"기본 다운로드 방식으로 폴백: {video_url}")
-        headers = build_headers_for(video_url, referer_mode="root")
+        # 다운로드 옵션 설정
         ydl_opts = {
-            'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'merge_output_format': 'mp4',
-            'outtmpl': download_path + '/%(title)s.%(ext)s',
-            'noplaylist': True,
-            'retries': 3,
-            'fragment_retries': 3,
-            'socket_timeout': 30,
-            'max_filesize': MAX_FILE_SIZE,
+            'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+            'quiet': False,
             'noprogress': True,
-            'buffersize': 1024,
-            'nocheckcertificate': True,
-            "http_headers": headers,
-            # 기본 방식에도 강제 Referer 적용
-            "referer": f"{video_url.split('://')[0]}://{video_url.split('/')[2]}/",
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',
-            }],
+            'retries': 10,
+            'fragment_retries': 10,
             'progress_hooks': [progress_hook],
+            'max_filesize': MAX_FILE_SIZE,
         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=True)
+        # 비디오 정보 가져오기
+        try:
+            video_info = get_video_info(video_url)
+            title = video_info.get('title', 'Unknown Title')
+        except Exception:
+            title = 'Unknown Title'
+
+        try:
+            # yt-dlp로 다운로드 시도
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([video_url])
+
+            # 다운로드된 파일 확인
+            files = safely_access_files(download_path)
+            if not files:
+                raise Exception(_("다운로드된 파일이 없습니다."))
+
+            # 상태 업데이트
             update_status_callback(file_id, {
                 'status': 'completed',
-                'title': info.get('title', '알 수 없는 제목'),
+                'progress': 100,
+                'title': title,
                 'url': video_url,
+                'is_direct_link': False,
+                'thumbnail': get_video_info(video_url).get('thumbnail') if video_info else None,
                 'timestamp': datetime.now().timestamp()
             })
-            logging.info(f"기본 다운로드 성공: {info.get('title')} ({video_url})")
+
             update_download_stats('completed')
-            return info
+
+        except Exception as e:
+            # 향상된 다운로드 방식 시도
+            try:
+                try_download_enhanced(video_url, download_path)
+
+                # 다운로드된 파일 확인
+                files = safely_access_files(download_path)
+                if not files:
+                    raise Exception(_("다운로드된 파일이 없습니다."))
+
+                # 상태 업데이트
+                update_status_callback(file_id, {
+                    'status': 'completed',
+                    'progress': 100,
+                    'title': title,
+                    'url': video_url,
+                    'is_direct_link': False,
+                    'timestamp': datetime.now().timestamp()
+                })
+
+                update_download_stats('completed')
+
+            except Exception as enhanced_error:
+                # 모든 다운로드 방식 실패
+                error_id = generate_error_id()
+                error_message = f"Error ({error_id}): {str(enhanced_error)}"
+                logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(enhanced_error)}")
+
+                update_status_callback(file_id, {
+                    'status': 'error',
+                    'error': error_message,
+                    'timestamp': datetime.now().timestamp()
+                })
+
+                update_download_stats('errors')
+
+                # 다운로드 폴더 정리
+                try:
+                    shutil.rmtree(download_path, ignore_errors=True)
+                except Exception:
+                    pass
 
     except Exception as e:
-        error_msg = str(e)
+        # 최상위 예외 처리
         error_id = generate_error_id()
-
-        # 상세 로그 기록
-        logging.error(f"다운로드 오류 (ID: {error_id}, URL: {video_url}): {error_msg}", exc_info=True)
-
-        # 사용자 친화적 메시지
-        user_friendly_msg = _("An error occurred during video download. Please try again later.")
-
-        # 에러 패턴별 메시지 설정 (기존과 동일)
-        if "File is larger than max-filesize" in error_msg:
-            user_friendly_msg = _("This video is too large. Please try a shorter video or lower quality.")
-        elif "Video unavailable" in error_msg:
-            user_friendly_msg = _("The video could not be downloaded. It may be unavailable.")
-        elif "Private video" in error_msg:
-            user_friendly_msg = _("Private videos cannot be downloaded.")
-        elif "This video is available for premium users only" in error_msg or "paywall" in error_msg.lower():
-            user_friendly_msg = _("This video requires a premium account and cannot be downloaded.")
-        elif "Sign in to confirm your age" in error_msg or "age" in error_msg.lower():
-            user_friendly_msg = _("Age-restricted videos cannot be downloaded.")
-        elif "requested format not available" in error_msg.lower():
-            user_friendly_msg = _("The requested video format is not available.")
-        elif "ffmpeg not found" in error_msg.lower() or "ffmpeg" in error_msg.lower():
-            user_friendly_msg = _("Server configuration error. Please contact support.")
-            logging.critical(f"FFmpeg 관련 오류 (ID: {error_id}): {error_msg}")
-        elif "copyright" in error_msg.lower() or "blocked" in error_msg.lower():
-            user_friendly_msg = _("This video cannot be accessed due to copyright restrictions.")
-        elif "429" in error_msg or "too many requests" in error_msg.lower():
-            user_friendly_msg = _("Service temporarily unavailable due to high traffic. Please try again later.")
-        elif "network error" in error_msg.lower() or "connection" in error_msg.lower():
-            user_friendly_msg = _("A network error occurred. Please check your internet connection or try again later.")
-        elif "timeout" in error_msg.lower():
-            user_friendly_msg = _("The download timed out. Please try again later.")
-        elif "quota" in error_msg.lower():
-            user_friendly_msg = _("Download quota exceeded. Please try again later.")
-        elif "not a valid URL" in error_msg:
-            user_friendly_msg = _("Please enter a valid video URL.")
-        elif "unsupported url" in error_msg.lower():
-            user_friendly_msg = _("This URL is not supported for downloading.")
-        # 새로운 에러 패턴 추가
-        elif "No m3u8 candidates found" in error_msg:
-            user_friendly_msg = _("Could not find video stream. The site may have changed its format.")
-        elif "All strategies failed" in error_msg:
-            user_friendly_msg = _("Failed to download with all available methods. The video may be protected.")
+        error_message = f"Error ({error_id}): {str(e)}"
+        logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(e)}", exc_info=True)
 
         update_status_callback(file_id, {
             'status': 'error',
-            'error': user_friendly_msg,
-            'error_id': error_id,
+            'error': error_message,
             'timestamp': datetime.now().timestamp()
         })
-        update_download_stats('error')
 
-        if os.path.exists(download_path):
-            shutil.rmtree(download_path)
-        return None
+        update_download_stats('errors')
+
+        # 다운로드 폴더 정리
+        try:
+            shutil.rmtree(download_path, ignore_errors=True)
+        except Exception:
+            pass
+
     finally:
+        # 메모리 정리
         gc.collect()

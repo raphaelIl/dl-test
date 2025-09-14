@@ -223,3 +223,89 @@ def get_video_info(url):
     """비디오 정보 가져오기"""
     with yt_dlp.YoutubeDL({'quiet': True, 'simulate': True}) as ydl:
         return ydl.extract_info(url, download=False)
+
+
+def extract_direct_download_link(url):
+    """
+    주어진 URL에서 직접 다운로드 가능한 링크를 추출합니다.
+    유튜브, 틱톡 등 지원하는 사이트에서 직접 다운로드 링크를 추출합니다.
+    반환값:
+        성공 시: {'url': '직접 다운로드 링크', 'title': '비디오 제목', 'ext': '확장자'}
+        실패 시: None
+    """
+    try:
+        with yt_dlp.YoutubeDL({
+            'quiet': True,
+            'format': 'best[ext=mp4]/best',
+            'skip_download': True,
+            'noplaylist': True
+        }) as ydl:
+            info = ydl.extract_info(url, download=False)
+
+            # 플레이리스트의 경우 첫 번째 항목 사용
+            if 'entries' in info:
+                info = info['entries'][0]
+
+            if not info:
+                return None
+
+            # 직접 다운로드 URL 추출
+            direct_url = info.get('url')
+            if not direct_url:
+                return None
+
+            return {
+                'url': direct_url,
+                'title': info.get('title', 'video'),
+                'ext': info.get('ext', 'mp4'),
+                'thumbnail': info.get('thumbnail'),
+                'duration': info.get('duration'),
+                'uploader': info.get('uploader'),
+                'source': info.get('extractor', '').lower()
+            }
+    except Exception as e:
+        print(f"직접 다운로드 링크 추출 중 오류: {str(e)}")
+        return None
+
+
+def validate_direct_download_link(url):
+    """
+    주어진 직접 다운로드 링크가 유효한지 확인합니다.
+    헤더 요청으로 URL이 유효한지, 파일 크기가 제한을 초과하지 않는지 검증합니다.
+    반환값:
+        유효한 경우: {'valid': True, 'size': 파일_크기(바이트)}
+        유효하지 않은 경우: {'valid': False, 'reason': '이유'}
+    """
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+            'Range': 'bytes=0-0'  # 첫 바이트만 요청하여 빠른 검증
+        }
+
+        # HEAD 요청으로 파일 정보 확인
+        response = requests.head(url, headers=headers, timeout=10, allow_redirects=True)
+
+        # 성공적인 응답이 아니면 GET으로 재시도
+        if response.status_code != 200:
+            response = requests.get(url, headers=headers, timeout=10, stream=True, allow_redirects=True)
+            if response.status_code != 200 and response.status_code != 206:
+                return {'valid': False, 'reason': f'상태 코드 오류: {response.status_code}'}
+
+        # 파일 크기 확인
+        size = None
+        if 'Content-Length' in response.headers:
+            size = int(response.headers.get('Content-Length', 0))
+            if size > MAX_FILE_SIZE:
+                return {'valid': False, 'reason': f'파일 크기 제한 초과: {size/(1024*1024):.1f}MB'}
+
+        # 컨텐트 타입 확인 - 비디오 형식인지
+        content_type = response.headers.get('Content-Type', '')
+        if content_type and not ('video' in content_type.lower() or 'octet-stream' in content_type.lower()):
+            # 잘못된 컨텐트 타입이지만, URL이 m3u8이나 mp4로 끝나면 유효하다고 간주
+            if not (url.lower().endswith('.mp4') or url.lower().endswith('.m3u8')):
+                return {'valid': False, 'reason': f'잘못된 컨텐트 타입: {content_type}'}
+
+        return {'valid': True, 'size': size, 'content_type': content_type}
+
+    except Exception as e:
+        return {'valid': False, 'reason': f'유효성 검증 중 오류: {str(e)}'}
