@@ -10,9 +10,54 @@ from datetime import datetime
 from flask_babel import gettext as _
 
 from config import MAX_FILE_SIZE
-from download_utils import try_download_enhanced, build_headers_for, get_video_info, extract_direct_download_link, validate_direct_download_link
+from download_utils import try_download_enhanced, build_headers_for, get_video_info, extract_direct_download_link, validate_direct_download_link, default_user_agent
 from utils import safely_access_files, generate_error_id
 from stats import update_download_stats
+
+
+def update_status_completed(file_id, update_status_callback, video_url, title, is_direct_link=False, direct_url=None, **extra_info):
+    """완료 상태 업데이트 로직 통합"""
+    status_data = {
+        'status': 'completed',
+        'progress': 100,
+        'title': title,
+        'url': video_url,
+        'is_direct_link': is_direct_link,
+        'timestamp': datetime.now().timestamp()
+    }
+
+    # 직접 다운로드 링크인 경우 추가 정보
+    if is_direct_link and direct_url:
+        status_data['direct_url'] = direct_url
+
+    # 추가 정보 통합
+    for key, value in extra_info.items():
+        if value is not None:
+            status_data[key] = value
+
+    update_status_callback(file_id, status_data)
+    update_download_stats('completed')
+
+
+def handle_download_error(file_id, update_status_callback, video_url, download_path, error):
+    """에러 처리 로직 통합"""
+    error_id = generate_error_id()
+    error_message = f"Error ({error_id}): {str(error)}"
+    logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(error)}", exc_info=True)
+
+    update_status_callback(file_id, {
+        'status': 'error',
+        'error': error_message,
+        'timestamp': datetime.now().timestamp()
+    })
+
+    update_download_stats('errors')
+
+    # 다운로드 폴더 정리
+    try:
+        shutil.rmtree(download_path, ignore_errors=True)
+    except Exception:
+        pass
 
 
 def download_video(video_url, file_id, download_path, update_status_callback):
@@ -33,21 +78,18 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                 logging.info(f"직접 다운로드 링크 발견: {video_url} -> {direct_url}")
 
                 # 상태 업데이트 (직접 다운로드 링크 사용)
-                update_status_callback(file_id, {
-                    'status': 'completed',
-                    'progress': 100,
-                    'title': direct_link_info['title'],
-                    'url': video_url,
-                    'direct_url': direct_url,
-                    'is_direct_link': True,
-                    'thumbnail': direct_link_info.get('thumbnail'),
-                    'duration': direct_link_info.get('duration'),
-                    'uploader': direct_link_info.get('uploader'),
-                    'source': direct_link_info.get('source'),
-                    'timestamp': datetime.now().timestamp()
-                })
-
-                update_download_stats('completed')
+                update_status_completed(
+                    file_id,
+                    update_status_callback,
+                    video_url,
+                    direct_link_info['title'],
+                    is_direct_link=True,
+                    direct_url=direct_url,
+                    thumbnail=direct_link_info.get('thumbnail'),
+                    duration=direct_link_info.get('duration'),
+                    uploader=direct_link_info.get('uploader'),
+                    source=direct_link_info.get('source')
+                )
                 return
 
         # 2. 직접 다운로드 링크가 없거나 유효하지 않으면 기존 방식으로 다운로드
@@ -59,7 +101,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                     if d['total_bytes'] > MAX_FILE_SIZE:
                         update_status_callback(file_id, {
                             'status': 'error',
-                            'error': "This video is too big.",
+                            'error': _("This video is too big."),
                             'timestamp': datetime.now().timestamp()
                         })
                         return
@@ -68,7 +110,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                     if d['total_bytes_estimate'] > MAX_FILE_SIZE:
                         update_status_callback(file_id, {
                             'status': 'error',
-                            'error': f'파일 크기 제한 초과: {d["total_bytes_estimate"]/(1024*1024):.1f}MB (최대 {MAX_FILE_SIZE/(1024*1024)}MB)',
+                            'error': f'{_("파일 크기 제한 초과")}: {d["total_bytes_estimate"]/(1024*1024):.1f}MB (최대 {MAX_FILE_SIZE/(1024*1024)}MB)',
                             'timestamp': datetime.now().timestamp()
                         })
                         return
@@ -81,7 +123,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
             elif d['status'] == 'error':
                 update_status_callback(file_id, {
                     'status': 'error',
-                    'error': d.get('error', '알 수 없는 오류'),
+                    'error': d.get('error', _('알 수 없는 오류')),
                     'timestamp': datetime.now().timestamp()
                 })
 
@@ -96,14 +138,17 @@ def download_video(video_url, file_id, download_path, update_status_callback):
             'fragment_retries': 10,
             'progress_hooks': [progress_hook],
             'max_filesize': MAX_FILE_SIZE,
+            'http_headers': {
+                'User-Agent': default_user_agent()
+            }
         }
 
         # 비디오 정보 가져오기
         try:
             video_info = get_video_info(video_url)
-            title = video_info.get('title', 'Unknown Title')
+            title = video_info.get('title', _('Unknown Title'))
         except Exception:
-            title = 'Unknown Title'
+            title = _('Unknown Title')
 
         try:
             # yt-dlp로 다운로드 시도
@@ -116,17 +161,18 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                 raise Exception(_("다운로드된 파일이 없습니다."))
 
             # 상태 업데이트
-            update_status_callback(file_id, {
-                'status': 'completed',
-                'progress': 100,
-                'title': title,
-                'url': video_url,
-                'is_direct_link': False,
-                'thumbnail': get_video_info(video_url).get('thumbnail') if video_info else None,
-                'timestamp': datetime.now().timestamp()
-            })
+            thumbnail = None
+            if video_info:
+                thumbnail = video_info.get('thumbnail')
 
-            update_download_stats('completed')
+            update_status_completed(
+                file_id,
+                update_status_callback,
+                video_url,
+                title,
+                is_direct_link=False,
+                thumbnail=thumbnail
+            )
 
         except Exception as e:
             # 향상된 다운로드 방식 시도
@@ -139,57 +185,26 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                     raise Exception(_("다운로드된 파일이 없습니다."))
 
                 # 상태 업데이트
-                update_status_callback(file_id, {
-                    'status': 'completed',
-                    'progress': 100,
-                    'title': title,
-                    'url': video_url,
-                    'is_direct_link': False,
-                    'thumbnail': get_video_info(video_url).get('thumbnail') if video_info else None,
-                    'timestamp': datetime.now().timestamp()
-                })
+                thumbnail = None
+                if video_info:
+                    thumbnail = video_info.get('thumbnail')
 
-                update_download_stats('completed')
+                update_status_completed(
+                    file_id,
+                    update_status_callback,
+                    video_url,
+                    title,
+                    is_direct_link=False,
+                    thumbnail=thumbnail
+                )
 
             except Exception as enhanced_error:
                 # 모든 다운로드 방식 실패
-                error_id = generate_error_id()
-                error_message = f"Error ({error_id}): {str(enhanced_error)}"
-                logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(enhanced_error)}")
-
-                update_status_callback(file_id, {
-                    'status': 'error',
-                    'error': error_message,
-                    'timestamp': datetime.now().timestamp()
-                })
-
-                update_download_stats('errors')
-
-                # 다운로드 폴더 정리
-                try:
-                    shutil.rmtree(download_path, ignore_errors=True)
-                except Exception:
-                    pass
+                handle_download_error(file_id, update_status_callback, video_url, download_path, enhanced_error)
 
     except Exception as e:
         # 최상위 예외 처리
-        error_id = generate_error_id()
-        error_message = f"Error ({error_id}): {str(e)}"
-        logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(e)}", exc_info=True)
-
-        update_status_callback(file_id, {
-            'status': 'error',
-            'error': error_message,
-            'timestamp': datetime.now().timestamp()
-        })
-
-        update_download_stats('errors')
-
-        # 다운로드 폴더 정리
-        try:
-            shutil.rmtree(download_path, ignore_errors=True)
-        except Exception:
-            pass
+        handle_download_error(file_id, update_status_callback, video_url, download_path, e)
 
     finally:
         # 메모리 정리

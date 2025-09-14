@@ -61,6 +61,19 @@ limiter = Limiter(
 limiter.init_app(app)
 
 
+# 공통 유틸리티 함수
+def render_error(error_message, status_code=400):
+    """에러 응답 통합 함수"""
+    error_id = generate_error_id()
+    logging.warning(f"{status_code} 에러 - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, 메시지: {error_message}")
+    return render_template('error.html', error=error_message, error_id=error_id), status_code
+
+
+def check_valid_file_id(file_id):
+    """유효한 파일 ID인지 검사"""
+    return re.match(r'^[0-9a-f\-]+$', file_id) is not None
+
+
 # Flask 라우트들
 @app.after_request
 def after_request(response):
@@ -147,7 +160,7 @@ def set_language(language):
 @app.route('/download-waiting/<file_id>')
 def download_waiting(file_id):
     """다운로드 대기 페이지"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
 
@@ -162,7 +175,7 @@ def download_waiting(file_id):
 @app.route('/check-status/<file_id>')
 def check_status(file_id):
     """다운로드 상태 확인"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 상태 확인 시도: {file_id}")
         return {'status': 'error', 'error': '유효하지 않은 파일 ID'}
 
@@ -179,7 +192,7 @@ def check_status(file_id):
 @app.route('/result/<file_id>')
 def result(file_id):
     """다운로드 결과 페이지"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
 
@@ -203,23 +216,23 @@ def result(file_id):
                               current_lang=get_locale(),
                               languages=LANGUAGES)
 
-    # 기��� 방식: 서버에서 다운로드한 파일
+    # 기존 방식: 서버에서 다운로드한 파일
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
     if not os.path.exists(download_path):
         logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+        return render_template('index.html', error=_("다운로드 파일을 찾을 수 없습니다."), current_lang=get_locale(), languages=LANGUAGES)
 
     files = safely_access_files(download_path)
     if not files:
         logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-        return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+        return render_template('index.html', error=_("다운로드된 파일이 없습니다."), current_lang=get_locale(), languages=LANGUAGES)
 
     file_name = files[0]
     file_path = safe_path_join(download_path, file_name)
     file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else 0
 
     return render_template('download_result.html',
-                           title=status.get('title', '알 수 없는 제목'),
+                           title=status.get('title', _('알 수 없는 제목')),
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
@@ -236,15 +249,13 @@ def download_file(file_id):
     try:
         logging.info(f"파일 다운로드 시작: {file_id}")
 
-        if not re.match(r'^[0-9a-f\-]+$', file_id):
-            logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
-            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=get_locale(), languages=LANGUAGES)
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
 
         # 상태 확인
         status = get_status(file_id)
         if not status or status.get('status') != 'completed':
-            logging.error(f"완료되지 않은 다운로드에 대한 다운로드 시도: {file_id}")
-            return render_template('index.html', error="다운로드가 완료되지 않았습니다.", current_lang=get_locale(), languages=LANGUAGES)
+            return render_error(_("다운로드가 완료되지 않았습니다."))
 
         # 직접 다운로드 링크가 있는 경우 리다이렉트
         if status.get('is_direct_link', False) and status.get('direct_url'):
@@ -254,20 +265,17 @@ def download_file(file_id):
         # 기존 방식: 서버에서 다운로드한 파일 제공
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         if not os.path.exists(download_path):
-            logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-            return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+            return render_error(_("다운로드 파일을 찾을 수 없습니다."))
 
         files = safely_access_files(download_path)
         if not files:
-            logging.error(f"다운로드 폴더에 파일이 ��음: {download_path}")
-            return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+            return render_error(_("다운로드된 파일이 없습니다."))
 
         filename = files[0]
         file_path = safe_path_join(download_path, filename)
 
         if not os.path.isfile(file_path):
-            logging.error(f"파일이 아닌 경로: {file_path}")
-            return render_template('index.html', error="유효하지 않은 파일입니다.", current_lang=get_locale(), languages=LANGUAGES)
+            return render_error(_("유효하지 않은 파일입니다."))
 
         safe_filename = f"download-{file_id}.mp4"
         response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
@@ -277,7 +285,7 @@ def download_file(file_id):
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}", current_lang=get_locale(), languages=LANGUAGES)
+        return render_error(f"{_('파일 다운로드 중 오류가 발생했습니다')}: {str(e)}")
 
 
 @app.route('/robots.txt')
@@ -307,8 +315,6 @@ def health_check():
     try:
         stats = load_download_stats()
 
-        # 현재 진행 중인 다운로드 수 계산 (상태 관리자에서 가져와야 함)
-        # 여기서는 간단히 0으로 설정
         in_progress = 0
 
         health_data = {
@@ -332,39 +338,28 @@ def health_check():
 # 에러 핸들러들
 @app.errorhandler(403)
 def forbidden(e):
-    error_id = generate_error_id()
-    """다운로드 대기 페이지"""
-    return render_template('error.html', error="You don't have permission to access this resource.", error_id=error_id), 403
+    return render_error("You don't have permission to access this resource.", 403)
 
 
 @app.errorhandler(400)
 def bad_request(e):
-    error_id = generate_error_id()
-    logging.warning(f"400 Bad request - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="Invalid request.", error_id=error_id), 400
+    return render_error("Invalid request.", 400)
 
 
 @app.errorhandler(404)
 def not_found(e):
-    error_id = generate_error_id()
-    logging.info(f"404 Not found - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="The requested resource could not be found.", error_id=error_id), 404
+    return render_error("The requested resource could not be found.", 404)
 
 
 @app.errorhandler(429)
 @app.errorhandler(RateLimitExceeded)
 def ratelimit_handler(e):
-    error_id = generate_error_id()
-    logging.warning(f"429 Rate limit exceeded - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="Too many download requests. Please try again later.", error_id=error_id), 429
+    return render_error("Too many download requests. Please try again later.", 429)
 
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(e):
-    error_id = generate_error_id()
-    user_message = "An unexpected error occurred. Please try again later."
-    logging.error(f"Unexpected error - ID: {error_id}, Type: {type(e).__name__}, Message: {str(e)}, IP: {get_client_ip()}", exc_info=True)
-    return render_template('error.html', error=user_message, error_id=error_id), 500
+    return render_error("An unexpected error occurred. Please try again later.", 500)
 
 
 # 컨텍스트 프로세서

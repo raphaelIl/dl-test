@@ -27,16 +27,21 @@ def build_headers_for(url: str, *, ua: str | None = None, referer_mode: str = "r
         "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
         "Connection": "keep-alive",
         "Origin": origin,
-        "Referer": referer,  # 헤더에도 넣되,
+        "Referer": referer,
     }
     if ua:
         headers["User-Agent"] = ua
     return headers
 
 
+def default_user_agent():
+    """기본 User-Agent 반환"""
+    return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+
+
 def base_ydl_opts(detail_url: str, download_dir="/app/downloads", use_cookies=False):
     """
-    YoutubeDL 기본 옵션 - 강제 Referer 적용
+    YoutubeDL 기본 옵션 설정
     """
     os.makedirs(download_dir, exist_ok=True)
     root = f"{urlsplit(detail_url).scheme}://{urlsplit(detail_url).netloc}/"
@@ -52,11 +57,10 @@ def base_ydl_opts(detail_url: str, download_dir="/app/downloads", use_cookies=Fa
         "merge_output_format": "mp4",
         "max_filesize": MAX_FILE_SIZE,
         "nocheckcertificate": True,
-        # ★ m3u8 요청까지 루트 Referer가 '옵션'으로 강제 적용되도록
         "referer": root,
     }
     if use_cookies:
-        opts["cookiesfrombrowser"] = ("chrome",)  # 필요할 때만
+        opts["cookiesfrombrowser"] = ("chrome",)
     return opts
 
 
@@ -144,12 +148,12 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
     """
     base = base_ydl_opts(detail_url, download_dir, use_cookies)
 
-    # 전역 헤더(루트 Origin/Referer)
-    hdr_root = build_headers_for(detail_url, ua=None, referer_mode="root")
-    hdr_page = build_headers_for(detail_url, ua=None, referer_mode="page")
+    # 전역 헤더(루��� Origin/Referer)
+    hdr_root = build_headers_for(detail_url, referer_mode="root")
+    hdr_page = build_headers_for(detail_url, referer_mode="page")
     hdr_root_ua = build_headers_for(
         detail_url,
-        ua=(ua or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"),
+        ua=(ua or default_user_agent()),
         referer_mode="root",
     )
 
@@ -198,25 +202,6 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
             continue
 
     raise last_err or DownloadError("All strategies failed")
-
-
-# 기존 함수들 (하위 호환성)
-def _ydl_base_enhanced(download_dir: str, use_cookies: bool):
-    """기존 앱과 통합된 YoutubeDL 기본 설정 - 하위 호환성"""
-    return {
-        "downloader": "m3u8:native",
-        "retries": 10,
-        "fragment_retries": 10,
-        "concurrent_fragment_downloads": 1,
-        "paths": {"home": download_dir, "temp": download_dir},
-        "outtmpl": {"default": "%(title).200B.%(ext)s"},
-        "default_search": "ytsearch",
-        "format": "bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best",
-        "merge_output_format": "mp4",
-        "max_filesize": MAX_FILE_SIZE,
-        "nocheckcertificate": True,
-        "cookiesfrombrowser": ("chrome",) if use_cookies else None
-    }
 
 
 def get_video_info(url):
@@ -278,7 +263,7 @@ def validate_direct_download_link(url):
     """
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+            'User-Agent': default_user_agent(),
             'Range': 'bytes=0-0'  # 첫 바이트만 요청하여 빠른 검증
         }
 
