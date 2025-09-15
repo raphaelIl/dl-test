@@ -221,8 +221,11 @@ def extract_direct_download_link(url):
     """
     try:
         with yt_dlp.YoutubeDL({
-            'quiet': True,
-            'format': 'best[ext=mp4]/best',
+            'quiet': False,
+            # https://github.com/yt-dlp/yt-dlp#format-selection
+            'format': 'best[ext=mp4]/best', # best: Select the best quality format that contains both video and audio. Equivalent to best*[vcodec!=none][acodec!=none]
+            # 그 외 코덱 조합을 하면 내가 말아서 줘야한다.
+            # "format": 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
             'skip_download': True,
             'noplaylist': True
         }) as ydl:

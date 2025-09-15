@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS builder
+FROM python:3.11-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
@@ -9,9 +9,10 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir --user --upgrade yt-dlp
 
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg curl \

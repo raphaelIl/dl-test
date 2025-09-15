@@ -40,10 +40,15 @@ def update_status_completed(file_id, update_status_callback, video_url, title, i
 
 
 def handle_download_error(file_id, update_status_callback, video_url, download_path, error):
-    """에러 처리 로직 통합"""
+    """에러 처리 로직 통합 - 사용자에게는 친화적인 메시지만 표시"""
     error_id = generate_error_id()
-    error_message = f"Error ({error_id}): {str(error)}"
-    logging.error(f"다운로드 실패 (ID: {error_id}, URL: {video_url}): {str(error)}", exc_info=True)
+
+    # 기술적 오류는 로그에만 기록
+    logging.error(f"Download Fail (ID: {error_id}, URL: {video_url}): {str(error)}", exc_info=True)
+
+    # 사용자에게는 친화적인 메시지만 표시
+    user_friendly_message = _("An unexpected error occurred. Please try again later.")
+    error_message = f"{user_friendly_message} (Error ID: {error_id})"
 
     update_status_callback(file_id, {
         'status': 'error',
@@ -68,7 +73,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
         # 1. 먼저 직접 다운로드 링크 추출 시도
         direct_link_info = extract_direct_download_link(video_url)
 
-        # 직접 다운로드 ���크가 추출되었으면 유효성 검증
+        # 직접 다운로드 링크가 추출되었으면 유효성 검증
         if direct_link_info:
             direct_url = direct_link_info['url']
             validation_result = validate_direct_download_link(direct_url)
@@ -136,7 +141,8 @@ def download_video(video_url, file_id, download_path, update_status_callback):
 
         # 다운로드 옵션 설정
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            # 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
             'merge_output_format': 'mp4',
             'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
             'quiet': False,
