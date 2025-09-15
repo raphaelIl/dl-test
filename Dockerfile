@@ -9,7 +9,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir --user --upgrade yt-dlp
 
 FROM python:3.10-slim
 
