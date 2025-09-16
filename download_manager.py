@@ -157,6 +157,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
         }
 
         # 비디오 정보 가져오기
+        video_info = None  # 기본값 설정
         try:
             video_info = get_video_info(video_url)
             title = video_info.get('title', _('Unknown Title'))
