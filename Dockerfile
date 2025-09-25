@@ -9,8 +9,9 @@ WORKDIR /app
 
 COPY requirements.txt .
 
+# https://github.com/yt-dlp/yt-dlp/issues/14404
 RUN pip install --no-cache-dir --user -r requirements.txt && \
-    pip install --no-cache-dir --user --upgrade yt-dlp
+    pip install --no-cache-dir --user --upgrade "yt-dlp[default]"
 
 FROM python:3.11-slim
 
