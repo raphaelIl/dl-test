@@ -3,31 +3,15 @@ DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
 CONTAINER_NAME = video-downloader
 
-.PHONY: start clean-all clean-image
+.PHONY: build-restart restart clean-all clean-image clean latest-build build
 
-start: latest-build clean
-# start: clean
+build-restart: latest-build restart
+
+restart: clean
 	@echo "docker compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
 	@echo "caffeinate -i docker compose up"
 	caffeinate -i docker compose up
-
-clean-all:
-	@echo "docker compose down"
-	docker compose down
-	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
-	docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
-	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
-	docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
-	@echo "docker system prune -f"
-	docker system prune -f
-	@echo "docker volume prune -f"
-	docker volume prune -f
-	@echo "docker network prune -f"
-	docker network prune -f
-
-clean-image:
-	docker rmi -f $(docker images | sed 1d | awk '{print $3}')
 
 clean:
 	@echo "docker compose down --remove-orphans"
@@ -46,6 +30,23 @@ build:
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+
+clean-all:
+	@echo "docker compose down"
+	docker compose down
+	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
+	docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+	@echo "docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
+	docker rmi $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+	@echo "docker system prune -f"
+	docker system prune -f
+	@echo "docker volume prune -f"
+	docker volume prune -f
+	@echo "docker network prune -f"
+	docker network prune -f
+
+clean-image:
+	docker rmi -f $(docker images | sed 1d | awk '{print $3}')
 
 #
 #VERSION = $(shell date +%Y%m%d)
