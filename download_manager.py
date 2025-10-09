@@ -567,3 +567,142 @@ def download_video(video_url, file_id, download_path, update_status_callback):
 
         # 메모리 정리
         gc.collect()
+
+
+def get_video_download(video_url, download_dir=None, use_cookies=False):
+    """
+    향상된 다운로드 메커니즘 - 다운로드 흐름 관리 및 안전성 보장
+
+    방식 기반 접근법:
+    1. 직접 스트리밍 URL 추출 시도
+    2. 실패 시 영상 다운로드로 fallback
+    """
+    from urllib.parse import urlparse
+    from datetime import datetime, timezone
+    import uuid
+    import os
+    import time
+
+    try:
+        # URL 기본 정보
+        parsed = urlparse(video_url)
+        domain = parsed.netloc.lower()
+
+        # 1. 기본 정보 준비 및 디렉토리 생성
+        download_id = str(uuid.uuid4())
+
+        if not download_dir:
+            # 기본 다운로드 디렉토리 설정
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "downloads"))
+            download_dir = os.path.join(base_dir, download_id)
+
+        # 디렉토리가 없으면 생성
+        os.makedirs(download_dir, exist_ok=True)
+
+        # 2. 직접 스트리밍 URL 추출 시도
+        direct_stream_info = None
+        try:
+            logging.info(f"🔍 직접 스트리밍 URL 추출 시도: {video_url}")
+            info = extract_direct_download_link(video_url)
+            if info and info.get('url'):
+                # URL 유효성 검증
+                valid = validate_direct_download_link(info['url'])
+                if valid and valid.get('valid'):
+                    direct_stream_info = info
+                    logging.info(f"✅ 직접 스트리밍 URL 추출 성공: {info['url'][:50]}...")
+        except Exception as e:
+            logging.warning(f"⚠️ 직접 스트리밍 URL 추출 실패: {str(e)}")
+
+        # 3. 결과에 따른 처리
+        download_info = {
+            "id": download_id,
+            "url": video_url,
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "path": download_dir
+        }
+
+        if direct_stream_info:
+            # 직접 스트리밍 가능한 경우
+            download_info["status"] = "direct_stream"
+            download_info["title"] = direct_stream_info.get("title", "Video")
+            download_info["stream_url"] = direct_stream_info.get("url")
+            download_info["extension"] = direct_stream_info.get("ext", "mp4")
+
+            # 로그와 통계 업데이트
+            logging.info(f"🎬 직접 스트리밍으로 처리: {download_info['title']}")
+            update_download_stats(status='direct', domain=domain)
+
+        else:
+            # 직접 스트리밍 URL 추출 실패 - 다운로드 필요
+
+            logging.info(f"📥 직접 스트리밍 URL 추출 실패, 영상 다운로드 시작: {video_url}")
+            download_info["status"] = "downloading"
+
+            # 다운로드 시작 전 시간 기록
+            start_time = time.time()
+
+            try:
+                # 실제 다운로드 실행
+                success = try_download_enhanced(video_url, download_dir, use_cookies=use_cookies)
+
+                if success:
+                    # 다운로드 성공 시 파일 정보 추출
+                    files = safely_access_files(download_dir)
+                    if not files:
+                        raise Exception("No files downloaded")
+
+                    # 첫 번째 다운로드된 비디오 파일 사용
+                    video_file = None
+                    for file in files:
+                        if file.lower().endswith(('.mp4', '.webm', '.mkv', '.avi', '.mov')):
+                            video_file = file
+                            break
+
+                    if not video_file:
+                        raise Exception("No video file found in downloaded files")
+
+                    # 다운로드 성공 정보 업데이트
+                    download_info["status"] = "completed"
+                    download_info["title"] = os.path.splitext(video_file)[0]
+                    download_info["filename"] = video_file
+                    download_info["path"] = os.path.join(download_dir, video_file)
+                    download_info["extension"] = os.path.splitext(video_file)[1][1:].lower()
+                    download_info["size"] = os.path.getsize(os.path.join(download_dir, video_file))
+                    download_info["completed_at"] = datetime.now(timezone.utc).isoformat()
+                    download_info["duration"] = round(time.time() - start_time, 1)
+
+                    # 로그와 통계 업데이트
+                    logging.info(f"✅ 다운로드 성공: {download_info['title']} ({readable_size(download_info['size'])})")
+                    update_download_stats(status='success', domain=domain)
+                else:
+                    raise Exception("Download failed")
+
+            except Exception as e:
+                # 다운로드 실패 처리
+                error_id = generate_error_id()
+                download_info["status"] = "failed"
+                download_info["error"] = str(e)
+                download_info["error_id"] = error_id
+
+                logging.error(f"❌ 다운로드 실패 [{error_id}]: {str(e)}")
+                update_download_stats(status='failed', domain=domain)
+
+        # 최종 정보 반환
+        return download_info
+
+    except Exception as e:
+        # 전체 프로세스 오류 처리
+        error_id = generate_error_id()
+        logging.error(f"❌ 다운로드 프로세스 오류 [{error_id}]: {str(e)}")
+
+        return {
+            "id": str(uuid.uuid4()) if not locals().get('download_id') else download_id,
+            "url": video_url,
+            "status": "error",
+            "error": str(e),
+            "error_id": error_id
+        }
+    finally:
+        # 메모리 관리
+        gc.collect()

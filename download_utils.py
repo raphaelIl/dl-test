@@ -170,15 +170,18 @@ def find_m3u8_candidates(detail_url: str, text: str) -> list[str]:
 def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None = None, use_cookies=False) -> bool:
     """
     효율적인 다운로드 함수 - Docker 환경 대응 및 m3u8 실제 변환
+    직접 링크 추출 시도 -> 실패 시 영상 다운로드로 fallback
     """
     from urllib.parse import urlparse
 
-    # URL 분석으로 최적 전략 결정
+    # URL 분석으로 기본 정보 추출
     parsed = urlparse(detail_url)
     domain = parsed.netloc.lower()
 
+    # 기본 옵션 설정
     base = base_ydl_opts(detail_url, download_dir, use_cookies)
 
+    # 모든 사이트에 대해 실제 비디오 파일 변환 설정 적용 (다운로드 필요할 경우)
     # m3u8 파일이 아닌 실제 비디오 파일을 다운로드하도록 포맷 설정 개선
     base.update({
         # 최대 1080p로 제한하고 mp4 우선
