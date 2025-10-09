@@ -491,7 +491,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
                         file_size = readable_size(os.path.getsize(file_path))
 
                         # 기본 비디오 정보 추출 시도
-                        title = "다운로드된 영상"
+                        title = "Downloaded Video"
                         thumbnail = None
                         duration = None
                         uploader = None
