@@ -3,9 +3,15 @@ DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
 CONTAINER_NAME = video-downloader
 
-.PHONY: build-restart restart clean-all clean-image clean latest-build build
+.PHONY: build-restart restart clean-all clean-image clean build-latest build
 
-build-restart: latest-build restart
+start: build restart
+
+start-latest: build-latest restart
+
+clean:
+	@echo "docker compose down --remove-orphans"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose down --remove-orphans || true
 
 restart: clean
 	@echo "docker compose up -d"
@@ -13,11 +19,7 @@ restart: clean
 	@echo "caffeinate -i docker compose up"
 	caffeinate -i docker compose up
 
-clean:
-	@echo "docker compose down --remove-orphans"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose down --remove-orphans || true
-
-latest-build:
+build-latest:
 	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
 	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"

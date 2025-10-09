@@ -145,91 +145,147 @@ def find_m3u8_candidates(detail_url: str, text: str) -> list[str]:
 
 def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None = None, use_cookies=False) -> bool:
     """
-    향상된 다운로드 함수 - 다단계 전략 및 m3u8 구출 폴백
+    효율적인 다운로드 함수 - 재시도 대신 스마트 전략 적용
     """
+    from urllib.parse import urlparse
+
+    # URL 분석으로 최적 전략 결정
+    parsed = urlparse(detail_url)
+    domain = parsed.netloc.lower()
+
     base = base_ydl_opts(detail_url, download_dir, use_cookies)
 
-    # 전역 헤더(루트 Origin/Referer)
-    hdr_root = build_headers_for(detail_url, referer_mode="root")
-    hdr_page = build_headers_for(detail_url, referer_mode="page")
-    hdr_root_ua = build_headers_for(
-        detail_url,
-        ua=(ua or default_user_agent()),
-        referer_mode="root",
-    )
+    # 도메인별 최적화된 설정
+    if any(x in domain for x in ['youtube.com', 'youtu.be']):
+        # YouTube는 빠른 처리 가능
+        base.update({
+            'socket_timeout': 20,
+            'retries': 1,
+            'fragment_retries': 1,
+        })
+    elif any(x in domain for x in ['tiktok.com', 'instagram.com', 'facebook.com']):
+        # 소셜 미디어는 CORS 및 User-Agent 중요
+        base.update({
+            'socket_timeout': 45,
+            'retries': 1,
+            'http_headers': {
+                'User-Agent': ua or default_user_agent(),
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'cross-site'
+            }
+        })
+    else:
+        # 알 수 없는 사이트는 Generic Extractor부터 시작
+        base.update({
+            'socket_timeout': 60,
+            'retries': 1,
+            'force_generic_extractor': True,
+        })
 
-    strategies = [
-        {"http_headers": hdr_root},
-        {"http_headers": hdr_page},
-        {"http_headers": hdr_root_ua},
-    ]
-
-    last_err = None
-    for s in strategies:
-        try:
-            with YoutubeDL({**base, **s}) as ydl:
-                ydl.download([detail_url])  # 먼저 일반 경로 시도
-            return True
-        except DownloadError as e:
-            last_err = e
-
-    # 폴백: 진짜 m3u8을 찾아 직접 다운로드
+    # 1차: 최적화된 설정으로 한 번만 시도
     try:
-        page_html = fetch_text(detail_url)
+        logging.info(f"스마트 다운로드 시도: {detail_url}")
+        with YoutubeDL(base) as ydl:
+            ydl.download([detail_url])
+        logging.info(f"✅ 스마트 다운로드 성공")
+        return True
+    except DownloadError as e:
+        error_msg = str(e).lower()
+        logging.warning(f"⚠️ 기본 다운로드 실패: {str(e)}")
+
+        # 404나 접근 불가 오류는 바로 포기
+        if any(x in error_msg for x in ['404', 'not found', 'unavailable', 'private', 'removed']):
+            logging.warning(f"비디오 접근 불가, m3u8 폴백 건너뛰기")
+            raise e
+    except (ConnectionResetError, ConnectionAbortedError, OSError) as e:
+        logging.warning(f"⚠️ 네트워크 연결 오류: {str(e)}")
     except Exception as e:
-        raise last_err or e
+        logging.warning(f"⚠️ 일반 오류: {str(e)}")
 
-    m3u8s = find_m3u8_candidates(detail_url, page_html)
-    if not m3u8s:
-        raise last_err or DownloadError("No m3u8 candidates found")
+    # 2차: m3u8 폴백 (한 번만)
+    logging.info("기본 다운로드 실패, m3u8 폴백 시도")
+    try:
+        page_html = fetch_text(detail_url, timeout=30)
+        m3u8s = find_m3u8_candidates(detail_url, page_html)
 
-    # 1차: 루트 헤더 + m3u8 직접 다운로드
-    for m3u8 in m3u8s:
-        try:
-            with YoutubeDL({**base, "http_headers": hdr_root}) as ydl:
-                ydl.download([m3u8])
-            return True
-        except DownloadError:
-            continue
+        if not m3u8s:
+            logging.warning("m3u8 후보를 찾을 수 없음")
+            raise DownloadError("No m3u8 candidates found")
 
-    # 2차: 쿠키/UA 확장
-    base_ck = base_ydl_opts(detail_url, download_dir, use_cookies=True)
-    for m3u8 in m3u8s:
-        try:
-            with YoutubeDL({**base_ck, "http_headers": hdr_root_ua}) as ydl:
-                ydl.download([m3u8])
-            return True
-        except DownloadError:
-            continue
+        # 가장 유력한 후보 1개만 시도
+        best_m3u8 = m3u8s[0]
+        logging.info(f"최적 m3u8 후보 시도: {best_m3u8[:100]}...")
 
-    raise last_err or DownloadError("All strategies failed")
+        enhanced_base = {**base, "socket_timeout": 90, "retries": 1}
+        enhanced_base.pop('force_generic_extractor', None)  # m3u8는 generic 필요없음
+
+        with YoutubeDL(enhanced_base) as ydl:
+            ydl.download([best_m3u8])
+        logging.info(f"✅ m3u8 폴백 성공")
+        return True
+
+    except Exception as e:
+        logging.error(f"m3u8 폴백도 실패: {str(e)}")
+        raise DownloadError("Both direct and m3u8 fallback failed")
 
 
 def get_video_info(url):
     """비디오 정보 가져오기"""
-    with yt_dlp.YoutubeDL({'quiet': True, 'simulate': True}) as ydl:
+    with yt_dlp.YoutubeDL({'quiet': False, 'simulate': True}) as ydl:
         return ydl.extract_info(url, download=False)
 
 
 def extract_direct_download_link(url):
     """
-    주어진 URL에서 직접 다운로드 가능한 링크를 추출합니다.
-    유튜브, 틱톡 등 지원하는 사이트에서 직접 다운로드 링크를 추출합니다.
-    반환값:
-        성공 시: {'url': '직접 다운로드 링크', 'title': '비디오 제목', 'ext': '확장자'}
-        실패 시: None
+    스마트한 직접 다운로드 링크 추출 - 재시도 없이 효율적으로
     """
+    from urllib.parse import urlparse
+
+    # URL 사전 검증
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+
+    # 직접 파일 링크인 경우 즉시 반환
+    if any(url.lower().endswith(ext) for ext in ['.mp4', '.webm', '.m4v', '.avi', '.mov']):
+        return {
+            'url': url,
+            'title': 'Direct Video File',
+            'ext': url.split('.')[-1].split('?')[0],
+            'source': 'direct'
+        }
+
+    # 도메인별 최적화된 설정
+    ydl_opts = {
+        'quiet': False,
+        'format': 'best',
+        'skip_download': True,
+        'noplaylist': True,
+        'socket_timeout': 30,
+        'retries': 1,  # 재시도 최소화
+        'ignoreerrors': True,
+    }
+
+    # 도메인별 특별 처리
+    if any(x in domain for x in ['youtube.com', 'youtu.be']):
+        # YouTube는 빠른 처리 가능
+        ydl_opts['socket_timeout'] = 15
+    elif any(x in domain for x in ['tiktok.com', 'instagram.com', 'facebook.com']):
+        # 소셜 미디어는 User-Agent 중요
+        ydl_opts.update({
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': '*/*',
+            }
+        })
+    else:
+        # 알 수 없는 사이트는 generic extractor 사용
+        ydl_opts['force_generic_extractor'] = True
+        ydl_opts['socket_timeout'] = 45
+
     try:
-        with yt_dlp.YoutubeDL({
-            'quiet': False,
-            # https://github.com/yt-dlp/yt-dlp#format-selection
-            'format': 'best', # best: Select the best quality format that contains both video and audio. Equivalent to best*[vcodec!=none][acodec!=none]
-            # 'format': 'best[ext=mp4]/best',
-            # 그 외 코덱 조합을 하면 내가 말아서 줘야한다.
-            # "format": 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/best[vcodec^=avc]/bestvideo+bestaudio/best',
-            'skip_download': True,
-            'noplaylist': True
-        }) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
             # 플레이리스트의 경우 첫 번째 항목 사용
@@ -254,8 +310,7 @@ def extract_direct_download_link(url):
                 'source': info.get('extractor', '').lower()
             }
     except Exception as e:
-        # print 대신 logging 사용
-        logging.warning(f"직접 다운로드 링크 추출 중 오류: {str(e)}")
+        logging.warning(f"직접 다운로드 링크 추출 실패 (재시도 없음): {str(e)}")
         return None
 
 

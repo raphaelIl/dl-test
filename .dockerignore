@@ -1,24 +1,6 @@
-# operational files
-downloads/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-ENV/
-.env
-.venv
-
-# development files
-.git
-.gitignore
-.idea
-.vscode
-*.swp
-*.swo
-
-# system files
-.DS_Store
-Thumbs.db
+/.idea/
+/downloads/*
+/venv/
+/.venv/
+/logs/*
+/.env

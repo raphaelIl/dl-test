@@ -1,5 +1,5 @@
 """
-Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전
+Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전 (스트리밍 우선)
 """
 import os
 import re
@@ -191,7 +191,7 @@ def check_status(file_id):
 
 @app.route('/result/<file_id>')
 def result(file_id):
-    """다운로드 결과 페이지"""
+    """다운로드 결과 페이지 - 안정성 우선으로 단순화"""
     if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
@@ -201,7 +201,23 @@ def result(file_id):
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
         return redirect(url_for('index'))
 
-    # 직접 다운로드 링크가 있는 경우
+    # 스트리밍 정보가 있는 경우 (우선순위 1)
+    if status.get('streaming_info'):
+        streaming_info = status.get('streaming_info')
+        return render_template('download_result.html',
+                              title=status.get('title', '알 수 없는 제목'),
+                              file_id=file_id,
+                              url=status.get('url', ''),
+                              streaming_info=streaming_info,
+                              has_streaming=True,
+                              is_direct_link=False,
+                              thumbnail=status.get('thumbnail', ''),
+                              duration=status.get('duration'),
+                              uploader=status.get('uploader', ''),
+                              current_lang=get_locale(),
+                              languages=LANGUAGES)
+
+    # 직접 다운로드 링크가 있는 경우 (우선순위 2)
     if status.get('is_direct_link', False) and status.get('direct_url'):
         return render_template('download_result.html',
                               title=status.get('title', '알 수 없는 제목'),
@@ -209,6 +225,7 @@ def result(file_id):
                               url=status.get('url', ''),
                               direct_url=status.get('direct_url', ''),
                               is_direct_link=True,
+                              has_streaming=False,
                               thumbnail=status.get('thumbnail', ''),
                               duration=status.get('duration'),
                               uploader=status.get('uploader', ''),
@@ -216,38 +233,84 @@ def result(file_id):
                               current_lang=get_locale(),
                               languages=LANGUAGES)
 
-    # 기존 방식: 서버에서 다운로드한 파일
+    # 기존 방식: 서버에서 다운로드한 파일 (우선순위 3)
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
-    if not os.path.exists(download_path):
-        logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-        return render_template('index.html', error=_("다운로드 파일을 찾을 수 없습니다."), current_lang=get_locale(), languages=LANGUAGES)
 
-    files = safely_access_files(download_path)
-    if not files:
-        logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-        return render_template('index.html', error=_("다운로드된 파일이 없습니다."), current_lang=get_locale(), languages=LANGUAGES)
+    # 파일이 없어도 에러를 표시하지 않고 기본 정보만 표시
+    file_name = "video.mp4"
+    file_size = "Unknown"
 
-    file_name = files[0]
-    file_path = safe_path_join(download_path, file_name)
-    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else 0
+    if os.path.exists(download_path):
+        files = safely_access_files(download_path)
+        if files:
+            file_name = files[0]
+            file_path = safe_path_join(download_path, file_name)
+            if os.path.isfile(file_path):
+                file_size = readable_size(os.path.getsize(file_path))
 
     return render_template('download_result.html',
-                           title=status.get('title', _('알 수 없는 제목')),
+                           title=status.get('title', _('다운로드 완료')),
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
-                           file_size=readable_size(file_size),
+                           file_size=file_size,
                            is_direct_link=False,
+                           has_streaming=False,
                            thumbnail=status.get('thumbnail', ''),
                            current_lang=get_locale(),
                            languages=LANGUAGES)
 
 
+@app.route('/stream/<file_id>')
+def stream_video(file_id):
+    """비디오 스트리밍 엔드포인트"""
+    try:
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
+
+        # 상태 확인
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            return render_error(_("다운로드가 완료되지 않았습니다."))
+
+        # 스트리밍 정보 확인
+        streaming_info = status.get('streaming_info')
+        if not streaming_info or not streaming_info.get('best_url'):
+            return render_error(_("스트리밍 URL을 찾을 수 없습니다."))
+
+        # 요청된 품질 파라미터 확인
+        quality = request.args.get('quality', 'best')
+
+        # 적절한 스트리밍 URL 선택
+        selected_url = streaming_info.get('best_url')
+
+        if quality != 'best':
+            try:
+                quality_num = int(quality)
+                for stream in streaming_info.get('streaming_urls', []):
+                    if stream.get('quality') == quality_num:
+                        selected_url = stream.get('url')
+                        break
+            except ValueError:
+                pass
+
+        if not selected_url:
+            return render_error(_("요청된 품질의 스트리밍 URL을 찾을 수 없습니다."))
+
+        # 스트리밍 URL로 리다이렉트
+        logging.info(f"스트리밍 리다이렉트: {file_id} -> {selected_url}")
+        return redirect(selected_url)
+
+    except Exception as e:
+        logging.error(f"스트리밍 중 오류: {str(e)}", exc_info=True)
+        return render_error(_("스트리밍 중 오류가 발생했습니다"), debug_message=str(e))
+
+
 @app.route('/download-file/<file_id>')
 def download_file(file_id):
-    """파일 다운로드"""
+    """파일 다운로드 - 브라우저 직접 재생 우선"""
     try:
-        logging.info(f"파일 다운로드 시작: {file_id}")
+        logging.info(f"파일 다운로드 요청: {file_id}")
 
         if not check_valid_file_id(file_id):
             return render_error(_("유효하지 않은 파일 ID입니다."))
@@ -257,12 +320,37 @@ def download_file(file_id):
         if not status or status.get('status') != 'completed':
             return render_error(_("다운로드가 완료되지 않았습니다."))
 
-        # 직접 다운로드 링크가 있는 경우 리다이렉트
+        # 원본 URL을 사용해서 실시간으로 스트리밍 URL 추출 시도
+        original_url = status.get('url', '')
+        if original_url:
+            try:
+                # 실시간으로 스트리밍 URL 추출
+                from download_manager import extract_streaming_urls
+                streaming_info = extract_streaming_urls(original_url)
+
+                if streaming_info and streaming_info.get('best_url'):
+                    logging.info(f"실시간 스트리밍 URL 추출 성공, 브라우저로 리다이렉트")
+                    return redirect(streaming_info.get('best_url'))
+            except Exception as e:
+                logging.warning(f"실시간 스트리밍 추출 실패: {e}")
+
+        # 저장된 스트리밍 정보 확인 (우선순위 1)
+        streaming_info = status.get('streaming_info')
+        if streaming_info and streaming_info.get('best_url'):
+            logging.info(f"저장된 스트리밍 URL로 리다이렉트: {streaming_info.get('best_url')}")
+            return redirect(streaming_info.get('best_url'))
+
+        # 직접 다운로드 링크가 있는 경우 리다이렉트 (우선순위 2)
         if status.get('is_direct_link', False) and status.get('direct_url'):
             logging.info(f"직접 다운로드 링크로 리다이렉트: {status.get('direct_url')}")
             return redirect(status.get('direct_url'))
 
-        # 기존 방식: 서버에서 다운로드한 파일 제공
+        # 원본 URL로 다시 시도 (우선순위 3)
+        if original_url:
+            logging.info(f"원본 URL로 리다이렉트: {original_url}")
+            return redirect(original_url)
+
+        # 최후 수단: 서버에서 다운로드한 파일 제공 (우선순위 4)
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         if not os.path.exists(download_path):
             return render_error(_("다운로드 파일을 찾을 수 없습니다."))
