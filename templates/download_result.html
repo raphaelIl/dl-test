@@ -178,10 +178,10 @@
 
         {% if streaming_info.streaming_urls and streaming_info.streaming_urls|length > 1 %}
         <div class="quality-selector">
-            <h4><i class="fas fa-cog"></i> {{ _('화질 선택') }}</h4>
+            <h4><i class="fas fa-cog"></i> {{ _('Choose quality') }}</h4>
             <div class="quality-buttons">
                 <a href="#" class="quality-btn active" data-quality="best" data-url="{{ url_for('stream_video', file_id=file_id, quality='best') }}">
-                    {{ _('최고 화질') }} ({{ streaming_info.best_quality }}p)
+                    {{ _('Best quality') }} ({{ streaming_info.best_quality }}p)
                 </a>
                 {% for stream in streaming_info.streaming_urls %}
                     {% if stream.quality and stream.quality != streaming_info.best_quality %}
@@ -197,6 +197,7 @@
         </div>
         {% endif %}
 
+        <!-- 버튼 그룹 - 모든 버튼을 한 곳에 배치 -->
         <div class="view-options">
             {% if streaming_info and streaming_info.best_url %}
             <a href="{{ streaming_info.best_url }}" class="btn btn-success" target="_blank" rel="noopener" download>
@@ -207,6 +208,10 @@
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
             {% endif %}
+
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
         </div>
 
         {% elif is_direct_link and direct_url %}
@@ -215,22 +220,24 @@
             <a href="{{ direct_url }}" class="btn btn-success" target="_blank" rel="noopener" download>
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
-        </div>
 
-        {% else %}
-        <!-- 기존 방식 (서버 다운로드) -->
-        <div class="actions">
-            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
-                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
-            </a>
-        </div>
-        {% endif %}
-
-        <div class="actions" style="margin-top: 20px;">
             <a href="{{ url_for('index') }}" class="btn btn-primary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
         </div>
+
+        {% else %}
+        <!-- 기존 방식 (서버 다운로드) -->
+        <div class="view-options">
+            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            </a>
+
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <script>

@@ -308,7 +308,7 @@ def stream_video(file_id):
 
 @app.route('/download-file/<file_id>')
 def download_file(file_id):
-    """파일 다운로드 - 브라우저 직접 재생 우선"""
+    """파일 다운로드 - 브라우저 직접 재생 우선, 서버 파일 fallback"""
     try:
         logging.info(f"파일 다운로드 요청: {file_id}")
 
@@ -320,11 +320,37 @@ def download_file(file_id):
         if not status or status.get('status') != 'completed':
             return render_error(_("다운로드가 완료되지 않았습니다."))
 
-        # 원본 URL을 사용해서 실시간으로 스트리밍 URL 추출 시도
+        # 1단계: 저장된 스트리밍 정보 확인 (최우선)
+        streaming_info = status.get('streaming_info')
+        if streaming_info and streaming_info.get('best_url'):
+            logging.info(f"저장된 스트리밍 URL로 리다이렉트: {streaming_info.get('best_url')}")
+            return redirect(streaming_info.get('best_url'))
+
+        # 2단계: 직접 다운로드 링크가 있는 경우 리다이렉트
+        if status.get('is_direct_link', False) and status.get('direct_url'):
+            logging.info(f"직접 다운로드 링크로 리다이렉트: {status.get('direct_url')}")
+            return redirect(status.get('direct_url'))
+
+        # 3단계: 서버에 다운로드된 파일 제공 (핵심 fallback)
+        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
+        if os.path.exists(download_path):
+            files = safely_access_files(download_path)
+            if files:
+                filename = files[0]
+                file_path = safe_path_join(download_path, filename)
+
+                if os.path.isfile(file_path):
+                    logging.info(f"서버 다운로드 파일 제공: {file_path}")
+                    safe_filename = f"download-{file_id}.mp4"
+                    response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
+                    encoded_filename = quote(filename)
+                    response.headers["Content-Disposition"] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
+                    return response
+
+        # 4단계: 실시간으로 스트리밍 URL 추출 재시도
         original_url = status.get('url', '')
         if original_url:
             try:
-                # 실시간으로 스트리밍 URL 추출
                 from download_manager import extract_streaming_urls
                 streaming_info = extract_streaming_urls(original_url)
 
@@ -334,46 +360,17 @@ def download_file(file_id):
             except Exception as e:
                 logging.warning(f"실시간 스트리밍 추출 실패: {e}")
 
-        # 저장된 스트리밍 정보 확인 (우선순위 1)
-        streaming_info = status.get('streaming_info')
-        if streaming_info and streaming_info.get('best_url'):
-            logging.info(f"저장된 스트리밍 URL로 리다이렉트: {streaming_info.get('best_url')}")
-            return redirect(streaming_info.get('best_url'))
-
-        # 직접 다운로드 링크가 있는 경우 리다이렉트 (우선순위 2)
-        if status.get('is_direct_link', False) and status.get('direct_url'):
-            logging.info(f"직접 다운로드 링크로 리다이렉트: {status.get('direct_url')}")
-            return redirect(status.get('direct_url'))
-
-        # 원본 URL로 다시 시도 (우선순위 3)
+        # 5단계: 최후 수단으로 원본 URL 리다이렉트
         if original_url:
-            logging.info(f"원본 URL로 리다이렉트: {original_url}")
+            logging.info(f"최후 수단으로 원본 URL 리다이렉트: {original_url}")
             return redirect(original_url)
 
-        # 최후 수단: 서버에서 다운로드한 파일 제공 (우선순위 4)
-        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
-        if not os.path.exists(download_path):
-            return render_error(_("다운로드 파일을 찾을 수 없습니다."))
-
-        files = safely_access_files(download_path)
-        if not files:
-            return render_error(_("다운로드된 파일이 없습니다."))
-
-        filename = files[0]
-        file_path = safe_path_join(download_path, filename)
-
-        if not os.path.isfile(file_path):
-            return render_error(_("유효하지 않은 파일입니다."))
-
-        safe_filename = f"download-{file_id}.mp4"
-        response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
-        encoded_filename = quote(filename)
-        response.headers["Content-Disposition"] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
-        return response
+        # 모든 방법 실패
+        return render_error(_("다운로드된 파일이 없습니다."))
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_error(_("파일 다운로드 중 오류가 발생했습니다"), debug_message=str(e))
+        return render_error(_("파일 다운로드 중 오류가 발생했습니다"))
 
 
 @app.route('/robots.txt')

@@ -6,11 +6,37 @@ import re
 import html
 import base64
 import requests
+import random
 import yt_dlp
+import time
 from yt_dlp import YoutubeDL, DownloadError
 from urllib.parse import urlsplit, urljoin, unquote
 from config import MAX_FILE_SIZE
 import logging
+
+# 프록시 설정 - 필요시 여기에 실제 프록시 서버 추가
+PROXY_LIST = [
+    None,  # 프록시 없이 직접 연결 (기본)
+    # 아래에 실제 프록시 서버를 추가할 수 있습니다
+    # 'socks5://user:pass@host:port',
+    # 'http://user:pass@host:port',
+]
+
+# 다양한 User-Agent 목록
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/127.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/127.0.0.0 Mobile/15E148 Safari/604.1',
+]
+
+
+def get_random_user_agent():
+    """랜덤 User-Agent 반환"""
+    return random.choice(USER_AGENTS)
 
 
 def build_headers_for(url: str, *, ua: str | None = None, referer_mode: str = "root") -> dict:
@@ -60,8 +86,6 @@ def base_ydl_opts(detail_url: str, download_dir="/app/downloads", use_cookies=Fa
         "nocheckcertificate": True,
         "referer": root,
     }
-    if use_cookies:
-        opts["cookiesfrombrowser"] = ("chrome",)
     return opts
 
 
@@ -145,7 +169,7 @@ def find_m3u8_candidates(detail_url: str, text: str) -> list[str]:
 
 def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None = None, use_cookies=False) -> bool:
     """
-    효율적인 다운로드 함수 - 재시도 대신 스마트 전략 적용
+    효율적인 다운로드 함수 - Docker 환경 대응 및 m3u8 실제 변환
     """
     from urllib.parse import urlparse
 
@@ -155,6 +179,20 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
 
     base = base_ydl_opts(detail_url, download_dir, use_cookies)
 
+    # m3u8 파일이 아닌 실제 비디오 파일을 다운로드하도록 포맷 설정 개선
+    base.update({
+        # 최대 1080p로 제한하고 mp4 우선
+        'format': 'best[height<=1080][ext=mp4]/best[height<=1080]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+        'merge_output_format': 'mp4',
+        # m3u8를 native로 처리하여 실제 비디오 파일로 변환
+        'hls_prefer_native': True,
+        'hls_use_mpegts': False,
+        # 파일명에서 m3u8 관련 정보 제거
+        'outtmpl': {'default': '%(title).150B.%(ext)s'},
+        # 스트리밍 프로토콜 처리 개선
+        'http_chunk_size': 10485760,  # 10MB chunks
+    })
+
     # 도메인별 최적화된 설정
     if any(x in domain for x in ['youtube.com', 'youtu.be']):
         # YouTube는 빠른 처리 가능
@@ -163,6 +201,35 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
             'retries': 1,
             'fragment_retries': 1,
         })
+    elif any(x in domain for x in ['pornhub.com', 'xhamster.com', 'xvideos.com', 'redtube.com']):
+        # 성인 사이트는 특별한 우회 전략 필요 - Docker 환경 대응
+        base.update({
+            'socket_timeout': 120,  # 매우 긴 타임아웃
+            'retries': 1,
+            'fragment_retries': 1,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0',
+                'Referer': 'https://www.pornhub.com/',
+            },
+            'geo_bypass': True,
+            'sleep_interval': 3,  # 요청 간 더 긴 대기
+            'max_sleep_interval': 8,
+            'no_check_certificate': True,
+        })
+        # Docker 환경에서는 쿠키 사용하지 않음
+        if use_cookies:
+            logging.warning("Docker 환경에서 쿠키 사용 건너뛰기")
     elif any(x in domain for x in ['tiktok.com', 'instagram.com', 'facebook.com']):
         # 소셜 미디어는 CORS 및 User-Agent 중요
         base.update({
@@ -189,6 +256,20 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
         logging.info(f"스마트 다운로드 시도: {detail_url}")
         with YoutubeDL(base) as ydl:
             ydl.download([detail_url])
+
+        # 다운로드된 파일이 m3u8인지 확인하고 실제 비디오 파일인지 검증
+        downloaded_files = [f for f in os.listdir(download_dir) if os.path.isfile(os.path.join(download_dir, f))]
+        if downloaded_files:
+            for file in downloaded_files:
+                if file.endswith('.m3u8'):
+                    # m3u8 파일이 다운로드된 경우 삭제하고 실패로 처리
+                    os.remove(os.path.join(download_dir, file))
+                    logging.warning(f"⚠️ m3u8 파일이 다운로드됨, 삭제 후 폴백 시도")
+                    raise DownloadError("Downloaded m3u8 file instead of video")
+                elif any(file.endswith(ext) for ext in ['.mp4', '.webm', '.mkv', '.avi', '.mov']):
+                    logging.info(f"✅ 실제 비디오 파일 다운로드 성공: {file}")
+                    return True
+
         logging.info(f"✅ 스마트 다운로드 성공")
         return True
     except DownloadError as e:
@@ -204,8 +285,8 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
     except Exception as e:
         logging.warning(f"⚠️ 일반 오류: {str(e)}")
 
-    # 2차: m3u8 폴백 (한 번만)
-    logging.info("기본 다운로드 실패, m3u8 폴백 시도")
+    # 2차: 향상된 m3u8 폴백 - 실제 비디오 파일로 변환 (Docker 환경 대응)
+    logging.info("기본 다운로드 실패, 향상된 m3u8 폴백 시도 (Docker 환경)")
     try:
         page_html = fetch_text(detail_url, timeout=30)
         m3u8s = find_m3u8_candidates(detail_url, page_html)
@@ -214,17 +295,56 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
             logging.warning("m3u8 후보를 찾을 수 없음")
             raise DownloadError("No m3u8 candidates found")
 
-        # 가장 유력한 후보 1개만 시도
-        best_m3u8 = m3u8s[0]
-        logging.info(f"최적 m3u8 후보 시도: {best_m3u8[:100]}...")
+        # 가장 유력한 후보들을 시도
+        for i, m3u8_url in enumerate(m3u8s[:3]):  # 최대 3개까지만 시도
+            logging.info(f"m3u8 후보 {i+1} 시도: {m3u8_url[:100]}...")
 
-        enhanced_base = {**base, "socket_timeout": 90, "retries": 1}
-        enhanced_base.pop('force_generic_extractor', None)  # m3u8는 generic 필요없음
+            enhanced_base = {
+                **base,
+                "socket_timeout": 90,
+                "retries": 1,
+                # m3u8를 실제 비디오 파일로 변환하는 설정 강화
+                'hls_prefer_native': True,
+                'hls_use_mpegts': False,
+                'format': 'best[height<=1080][ext=mp4]/best[height<=1080]',
+                'merge_output_format': 'mp4',
+                # 세그먼트를 하나의 파일로 병합
+                'concurrent_fragment_downloads': 4,
+                'fragment_retries': 3,
+                # Docker 환경에서 쿠키 관련 오류 무시
+                'no_check_certificate': True,
+            }
+            enhanced_base.pop('force_generic_extractor', None)  # m3u8는 generic 필요없음
+            enhanced_base.pop('cookiesfrombrowser', None)  # Docker에서 쿠키 제거
 
-        with YoutubeDL(enhanced_base) as ydl:
-            ydl.download([best_m3u8])
-        logging.info(f"✅ m3u8 폴백 성공")
-        return True
+            try:
+                with YoutubeDL(enhanced_base) as ydl:
+                    ydl.download([m3u8_url])
+
+                # 다운로드된 파일 검증
+                downloaded_files = [f for f in os.listdir(download_dir) if os.path.isfile(os.path.join(download_dir, f))]
+                video_files = [f for f in downloaded_files if any(f.endswith(ext) for ext in ['.mp4', '.webm', '.mkv', '.avi', '.mov'])]
+
+                if video_files:
+                    logging.info(f"✅ m3u8 폴백으로 실제 비디오 파일 다운로드 성공: {video_files[0]}")
+                    # m3u8 파일이 있다면 삭제
+                    for f in downloaded_files:
+                        if f.endswith('.m3u8'):
+                            try:
+                                os.remove(os.path.join(download_dir, f))
+                                logging.info(f"불필요한 m3u8 파일 삭제: {f}")
+                            except:
+                                pass
+                    return True
+                else:
+                    logging.warning(f"m3u8 후보 {i+1} 실패: 실제 비디오 파일이 다운로드되지 않음")
+                    continue
+
+            except Exception as e:
+                logging.warning(f"m3u8 후보 {i+1} 실패: {str(e)}")
+                continue
+
+        raise DownloadError("All m3u8 candidates failed to download actual video")
 
     except Exception as e:
         logging.error(f"m3u8 폴백도 실패: {str(e)}")
