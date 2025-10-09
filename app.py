@@ -308,9 +308,15 @@ def stream_video(file_id):
 
 @app.route('/download-file/<file_id>')
 def download_file(file_id):
-    """파일 다운로드 - 브라우저 직접 재생 우선, 서버 파일 fallback"""
+    """파일 다운로드 - 선택한 품질에 따라 다운로드 URL 결정"""
     try:
-        logging.info(f"파일 다운로드 요청: {file_id}")
+        # 요청된 품질 확인 (URL 파라미터에서 가져옴)
+        quality = request.args.get('quality', 'best')
+
+        # 상세 로깅 추가
+        client_ip = get_client_ip()
+        user_agent = request.headers.get('User-Agent', '')
+        logging.info(f"파일 다운로드 요청: file_id={file_id}, quality={quality}, IP={client_ip}, UA={user_agent[:50]}")
 
         if not check_valid_file_id(file_id):
             return render_error(_("유효하지 않은 파일 ID입니다."))
@@ -320,18 +326,45 @@ def download_file(file_id):
         if not status or status.get('status') != 'completed':
             return render_error(_("다운로드가 완료되지 않았습니다."))
 
-        # 1단계: 저장된 스트리밍 정보 확인 (최우선)
+        # 스트리밍 정보가 있는 경우 처리
         streaming_info = status.get('streaming_info')
-        if streaming_info and streaming_info.get('best_url'):
-            logging.info(f"저장된 스트리밍 URL로 리다이렉트: {streaming_info.get('best_url')}")
-            return redirect(streaming_info.get('best_url'))
+        if streaming_info:
+            # 특정 품질이 요청된 경우
+            if quality != 'best' and streaming_info.get('streaming_urls'):
+                try:
+                    quality_num = int(quality)
+                    logging.info(f"요청된 특정 품질: {quality_num}p")
 
-        # 2단계: 직접 다운로드 링크가 있는 경우 리다이렉트
+                    # 요청된 품질과 일치하는 URL 찾기
+                    matching_url = None
+                    for stream in streaming_info.get('streaming_urls', []):
+                        if stream.get('quality') == quality_num and stream.get('url'):
+                            matching_url = stream.get('url')
+                            logging.info(f"매칭된 품질 URL 발견: {quality_num}p")
+                            break
+
+                    # 일치하는 품질의 URL이 있으면 리다이렉트
+                    if matching_url:
+                        logging.info(f"선택된 품질({quality_num}p)로 리다이렉트: {matching_url[:50]}...")
+                        return redirect(matching_url)
+                    else:
+                        logging.warning(f"요청된 품질({quality_num}p)에 맞는 URL을 찾지 못함")
+                except (ValueError, TypeError) as e:
+                    logging.warning(f"품질 파라미터 처리 중 오류: {str(e)}")
+
+            # best 품질이 요청되었거나 특정 품질을 찾지 못한 경우
+            if streaming_info.get('best_url'):
+                best_quality = streaming_info.get('best_quality', '알 수 없음')
+                logging.info(f"최고 품질({best_quality}p)로 리다이렉트")
+                return redirect(streaming_info.get('best_url'))
+
+        # 직접 다운로드 링크가 있는 경우
         if status.get('is_direct_link', False) and status.get('direct_url'):
-            logging.info(f"직접 다운로드 링크로 리다이렉트: {status.get('direct_url')}")
-            return redirect(status.get('direct_url'))
+            direct_url = status.get('direct_url')
+            logging.info(f"직접 다운로드 링크로 리다이렉트: {direct_url[:50]}...")
+            return redirect(direct_url)
 
-        # 3단계: 서버에 다운로드된 파일 제공 (핵심 fallback)
+        # 서버에 다운로드된 파일 제공 (fallback)
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         if os.path.exists(download_path):
             files = safely_access_files(download_path)
@@ -340,29 +373,45 @@ def download_file(file_id):
                 file_path = safe_path_join(download_path, filename)
 
                 if os.path.isfile(file_path):
-                    logging.info(f"서버 다운로드 파일 제공: {file_path}")
+                    file_size = os.path.getsize(file_path)
+                    logging.info(f"서버 파일 제공: {filename} ({readable_size(file_size)})")
                     safe_filename = f"download-{file_id}.mp4"
                     response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
                     encoded_filename = quote(filename)
                     response.headers["Content-Disposition"] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
                     return response
 
-        # 4단계: 실시간으로 스트리밍 URL 추출 재시도
+        # 실시간으로 스트리밍 URL 추출 재시도
         original_url = status.get('url', '')
         if original_url:
             try:
                 from download_manager import extract_streaming_urls
+                logging.info(f"실시간 스트리밍 URL 추출 시도: {original_url[:50]}...")
+
                 streaming_info = extract_streaming_urls(original_url)
 
-                if streaming_info and streaming_info.get('best_url'):
-                    logging.info(f"실시간 스트리밍 URL 추출 성공, 브라우저로 리다이렉트")
-                    return redirect(streaming_info.get('best_url'))
-            except Exception as e:
-                logging.warning(f"실시간 스트리밍 추출 실패: {e}")
+                if streaming_info:
+                    # 요청된 품질이 있는지 확인
+                    if quality != 'best' and streaming_info.get('streaming_urls'):
+                        try:
+                            quality_num = int(quality)
+                            for stream in streaming_info.get('streaming_urls', []):
+                                if stream.get('quality') == quality_num and stream.get('url'):
+                                    logging.info(f"실시간 추출된 {quality_num}p URL로 리다이렉트")
+                                    return redirect(stream.get('url'))
+                        except ValueError:
+                            pass
 
-        # 5단계: 최후 수단으로 원본 URL 리다이렉트
+                    # 특정 품질을 찾지 못한 경우 best URL 사용
+                    if streaming_info.get('best_url'):
+                        logging.info(f"실시간 추출된 best URL로 리다이렉트")
+                        return redirect(streaming_info.get('best_url'))
+            except Exception as e:
+                logging.warning(f"실시간 스트리밍 추출 실패: {str(e)}")
+
+        # 최후 수단으로 원본 URL 리다이렉트
         if original_url:
-            logging.info(f"최후 수단으로 원본 URL 리다이렉트: {original_url}")
+            logging.info(f"원본 URL로 리다이렉트: {original_url[:50]}...")
             return redirect(original_url)
 
         # 모든 방법 실패

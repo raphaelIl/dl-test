@@ -199,8 +199,9 @@
 
         <!-- 버튼 그룹 - 모든 버튼을 한 곳에 배치 -->
         <div class="view-options">
-            {% if streaming_info and streaming_info.best_url %}
-            <a href="{{ streaming_info.best_url }}" class="btn btn-success" target="_blank" rel="noopener" download>
+            {% if streaming_info %}
+            <!-- 다운로드 버튼 - JavaScript에서 동적으로 링크를 생성할 예정 -->
+            <a href="javascript:void(0);" class="btn btn-success" id="downloadButton" onclick="openDownloadInNewTab()">
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
             {% else %}
@@ -264,6 +265,10 @@
             // 화질 변경 처리
             const qualityButtons = document.querySelectorAll('.quality-btn');
             const mainVideo = document.getElementById('mainVideo');
+            const downloadButton = document.getElementById('downloadButton');
+
+            // 현재 선택된 품질 저장
+            let currentQuality = 'best';
 
             if (qualityButtons.length > 0 && mainVideo) {
                 qualityButtons.forEach(button => {
@@ -274,6 +279,9 @@
                         qualityButtons.forEach(btn => btn.classList.remove('active'));
                         this.classList.add('active');
 
+                        // 선택된 품질 저장
+                        currentQuality = this.dataset.quality;
+
                         // 비디오 소스 변경
                         const newUrl = this.dataset.url;
                         const currentTime = mainVideo.currentTime;
@@ -282,11 +290,45 @@
                         mainVideo.src = newUrl;
                         mainVideo.currentTime = currentTime;
 
+                        // 다운로드 버튼 URL 변경
+                        if (downloadButton) {
+                            // 파일 ID 추출
+                            const fileIdMatch = newUrl.match(/\/stream\/([^/?]+)/);
+                            if (fileIdMatch && fileIdMatch[1]) {
+                                const fileId = fileIdMatch[1];
+                                // 새로운 다운로드 URL 생성
+                                const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
+                                console.log(`다운로드 URL 변경: ${downloadUrl}`);
+                                downloadButton.href = downloadUrl;
+                                // target과 rel 속성 확인 및 설정
+                                downloadButton.setAttribute('target', '_blank');
+                                downloadButton.setAttribute('rel', 'noopener');
+                            }
+                        }
+
                         if (wasPlaying) {
                             mainVideo.play();
                         }
                     });
                 });
+            }
+
+            // 페이지 로드 시 초기 다운로드 버튼 URL 설정
+            if (downloadButton && mainVideo) {
+                const source = mainVideo.querySelector('source');
+                if (source && source.src) {
+                    const fileIdMatch = source.src.match(/\/stream\/([^/?]+)/);
+                    if (fileIdMatch && fileIdMatch[1]) {
+                        const fileId = fileIdMatch[1];
+                        // 초기 다운로드 URL 설정
+                        const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
+                        console.log(`초기 다운로드 URL 설정: ${downloadUrl}`);
+                        downloadButton.href = downloadUrl;
+                        // target과 rel 속성 확인 및 설정
+                        downloadButton.setAttribute('target', '_blank');
+                        downloadButton.setAttribute('rel', 'noopener');
+                    }
+                }
             }
 
             // 비디오 에러 처리
