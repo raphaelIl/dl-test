@@ -1,5 +1,5 @@
 """
-Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전
+Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전 (스트리밍 우선)
 """
 import os
 import re
@@ -7,11 +7,12 @@ import uuid
 import logging
 import atexit
 import psutil
+import requests
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, parse_qs
 from datetime import datetime
 
-from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response, Response
 from flask_babel import Babel, gettext as _
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
@@ -59,6 +60,19 @@ limiter = Limiter(
     default_limits=None,
 )
 limiter.init_app(app)
+
+
+# 공통 유틸리티 함수
+def render_error(error_message, status_code=400):
+    """에러 응답 통합 함수"""
+    error_id = generate_error_id()
+    logging.warning(f"{status_code} 에러 - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}, 메시지: {error_message}")
+    return render_template('error.html', error=error_message, error_id=error_id), status_code
+
+
+def check_valid_file_id(file_id):
+    """유효한 파일 ID인지 검사"""
+    return re.match(r'^[0-9a-f\-]+$', file_id) is not None
 
 
 # Flask 라우트들
@@ -114,7 +128,32 @@ def set_language(language):
     if language not in LANGUAGES:
         return redirect(url_for('index'))
 
-    response = make_response(redirect(request.referrer or url_for('index')))
+    # 리퍼러에서 돌아갈 페이지 결정
+    referrer = request.referrer
+    next_url = url_for('index')
+
+    # 리퍼러가 있으면 URL 분석
+    if referrer:
+        host_url = request.host_url.rstrip('/')
+        if referrer.startswith(host_url):
+            # 호스트 URL 제거하여 경로만 추출
+            path = referrer[len(host_url):]
+
+            # 경로 분석
+            if '/result/' in path:
+                match = re.search(r'/result/([0-9a-f\-]+)', path)
+                if match:
+                    file_id = match.group(1)
+                    next_url = url_for('result', file_id=file_id, _t=datetime.now().timestamp())
+
+            elif '/download-waiting/' in path:
+                match = re.search(r'/download-waiting/([0-9a-f\-]+)', path)
+                if match:
+                    file_id = match.group(1)
+                    next_url = url_for('download_waiting', file_id=file_id)
+
+    # 언어 쿠키 설정 및 리디렉션
+    response = make_response(redirect(next_url))
     response.set_cookie('language', language, max_age=30*24*60*60)  # 30일
     return response
 
@@ -122,7 +161,7 @@ def set_language(language):
 @app.route('/download-waiting/<file_id>')
 def download_waiting(file_id):
     """다운로드 대기 페이지"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
 
@@ -137,7 +176,7 @@ def download_waiting(file_id):
 @app.route('/check-status/<file_id>')
 def check_status(file_id):
     """다운로드 상태 확인"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 상태 확인 시도: {file_id}")
         return {'status': 'error', 'error': '유효하지 않은 파일 ID'}
 
@@ -153,8 +192,8 @@ def check_status(file_id):
 
 @app.route('/result/<file_id>')
 def result(file_id):
-    """다운로드 결과 페이지"""
-    if not re.match(r'^[0-9a-f\-]+$', file_id):
+    """다운로드 결과 페이지 - 안정성 우선으로 단순화"""
+    if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 접근 시도: {file_id}")
         return redirect(url_for('index'))
 
@@ -163,64 +202,305 @@ def result(file_id):
         logging.error(f"완료되지 않은 다운로드에 대한 접근: {file_id}")
         return redirect(url_for('index'))
 
+    # 스트리밍 정보가 있는 경우 (우선순위 1)
+    if status.get('streaming_info'):
+        streaming_info = status.get('streaming_info')
+        return render_template('download_result.html',
+                              title=status.get('title', '알 수 없는 제목'),
+                              file_id=file_id,
+                              url=status.get('url', ''),
+                              streaming_info=streaming_info,
+                              has_streaming=True,
+                              is_direct_link=False,
+                              thumbnail=status.get('thumbnail', ''),
+                              duration=status.get('duration'),
+                              uploader=status.get('uploader', ''),
+                              current_lang=get_locale(),
+                              languages=LANGUAGES)
+
+    # 직접 다운로드 링크가 있는 경우 (우선순위 2)
+    if status.get('is_direct_link', False) and status.get('direct_url'):
+        return render_template('download_result.html',
+                              title=status.get('title', '알 수 없는 제목'),
+                              file_id=file_id,
+                              url=status.get('url', ''),
+                              direct_url=status.get('direct_url', ''),
+                              is_direct_link=True,
+                              has_streaming=False,
+                              thumbnail=status.get('thumbnail', ''),
+                              duration=status.get('duration'),
+                              uploader=status.get('uploader', ''),
+                              source=status.get('source', ''),
+                              current_lang=get_locale(),
+                              languages=LANGUAGES)
+
+    # 기존 방식: 서버에서 다운로드한 파일 (우선순위 3)
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
-    if not os.path.exists(download_path):
-        logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-        return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
 
-    files = safely_access_files(download_path)
-    if not files:
-        logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-        return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+    # 파일이 없어도 에러를 표시하지 않고 기본 정보만 표시
+    file_name = "video.mp4"
+    file_size = "Unknown"
 
-    file_name = files[0]
-    file_path = safe_path_join(download_path, file_name)
-    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else 0
+    if os.path.exists(download_path):
+        files = safely_access_files(download_path)
+        if files:
+            file_name = files[0]
+            file_path = safe_path_join(download_path, file_name)
+            if os.path.isfile(file_path):
+                file_size = readable_size(os.path.getsize(file_path))
 
     return render_template('download_result.html',
-                           title=status.get('title', '알 수 없는 제목'),
+                           title=status.get('title', _('다운로드 완료')),
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
-                           file_size=readable_size(file_size))
+                           file_size=file_size,
+                           is_direct_link=False,
+                           has_streaming=False,
+                           thumbnail=status.get('thumbnail', ''),
+                           current_lang=get_locale(),
+                           languages=LANGUAGES)
+
+
+def has_ip_parameter(url):
+    """URL에 IP 파라미터가 있는지 확인"""
+    try:
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        return 'ip' in query_params
+    except Exception:
+        return False
+
+
+def proxy_stream_video(url):
+    """스트리밍 URL을 프록시로 제공"""
+    try:
+        # Range 헤더 처리를 위한 요청 헤더 설정
+        headers = {}
+
+        # 클라이언트의 Range 헤더가 있으면 전달
+        if 'Range' in request.headers:
+            headers['Range'] = request.headers['Range']
+
+        # User-Agent 설정
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+        # 원본 URL에서 스트리밍 데이터 요청
+        response = requests.get(url, headers=headers, stream=True, timeout=30)
+
+        # 응답 헤더 설정
+        def generate():
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+
+        # Flask Response 객체 생성
+        flask_response = Response(generate(), mimetype='video/mp4')
+
+        # 원본 응답의 중요한 헤더들을 복사
+        if 'Content-Length' in response.headers:
+            flask_response.headers['Content-Length'] = response.headers['Content-Length']
+        if 'Content-Range' in response.headers:
+            flask_response.headers['Content-Range'] = response.headers['Content-Range']
+        if 'Accept-Ranges' in response.headers:
+            flask_response.headers['Accept-Ranges'] = response.headers['Accept-Ranges']
+        else:
+            flask_response.headers['Accept-Ranges'] = 'bytes'
+
+        flask_response.status_code = response.status_code
+
+        return flask_response
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"스트리밍 프록시 중 네트워크 오류: {str(e)}")
+        return render_error(_("스트리밍 중 네트워크 오류가 발생했습니다."))
+    except Exception as e:
+        logging.error(f"스트리밍 프록시 중 오류: {str(e)}")
+        return render_error(_("스트리밍 중 오류가 발생했습니다."))
+
+
+@app.route('/stream/<file_id>')
+def stream_video(file_id):
+    """비디오 스트리밍 엔드포인트"""
+    try:
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
+
+        # 상태 확인
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            return render_error(_("다운로드가 완료되지 않았습니다."))
+
+        # 스트리밍 정보 확인
+        streaming_info = status.get('streaming_info')
+        if not streaming_info or not streaming_info.get('best_url'):
+            return render_error(_("스트리밍 URL을 찾을 수 없습니다."))
+
+        # 요청된 품질 파라미터 확인
+        quality = request.args.get('quality', 'best')
+
+        # 적절한 스트리밍 URL 선택
+        selected_url = streaming_info.get('best_url')
+
+        if quality != 'best':
+            try:
+                quality_num = int(quality)
+                for stream in streaming_info.get('streaming_urls', []):
+                    if stream.get('quality') == quality_num:
+                        selected_url = stream.get('url')
+                        break
+            except ValueError:
+                pass
+
+        if not selected_url:
+            return render_error(_("요청된 품질의 스트리밍 URL을 찾을 수 없습니다."))
+
+        # 스트리밍 모드 확인 및 IP 파라미터 검사
+        if IP_HIDE_MODE and has_ip_parameter(selected_url):
+            logging.info(f"스트리밍 모드 활성화 - IP 파라미터 감지, 프록시로 제공: {file_id}")
+            return proxy_stream_video(selected_url)
+        else:
+            # 기존 방식: 직접 리다이렉트
+            logging.info(f"스트리밍 리다이렉트: {file_id} -> {selected_url}")
+            return redirect(selected_url)
+
+    except Exception as e:
+        logging.error(f"스트리밍 중 오류: {str(e)}", exc_info=True)
+        return render_error(_("스트리밍 중 오류가 발생했습니다"), debug_message=str(e))
 
 
 @app.route('/download-file/<file_id>')
 def download_file(file_id):
-    """파일 다운로드"""
+    """파일 다운로드 - 선택한 품질에 따라 다운로드 URL 결정"""
     try:
-        logging.info(f"파일 다운로드 시작: {file_id}")
+        # 요청된 품질 확인 (URL 파라미터에서 가져옴)
+        quality = request.args.get('quality', 'best')
 
-        if not re.match(r'^[0-9a-f\-]+$', file_id):
-            logging.warning(f"유효하지 않은 file_id 다운로드 시도: {file_id}")
-            return render_template('index.html', error=_("유효하지 않은 파일 ID입니다."), current_lang=get_locale(), languages=LANGUAGES)
+        # 상세 로깅 추가
+        client_ip = get_client_ip()
+        user_agent = request.headers.get('User-Agent', '')
+        logging.info(f"파일 다운로드 요청: file_id={file_id}, quality={quality}, IP={client_ip}, UA={user_agent[:50]}")
 
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
+
+        # 상태 확인
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            return render_error(_("다운로드가 완료되지 않았습니다."))
+
+        # 스트리밍 정보가 있는 경우 처리
+        streaming_info = status.get('streaming_info')
+        if streaming_info:
+            # 특정 품질이 요청된 경우
+            if quality != 'best' and streaming_info.get('streaming_urls'):
+                try:
+                    quality_num = int(quality)
+                    logging.info(f"요청된 특정 품질: {quality_num}p")
+
+                    # 요청된 품질과 일치하는 URL 찾기
+                    matching_url = None
+                    for stream in streaming_info.get('streaming_urls', []):
+                        if stream.get('quality') == quality_num and stream.get('url'):
+                            matching_url = stream.get('url')
+                            logging.info(f"매칭된 품질 URL 발견: {quality_num}p")
+                            break
+
+                    # 일치하는 품질의 URL이 있으면 처리
+                    if matching_url:
+                        # 스트리밍 모드 확인 및 IP 파라미터 검사
+                        if IP_HIDE_MODE and has_ip_parameter(matching_url):
+                            logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: {quality_num}p")
+                            return proxy_stream_video(matching_url)
+                        else:
+                            logging.info(f"선택된 품질({quality_num}p)로 리다이렉트: {matching_url[:50]}...")
+                            return redirect(matching_url)
+                    else:
+                        logging.warning(f"요청된 품질({quality_num}p)에 맞는 URL을 찾지 못함")
+                except (ValueError, TypeError) as e:
+                    logging.warning(f"품질 파라미터 처리 중 오류: {str(e)}")
+
+            # best 품질이 요청되었거나 특정 품질을 찾지 못한 경우
+            if streaming_info.get('best_url'):
+                best_quality = streaming_info.get('best_quality', '알 수 없음')
+                best_url = streaming_info.get('best_url')
+
+                # 스트리밍 모드 확인 및 IP 파라미터 검사
+                if IP_HIDE_MODE and has_ip_parameter(best_url):
+                    logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: best({best_quality}p)")
+                    return proxy_stream_video(best_url)
+                else:
+                    logging.info(f"최고 품질({best_quality}p)로 리다이렉트")
+                    return redirect(best_url)
+
+        # 직접 다운로드 링크가 있는 경우
+        if status.get('is_direct_link', False) and status.get('direct_url'):
+            direct_url = status.get('direct_url')
+
+            # 스트리밍 모드 확인 및 IP 파라미터 검사
+            if IP_HIDE_MODE and has_ip_parameter(direct_url):
+                logging.info(f"다운로드 - 직접 링크에서 IP 파라미터 감지, 프록시로 제공")
+                return proxy_stream_video(direct_url)
+            else:
+                logging.info(f"직접 다운로드 링크로 리다이렉트: {direct_url[:50]}...")
+                return redirect(direct_url)
+
+        # 서버에 다운로드된 파일 제공 (fallback)
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
-        if not os.path.exists(download_path):
-            logging.error(f"다운로드 경로를 찾을 수 없음: {download_path}")
-            return render_template('index.html', error="다운로드 파일을 찾을 수 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+        if os.path.exists(download_path):
+            files = safely_access_files(download_path)
+            if files:
+                filename = files[0]
+                file_path = safe_path_join(download_path, filename)
 
-        files = safely_access_files(download_path)
-        if not files:
-            logging.error(f"다운로드 폴더에 파일이 없음: {download_path}")
-            return render_template('index.html', error="다운로드된 파일이 없습니다.", current_lang=get_locale(), languages=LANGUAGES)
+                if os.path.isfile(file_path):
+                    file_size = os.path.getsize(file_path)
+                    logging.info(f"서버 파일 제공: {filename} ({readable_size(file_size)})")
+                    safe_filename = f"download-{file_id}.mp4"
+                    response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
+                    encoded_filename = quote(filename)
+                    response.headers["Content-Disposition"] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
+                    return response
 
-        filename = files[0]
-        file_path = safe_path_join(download_path, filename)
+        # 실시간으로 스트리밍 URL 추출 재시도
+        original_url = status.get('url', '')
+        if original_url:
+            try:
+                from download_manager import extract_streaming_urls
+                logging.info(f"실시간 스트리밍 URL 추출 시도: {original_url[:50]}...")
 
-        if not os.path.isfile(file_path):
-            logging.error(f"파일이 아닌 경로: {file_path}")
-            return render_template('index.html', error="유효하지 않은 파일입니다.", current_lang=get_locale(), languages=LANGUAGES)
+                streaming_info = extract_streaming_urls(original_url)
 
-        safe_filename = f"download-{file_id}.mp4"
-        response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
-        encoded_filename = quote(filename)
-        response.headers["Content-Disposition"] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
-        return response
+                if streaming_info:
+                    # 요청된 품질이 있는지 확인
+                    if quality != 'best' and streaming_info.get('streaming_urls'):
+                        try:
+                            quality_num = int(quality)
+                            for stream in streaming_info.get('streaming_urls', []):
+                                if stream.get('quality') == quality_num and stream.get('url'):
+                                    logging.info(f"실시간 추출된 {quality_num}p URL로 리다이렉트")
+                                    return redirect(stream.get('url'))
+                        except ValueError:
+                            pass
+
+                    # 특정 품질을 찾지 못한 경우 best URL 사용
+                    if streaming_info.get('best_url'):
+                        logging.info(f"실시간 추출된 best URL로 리다이렉트")
+                        return redirect(streaming_info.get('best_url'))
+            except Exception as e:
+                logging.warning(f"실시간 스트리밍 추출 실패: {str(e)}")
+
+        # 최후 수단으로 원본 URL 리다이렉트
+        if original_url:
+            logging.info(f"원본 URL로 리다이렉트: {original_url[:50]}...")
+            return redirect(original_url)
+
+        # 모든 방법 실패
+        return render_error(_("다운로드된 파일이 없습니다."))
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_template('index.html', error=f"파일 다운로드 중 오류가 발생했습니다: {str(e)}", current_lang=get_locale(), languages=LANGUAGES)
+        return render_error(_("파일 다운로드 중 오류가 발생했습니다"))
 
 
 @app.route('/robots.txt')
@@ -250,8 +530,6 @@ def health_check():
     try:
         stats = load_download_stats()
 
-        # 현재 진행 중인 다운로드 수 계산 (상태 관리자에서 가져와야 함)
-        # 여기서는 간단히 0으로 설정
         in_progress = 0
 
         health_data = {
@@ -275,39 +553,28 @@ def health_check():
 # 에러 핸들러들
 @app.errorhandler(403)
 def forbidden(e):
-    error_id = generate_error_id()
-    logging.warning(f"403 Forbidden access - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="You don't have permission to access this resource.", error_id=error_id), 403
+    return render_error("You don't have permission to access this resource.", 403)
 
 
 @app.errorhandler(400)
 def bad_request(e):
-    error_id = generate_error_id()
-    logging.warning(f"400 Bad request - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="Invalid request.", error_id=error_id), 400
+    return render_error("Invalid request.", 400)
 
 
 @app.errorhandler(404)
 def not_found(e):
-    error_id = generate_error_id()
-    logging.info(f"404 Not found - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="The requested resource could not be found.", error_id=error_id), 404
+    return render_error("The requested resource could not be found.", 404)
 
 
 @app.errorhandler(429)
 @app.errorhandler(RateLimitExceeded)
 def ratelimit_handler(e):
-    error_id = generate_error_id()
-    logging.warning(f"429 Rate limit exceeded - ID: {error_id}, IP: {get_client_ip()}, Path: {request.path}")
-    return render_template('error.html', error="Too many download requests. Please try again later.", error_id=error_id), 429
+    return render_error("Too many download requests. Please try again later.", 429)
 
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(e):
-    error_id = generate_error_id()
-    user_message = "An unexpected error occurred. Please try again later."
-    logging.error(f"Unexpected error - ID: {error_id}, Type: {type(e).__name__}, Message: {str(e)}, IP: {get_client_ip()}", exc_info=True)
-    return render_template('error.html', error=user_message, error_id=error_id), 500
+    return render_error("An unexpected error occurred. Please try again later.", 500)
 
 
 # 컨텍스트 프로세서
@@ -362,6 +629,7 @@ def init_app():
         logging.warning(f"다운로드 워커: {MAX_WORKERS}")
         logging.warning(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
         logging.warning(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
+        logging.warning(f"스트리밍 모드: {'활성화' if IP_HIDE_MODE else '비활성화'} (IP 파라미터 숨김: {'ON' if IP_HIDE_MODE else 'OFF'})")
 
     except Exception as e:
         logging.error(f"시작 정보 로깅 중 오류 발생: {str(e)}")

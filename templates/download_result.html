@@ -5,6 +5,113 @@
 {% block extra_css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <style>
+        .video-thumbnail {
+            max-width: 320px;
+            border-radius: 4px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-player {
+            max-width: 800px;
+            width: 100%;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-player video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .quality-selector {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quality-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quality-btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .quality-btn:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+
+        .quality-btn.active {
+            background: #28a745;
+        }
+
+        .streaming-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .streaming-notice {
+            color: #155724;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn-stream {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-stream:hover {
+            background: #218838;
+            border-color: #1e7e34;
+        }
+
+        @media (max-width: 768px) {
+            .quality-buttons {
+                justify-content: center;
+            }
+
+            .view-options {
+                flex-direction: column;
+            }
+
+            .view-options .btn {
+                text-align: center;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -34,33 +141,109 @@
         </div>
         <h1>{{ _('다운로드 완료!') }}</h1>
 
+        {% if thumbnail %}
+        <div>
+            <img src="{{ thumbnail }}" alt="{{ title }}" class="video-thumbnail">
+        </div>
+        {% endif %}
+
         <div class="file-info">
-            <p><span class="label">{{ _('파일 이름:') }}</span> {{ file_name }}</p>
-            <p><span class="label">{{ _('파일 크기:') }}</span> {{ file_size }}</p>
             <p><span class="label">{{ _('제목:') }}</span> {{ title }}</p>
             <p><span class="label">{{ _('출처:') }}</span>
                 <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>
             </p>
+
+            {% if uploader %}
+            <p><span class="label">{{ _('Uploader:') }}</span> {{ uploader }}</p>
+            {% endif %}
+
+            {% if duration %}
+            <p><span class="label">{{ _('Durations:') }}</span> {{ duration }}s</p>
+            {% endif %}
+
+            {% if not has_streaming and not is_direct_link %}
+            <p><span class="label">{{ _('파일 이름:') }}</span> {{ file_name }}</p>
+            <p><span class="label">{{ _('파일 크기:') }}</span> {{ file_size }}</p>
+            {% endif %}
         </div>
 
-        <div class="actions">
-            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success">
+        {% if has_streaming and streaming_info %}
+        <!-- 스트리밍 비디오 플레이어 -->
+        <div class="video-player" id="videoPlayer">
+            <video controls preload="metadata" id="mainVideo">
+                <source src="{{ url_for('stream_video', file_id=file_id, quality='best') }}" type="video/mp4">
+                {{ _('귀하의 브라우저는 비디오 태그를 지원하지 않습니다.') }}
+            </video>
+        </div>
+
+        {% if streaming_info.streaming_urls and streaming_info.streaming_urls|length > 1 %}
+        <div class="quality-selector">
+            <h4><i class="fas fa-cog"></i> {{ _('Choose quality') }}</h4>
+            <div class="quality-buttons">
+                <a href="#" class="quality-btn active" data-quality="best" data-url="{{ url_for('stream_video', file_id=file_id, quality='best') }}">
+                    {{ _('Best quality') }} ({{ streaming_info.best_quality }}p)
+                </a>
+                {% for stream in streaming_info.streaming_urls %}
+                    {% if stream.quality and stream.quality != streaming_info.best_quality %}
+                    <a href="#" class="quality-btn" data-quality="{{ stream.quality }}" data-url="{{ url_for('stream_video', file_id=file_id, quality=stream.quality) }}">
+                        {{ stream.quality }}p
+                        {% if stream.filesize %}
+                        ({{ "%.1f"|format(stream.filesize / 1024 / 1024) }}MB)
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 버튼 그룹 - 모든 버튼을 한 곳에 배치 -->
+        <div class="view-options">
+            {% if streaming_info %}
+            <!-- 다운로드 버튼 - JavaScript에서 동적으로 링크를 생성할 예정 -->
+            <a href="javascript:void(0);" class="btn btn-success" id="downloadButton" onclick="openDownloadInNewTab()">
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
+            {% else %}
+            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            </a>
+            {% endif %}
+
             <a href="{{ url_for('index') }}" class="btn btn-primary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
         </div>
 
-        <div class="download-notice">
-            <p>{{ _('The download link will expire in a certain amount of time. Download it now!') }}</p>
-        </div>
-    </div>
-{% endblock %}
+        {% elif is_direct_link and direct_url %}
+        <!-- 직접 다운로드 링크 -->
+        <div class="view-options">
+            <a href="{{ direct_url }}" class="btn btn-success" target="_blank" rel="noopener" download>
+                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            </a>
 
-{% block extra_js %}
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
+        </div>
+
+        {% else %}
+        <!-- 기존 방식 (서버 다운로드) -->
+        <div class="view-options">
+            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            </a>
+
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 언어 드롭다운 처리
             const languageToggle = document.getElementById('languageToggle');
             const languageDrawer = document.getElementById('languageDrawer');
 
@@ -76,6 +259,91 @@
                         e.target !== languageToggle) {
                         languageDrawer.classList.remove('open');
                     }
+                });
+            }
+
+            // 화질 변경 처리
+            const qualityButtons = document.querySelectorAll('.quality-btn');
+            const mainVideo = document.getElementById('mainVideo');
+            const downloadButton = document.getElementById('downloadButton');
+
+            // 현재 선택된 품질 저장
+            let currentQuality = 'best';
+
+            if (qualityButtons.length > 0 && mainVideo) {
+                qualityButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        // 활성 버튼 변경
+                        qualityButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // 선택된 품질 저장
+                        currentQuality = this.dataset.quality;
+
+                        // 비디오 소스 변경
+                        const newUrl = this.dataset.url;
+                        const currentTime = mainVideo.currentTime;
+                        const wasPlaying = !mainVideo.paused;
+
+                        mainVideo.src = newUrl;
+                        mainVideo.currentTime = currentTime;
+
+                        // 다운로드 버튼 URL 변경
+                        if (downloadButton) {
+                            // 파일 ID 추출
+                            const fileIdMatch = newUrl.match(/\/stream\/([^/?]+)/);
+                            if (fileIdMatch && fileIdMatch[1]) {
+                                const fileId = fileIdMatch[1];
+                                // 새로운 다운로드 URL 생성
+                                const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
+                                console.log(`다운로드 URL 변경: ${downloadUrl}`);
+                                downloadButton.href = downloadUrl;
+                                // target과 rel 속성 확인 및 설정
+                                downloadButton.setAttribute('target', '_blank');
+                                downloadButton.setAttribute('rel', 'noopener');
+                            }
+                        }
+
+                        if (wasPlaying) {
+                            mainVideo.play();
+                        }
+                    });
+                });
+            }
+
+            // 페이지 로드 시 초기 다운로드 버튼 URL 설정
+            if (downloadButton && mainVideo) {
+                const source = mainVideo.querySelector('source');
+                if (source && source.src) {
+                    const fileIdMatch = source.src.match(/\/stream\/([^/?]+)/);
+                    if (fileIdMatch && fileIdMatch[1]) {
+                        const fileId = fileIdMatch[1];
+                        // 초기 다운로드 URL 설정
+                        const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
+                        console.log(`초기 다운로드 URL 설정: ${downloadUrl}`);
+                        downloadButton.href = downloadUrl;
+                        // target과 rel 속성 확인 및 설정
+                        downloadButton.setAttribute('target', '_blank');
+                        downloadButton.setAttribute('rel', 'noopener');
+                    }
+                }
+            }
+
+            // 비디오 에러 처리
+            if (mainVideo) {
+                mainVideo.addEventListener('error', function() {
+                    console.error('비디오 로딩 에러:', this.error);
+                    // 에러 시 폴백 처리 가능
+                });
+
+                mainVideo.addEventListener('loadstart', function() {
+                    console.log('비디오 로딩 시작');
+                });
+
+                mainVideo.addEventListener('canplay', function() {
+                    console.log('비디오 재생 준비 완료');
                 });
             }
         });
