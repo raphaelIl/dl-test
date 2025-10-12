@@ -263,11 +263,34 @@ def result(file_id):
 
 
 def has_ip_parameter(url):
-    """URL에 IP 파라미터가 있는지 확인"""
+    """URL에 IP 관련 파라미터가 있는지 확인 (다양한 형태의 IP 파라미터 감지)"""
     try:
+        # URL에서 쿼리스트링 부분만 추출
         parsed_url = urlparse(url)
-        query_params = parse_qs(parsed_url.query)
-        return 'ip' in query_params
+        query_string = parsed_url.query
+
+        if not query_string:
+            return False
+
+        # 다양한 IP 관련 파라미터 패턴들
+        ip_patterns = [
+            r'[?&]ip=',           # ip=
+            r'[?&]srcip=',        # srcIp=
+            r'[?&]client_?ip=',   # clientIp= 또는 client_ip=
+            r'[?&]user_?ip=',     # userIp= 또는 user_ip=
+            r'[?&]real_?ip=',     # realIp= 또는 real_ip=
+            r'[?&]remote_?ip=',   # remoteIp= 또는 remote_ip=
+            r'[?&]origin_?ip=',   # originIp= 또는 origin_ip=
+            r'[?&]source_?ip=',   # sourceIp= 또는 source_ip=
+        ]
+
+        # 모든 패턴 중 하나라도 매칭되면 True 반환
+        for pattern in ip_patterns:
+            if re.search(pattern, query_string, re.IGNORECASE):
+                return True
+
+        return False
+
     except Exception:
         return False
 
