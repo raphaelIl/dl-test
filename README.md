@@ -256,6 +256,115 @@ sequenceDiagram
     end
 ```
 
+## 스마트 "다운로드" 라우트의 실제 동작 원리
+
+### 🎯 핵심 개념: 다운로드 URL의 착각과 현실
+
+사용자가 `/download-file/xxx` 링크를 클릭해도 **실제로는 파일을 다운로드하지 않습니다**. 대신 **가장 효율적인 영상 접근 방법을 제공하는 스마트 라우터** 역할을 합니다.
+
+```mermaid
+flowchart TD
+    USER[사용자: /download-file/xxx 클릭] --> CHECK_STATUS[파일 상태 확인]
+    
+    CHECK_STATUS --> PRIORITY1{1순위: 스트리밍 정보 있음?}
+    
+    PRIORITY1 -->|YES| STREAM_CHECK{IP 파라미터 & STREAM_MODE?}
+    STREAM_CHECK -->|YES| PROXY[프록시로 스트리밍 제공]
+    STREAM_CHECK -->|NO| REDIRECT1[원본 스트리밍 URL로 리다이렉트]
+    
+    PRIORITY1 -->|NO| PRIORITY2{2순위: 직접 링크 있음?}
+    PRIORITY2 -->|YES| DIRECT_CHECK{IP 파라미터 & STREAM_MODE?}
+    DIRECT_CHECK -->|YES| PROXY2[프록시로 스트리밍 제공]
+    DIRECT_CHECK -->|NO| REDIRECT2[직접 링크로 리다이렉트]
+    
+    PRIORITY2 -->|NO| PRIORITY3{3순위: 서버 파일 있음?}
+    PRIORITY3 -->|YES| DOWNLOAD[실제 파일 다운로드]
+    PRIORITY3 -->|NO| FALLBACK[원본 URL로 리다이렉트]
+    
+    PROXY --> BROWSER[브라우저에서 영상 재생]
+    PROXY2 --> BROWSER
+    REDIRECT1 --> BROWSER
+    REDIRECT2 --> BROWSER
+    DOWNLOAD --> SAVE[파일 저장]
+    FALLBACK --> ORIGINAL[원본 사이트로 이동]
+```
+
+### 📊 우선순위별 처리 로직
+
+#### **1순위: 스트리밍 URL 우선 처리**
+```python
+# 스트리밍 정보가 있는 경우 처리
+streaming_info = status.get('streaming_info')
+if streaming_info:
+    if streaming_info.get('best_url'):
+        # IP 숨김 모드라면 프록시로 제공
+        if STREAM_MODE and has_ip_parameter(best_url):
+            return proxy_stream_video(best_url)  # 🎥 프록시 스트리밍
+        else:
+            return redirect(best_url)  # 🔄 원본 URL로 리다이렉트
+```
+
+#### **2순위: 직접 링크 처리**
+```python
+# 직접 다운로드 링크가 있는 경우
+if status.get('is_direct_link', False) and status.get('direct_url'):
+    return redirect(direct_url)  # 🔄 직접 링크로 리다이렉트
+```
+
+#### **3순위: 실제 파일 다운로드 (마지막 수단)**
+```python
+# 서버에 다운로드된 파일 제공 (fallback)
+if os.path.exists(download_path):
+    return send_file(file_path, as_attachment=True)  # 📁 실제 다운로드
+```
+
+### 🎬 실제 시나리오 예시
+
+```
+사용자 링크: https://devgrabs.com/download-file/d3cb6fc9-74dd-4387-959d-1f75dce5c2b2?quality=best
+
+실제 처리 과정:
+1. 파일 ID 확인: d3cb6fc9-74dd-4387-959d-1f75dce5c2b2
+2. 상태 조회: 메모리에서 해당 ID의 다운로드 상태 확인
+3. 스트리밍 정보 발견: streaming_info.best_url이 존재함
+4. HTTP 302 리다이렉트 실행:
+   → https://ev.phncdn.com/videos/202211/05/418917611/1080P_8000K_418917611.mp4?validfrom=...
+5. 브라우저: 실제 스트리밍 URL로 이동하여 영상 재생
+```
+
+### 🚀 이런 설계를 선택한 이유
+
+#### **사용자 경험 최적화**
+- 빠른 스트리밍이 가능하면 굳이 서버에 파일을 저장할 필요 없음
+- 브라우저 직접 재생으로 즉시 감상 가능
+- 동적 품질 선택 (`?quality=720`, `?quality=best`)
+
+#### **서버 리소스 절약**
+- 디스크 공간 절약 (스트리밍 우선)
+- 대역폭 절약 (프록시 모드가 아닌 경우)
+- 서버 부하 감소
+
+#### **유연한 폴백 시스템**
+- 스트리밍 실패 → 직접 링크 시도
+- 직접 링크 실패 → 서버 다운로드 시도
+- 모든 방법 실패 → 원본 사이트로 안내
+
+### 🔧 실제 네트워크 흐름
+
+```
+사용자 클릭: /download-file/xxx
+        ↓
+Flask 서버: 상태 확인 + 우선순위 판단 (< 1초)
+        ↓
+HTTP 302 Redirect: → 실제 스트리밍 URL
+        ↓
+사용자 브라우저: 리다이렉트 따라서 실제 영상 서버로 이동
+        ↓
+영상 재생: 원본 서버에서 직접 스트리밍
+```
+
+**결론:** `/download-file/`이라는 URL은 **다운로드 인터페이스**일 뿐, 실제로는 **가장 효율적인 영상 접근 방법을 제공하는 스마트 라우터**입니다!
+
 ## 도메인별 스마트 처리 전략
 ```mermaid
 flowchart TD
