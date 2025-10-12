@@ -1,3 +1,4 @@
+# TODO(2025.10.12.Sun): error message 기본 영어 -> 다국어로 컴파일
 """
 Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전 (스트리밍 우선)
 """
@@ -104,7 +105,7 @@ def download():
     video_url = request.form['video_url']
 
     if not video_url:
-        return render_template('index.html', error=_('URL을 입력해주세요.'))
+        return render_template('index.html', error=_('Please enter a URL.'))
 
     try:
         file_id = str(uuid.uuid4())
@@ -119,7 +120,7 @@ def download():
 
     except Exception as e:
         logging.error(f"예상치 못한 오류 (URL: {video_url}): {str(e)}", exc_info=True)
-        return render_template('index.html', error=f'{_("다운로드 중 오류가 발생했습니다")}: {str(e)}')
+        return render_template('index.html', error=f'{_("An error occurred during download")}: {str(e)}')
 
 
 @app.route('/set-language/<language>')
@@ -178,7 +179,7 @@ def check_status(file_id):
     """다운로드 상태 확인"""
     if not check_valid_file_id(file_id):
         logging.warning(f"유효하지 않은 file_id 상태 확인 시도: {file_id}")
-        return {'status': 'error', 'error': '유효하지 않은 파일 ID'}
+        return {'status': 'error', 'error': 'Invalid file ID'}
 
     status = get_status(file_id)
     if status.get('status') == 'completed':
@@ -206,7 +207,7 @@ def result(file_id):
     if status.get('streaming_info'):
         streaming_info = status.get('streaming_info')
         return render_template('download_result.html',
-                              title=status.get('title', '알 수 없는 제목'),
+                              title=status.get('title', 'Unknown Title'),
                               file_id=file_id,
                               url=status.get('url', ''),
                               streaming_info=streaming_info,
@@ -221,7 +222,7 @@ def result(file_id):
     # 직접 다운로드 링크가 있는 경우 (우선순위 2)
     if status.get('is_direct_link', False) and status.get('direct_url'):
         return render_template('download_result.html',
-                              title=status.get('title', '알 수 없는 제목'),
+                              title=status.get('title', 'Unknown Title'),
                               file_id=file_id,
                               url=status.get('url', ''),
                               direct_url=status.get('direct_url', ''),
@@ -250,7 +251,7 @@ def result(file_id):
                 file_size = readable_size(os.path.getsize(file_path))
 
     return render_template('download_result.html',
-                           title=status.get('title', _('다운로드 완료')),
+                           title=status.get('title', _('Download Complete')),
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
@@ -336,10 +337,10 @@ def proxy_stream_video(url):
 
     except requests.exceptions.RequestException as e:
         logging.error(f"스트리밍 프록시 중 네트워크 오류: {str(e)}")
-        return render_error(_("스트리밍 중 네트워크 오류가 발생했습니다."))
+        return render_error("A network error occurred during streaming.")
     except Exception as e:
         logging.error(f"스트리밍 프록시 중 오류: {str(e)}")
-        return render_error(_("스트리밍 중 오류가 발생했습니다."))
+        return render_error("An error occurred during streaming.")
 
 
 @app.route('/stream/<file_id>')
@@ -347,17 +348,17 @@ def stream_video(file_id):
     """비디오 스트리밍 엔드포인트"""
     try:
         if not check_valid_file_id(file_id):
-            return render_error(_("유효하지 않은 파일 ID입니다."))
+            return render_error("Invalid file ID.")
 
         # 상태 확인
         status = get_status(file_id)
         if not status or status.get('status') != 'completed':
-            return render_error(_("다운로드가 완료되지 않았습니다."))
+            return render_error("Download not completed.")
 
         # 스트리밍 정보 확인
         streaming_info = status.get('streaming_info')
         if not streaming_info or not streaming_info.get('best_url'):
-            return render_error(_("스트리밍 URL을 찾을 수 없습니다."))
+            return render_error("Streaming URL not found.")
 
         # 요청된 품질 파라미터 확인
         quality = request.args.get('quality', 'best')
@@ -376,7 +377,7 @@ def stream_video(file_id):
                 pass
 
         if not selected_url:
-            return render_error(_("요청된 품질의 스트리밍 URL을 찾을 수 없습니다."))
+            return render_error("Requested quality streaming URL not found.")
 
         # 스트리밍 모드 확인 및 IP 파라미터 검사
         if IP_HIDE_MODE and has_ip_parameter(selected_url):
@@ -389,7 +390,7 @@ def stream_video(file_id):
 
     except Exception as e:
         logging.error(f"스트리밍 중 오류: {str(e)}", exc_info=True)
-        return render_error(_("스트리밍 중 오류가 발생했습니다"), debug_message=str(e))
+        return render_error("An error occurred during streaming")
 
 
 @app.route('/download-file/<file_id>')
@@ -519,11 +520,11 @@ def download_file(file_id):
             return redirect(original_url)
 
         # 모든 방법 실패
-        return render_error(_("다운로드된 파일이 없습니다."))
+        return render_error("No downloaded file available.")
 
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류: {str(e)}", exc_info=True)
-        return render_error(_("파일 다운로드 중 오류가 발생했습니다"))
+        return render_error("An error occurred during file download")
 
 
 @app.route('/robots.txt')
