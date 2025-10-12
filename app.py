@@ -7,11 +7,12 @@ import uuid
 import logging
 import atexit
 import psutil
+import requests
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, parse_qs
 from datetime import datetime
 
-from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response, Response
 from flask_babel import Babel, gettext as _
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
@@ -261,6 +262,63 @@ def result(file_id):
                            languages=LANGUAGES)
 
 
+def has_ip_parameter(url):
+    """URL에 IP 파라미터가 있는지 확인"""
+    try:
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        return 'ip' in query_params
+    except Exception:
+        return False
+
+
+def proxy_stream_video(url):
+    """스트리밍 URL을 프록시로 제공"""
+    try:
+        # Range 헤더 처리를 위한 요청 헤더 설정
+        headers = {}
+
+        # 클라이언트의 Range 헤더가 있으면 전달
+        if 'Range' in request.headers:
+            headers['Range'] = request.headers['Range']
+
+        # User-Agent 설정
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+        # 원본 URL에서 스트리밍 데이터 요청
+        response = requests.get(url, headers=headers, stream=True, timeout=30)
+
+        # 응답 헤더 설정
+        def generate():
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+
+        # Flask Response 객체 생성
+        flask_response = Response(generate(), mimetype='video/mp4')
+
+        # 원본 응답의 중요한 헤더들을 복사
+        if 'Content-Length' in response.headers:
+            flask_response.headers['Content-Length'] = response.headers['Content-Length']
+        if 'Content-Range' in response.headers:
+            flask_response.headers['Content-Range'] = response.headers['Content-Range']
+        if 'Accept-Ranges' in response.headers:
+            flask_response.headers['Accept-Ranges'] = response.headers['Accept-Ranges']
+        else:
+            flask_response.headers['Accept-Ranges'] = 'bytes'
+
+        flask_response.status_code = response.status_code
+
+        return flask_response
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"스트리밍 프록시 중 네트워크 오류: {str(e)}")
+        return render_error(_("스트리밍 중 네트워크 오류가 발생했습니다."))
+    except Exception as e:
+        logging.error(f"스트리밍 프록시 중 오류: {str(e)}")
+        return render_error(_("스트리밍 중 오류가 발생했습니다."))
+
+
 @app.route('/stream/<file_id>')
 def stream_video(file_id):
     """비디오 스트리밍 엔드포인트"""
@@ -297,9 +355,14 @@ def stream_video(file_id):
         if not selected_url:
             return render_error(_("요청된 품질의 스트리밍 URL을 찾을 수 없습니다."))
 
-        # 스트리밍 URL로 리다이렉트
-        logging.info(f"스트리밍 리다이렉트: {file_id} -> {selected_url}")
-        return redirect(selected_url)
+        # 스트리밍 모드 확인 및 IP 파라미터 검사
+        if IP_HIDE_MODE and has_ip_parameter(selected_url):
+            logging.info(f"스트리밍 모드 활성화 - IP 파라미터 감지, 프록시로 제공: {file_id}")
+            return proxy_stream_video(selected_url)
+        else:
+            # 기존 방식: 직접 리다이렉트
+            logging.info(f"스트리밍 리다이렉트: {file_id} -> {selected_url}")
+            return redirect(selected_url)
 
     except Exception as e:
         logging.error(f"스트리밍 중 오류: {str(e)}", exc_info=True)
@@ -343,10 +406,15 @@ def download_file(file_id):
                             logging.info(f"매칭된 품질 URL 발견: {quality_num}p")
                             break
 
-                    # 일치하는 품질의 URL이 있으면 리다이렉트
+                    # 일치하는 품질의 URL이 있으면 처리
                     if matching_url:
-                        logging.info(f"선택된 품질({quality_num}p)로 리다이렉트: {matching_url[:50]}...")
-                        return redirect(matching_url)
+                        # 스트리밍 모드 확인 및 IP 파라미터 검사
+                        if IP_HIDE_MODE and has_ip_parameter(matching_url):
+                            logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: {quality_num}p")
+                            return proxy_stream_video(matching_url)
+                        else:
+                            logging.info(f"선택된 품질({quality_num}p)로 리다이렉트: {matching_url[:50]}...")
+                            return redirect(matching_url)
                     else:
                         logging.warning(f"요청된 품질({quality_num}p)에 맞는 URL을 찾지 못함")
                 except (ValueError, TypeError) as e:
@@ -355,14 +423,27 @@ def download_file(file_id):
             # best 품질이 요청되었거나 특정 품질을 찾지 못한 경우
             if streaming_info.get('best_url'):
                 best_quality = streaming_info.get('best_quality', '알 수 없음')
-                logging.info(f"최고 품질({best_quality}p)로 리다이렉트")
-                return redirect(streaming_info.get('best_url'))
+                best_url = streaming_info.get('best_url')
+
+                # 스트리밍 모드 확인 및 IP 파라미터 검사
+                if IP_HIDE_MODE and has_ip_parameter(best_url):
+                    logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: best({best_quality}p)")
+                    return proxy_stream_video(best_url)
+                else:
+                    logging.info(f"최고 품질({best_quality}p)로 리다이렉트")
+                    return redirect(best_url)
 
         # 직접 다운로드 링크가 있는 경우
         if status.get('is_direct_link', False) and status.get('direct_url'):
             direct_url = status.get('direct_url')
-            logging.info(f"직접 다운로드 링크로 리다이렉트: {direct_url[:50]}...")
-            return redirect(direct_url)
+
+            # 스트리밍 모드 확인 및 IP 파라미터 검사
+            if IP_HIDE_MODE and has_ip_parameter(direct_url):
+                logging.info(f"다운로드 - 직접 링크에서 IP 파라미터 감지, 프록시로 제공")
+                return proxy_stream_video(direct_url)
+            else:
+                logging.info(f"직접 다운로드 링크로 리다이렉트: {direct_url[:50]}...")
+                return redirect(direct_url)
 
         # 서버에 다운로드된 파일 제공 (fallback)
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
@@ -548,6 +629,7 @@ def init_app():
         logging.warning(f"다운로드 워커: {MAX_WORKERS}")
         logging.warning(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
         logging.warning(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
+        logging.warning(f"스트리밍 모드: {'활성화' if IP_HIDE_MODE else '비활성화'} (IP 파라미터 숨김: {'ON' if IP_HIDE_MODE else 'OFF'})")
 
     except Exception as e:
         logging.error(f"시작 정보 로깅 중 오류 발생: {str(e)}")

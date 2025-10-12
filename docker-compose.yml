@@ -28,6 +28,7 @@ services:
       - GUNICORN_ACCESS_LOGFILE=None # GUNICORN_ACCESS_LOGFILE=/app/logs/access.log
 #      - GUNICORN_ACCESS_LOG_FORMAT=%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s %(L)s
       - GUNICORN_ERROR_LOGFILE=/app/logs/error.log
+      - IP_HIDE_MODE=true
     logging:
       driver: "json-file"
       options:

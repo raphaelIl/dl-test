@@ -18,6 +18,9 @@ MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 100 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
+# 스트리밍 모드 설정 - IP 숨김 기능
+IP_HIDE_MODE = os.getenv('IP_HIDE_MODE', 'true').lower() in ('true', '1', 'yes', 'on')
+
 CACHE_CONFIG = {
     'css_js': os.getenv('CACHE_CSS_JS', '31536000,604800'),      # 브라우저 1년, CDN 1주일
     'media': os.getenv('CACHE_MEDIA', '31536000,31536000'),      # 브라우저/CDN 모두 1년
