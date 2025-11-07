@@ -1,17 +1,40 @@
+# robots.txt for GrabVideo - Free Video Downloader
+# https://devgrabs.com
+
 User-agent: *
 Allow: /
-Allow: /*/
 Allow: /static/
+Allow: /static/css/
+Allow: /static/img/
+Allow: /set-language/
 
-Disallow: /*/check-status/
-Disallow: /*/download-file/
-Disallow: /*/download-waiting/
-Disallow: /*/result/
+# Block dynamic download pages
 Disallow: /check-status/
 Disallow: /download-file/
 Disallow: /download-waiting/
+Disallow: /result/
+Disallow: /stream/
+Disallow: /download
 Disallow: /downloads/
 Disallow: /health
-Disallow: /result/
+Disallow: /__pycache__/
+Disallow: /logs/
 
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Sitemap location
 Sitemap: https://devgrabs.com/sitemap.xml
+
+# Specific user agents
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1

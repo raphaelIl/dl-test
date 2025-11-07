@@ -1,14 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset
       xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xhtml="http://www.w3.org/1999/xhtml"
+      xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
 <url>
   <loc>https://devgrabs.com/</loc>
-  <lastmod>2025-09-03T10:00:00+00:00</lastmod>
+  <lastmod>2025-11-07T00:00:00+00:00</lastmod>
+  <changefreq>daily</changefreq>
   <priority>1.00</priority>
+  <xhtml:link rel="alternate" hreflang="en" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="ko" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="ja" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="zh" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="es" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="pt" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="fr" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="id" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="th" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="vi" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="ur" href="https://devgrabs.com/" />
+  <xhtml:link rel="alternate" hreflang="x-default" href="https://devgrabs.com/" />
+  <image:image>
+    <image:loc>https://devgrabs.com/static/img/og-image.png</image:loc>
+    <image:title>GrabVideo - Free Video Downloader</image:title>
+    <image:caption>Download videos from YouTube, TikTok, Instagram, Facebook, Twitter</image:caption>
+  </image:image>
+  <image:image>
+    <image:loc>https://devgrabs.com/static/img/sharelink-1.png</image:loc>
+    <image:title>How to copy share link</image:title>
+  </image:image>
+  <image:image>
+    <image:loc>https://devgrabs.com/static/img/sharelink-2.png</image:loc>
+    <image:title>How to paste share link</image:title>
+  </image:image>
 </url>
 
 </urlset>

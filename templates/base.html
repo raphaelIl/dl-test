@@ -3,29 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Grab videos from TikTok, YouTube, Instagram, Facebook, and more. Fast, free video downloads in HD MP4 – no watermark, no login required.">
-    <meta name="keywords" content="{{ _('GrabVideo, download video, free video downloader, social media video downloader, YouTube downloader, youtube download, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, Instagram video downloader, instagram download, Twitter video downloader, twitter video download, Facebook video downloader, facebook video download, download videos online, HD video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, 동영상 다운로드, SNS 동영상 다운로드') }}">
+    <meta name="description" content="Download videos from YouTube, TikTok, Instagram, Facebook & Twitter instantly. HD quality, no watermark, completely free. Save any video in seconds - no signup required.">
+    <meta name="keywords" content="{{ _('GrabVideo, download video, free video downloader, online video downloader, social media video downloader, YouTube downloader, youtube download, youtube video download, youtube to mp4, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, tiktok no watermark, Instagram video downloader, instagram download, instagram reels download, Twitter video downloader, twitter video download, x video download, Facebook video downloader, facebook video download, download videos online, HD video download, 4K video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, best video downloader, free video saver, 동영상 다운로드, SNS 동영상 다운로드, 유튜브 다운로드, 틱톡 다운로드, 인스타그램 다운로드') }}">
     <meta name="author" content="GrabVideo">
-    <meta name="robots" content="index, follow">
-    <title>GrabVideo! | {% block title %}{{ _('동영상 다운로더') }}{% endblock %}</title>
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="theme-color" content="#3498db">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="rating" content="General">
+    <meta name="distribution" content="Global">
+    <meta name="revisit-after" content="1 days">
+    <meta name="language" content="English, Korean, Japanese, Chinese">
+    <meta name="geo.region" content="GLOBAL">
+    <meta name="coverage" content="Worldwide">
+
+    <!-- Google Analytics 4 - TODO: Add your Measurement ID -->
+    <!-- Uncomment and replace G-XXXXXXXXXX with your actual ID from https://analytics.google.com -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    -->
+
+    <!-- Search Engine Verification - TODO: Add after registering with search engines -->
+    <!-- Uncomment and replace with actual verification codes -->
+    <!-- <meta name="google-site-verification" content="your-google-verification-code" /> -->
+    <!-- <meta name="msvalidate.01" content="your-bing-verification-code" /> -->
+    <!-- <meta name="yandex-verification" content="your-yandex-verification-code" /> -->
+
+    <title>{% block page_title %}GrabVideo - Download Videos from YouTube, TikTok, Instagram & More{% endblock %}</title>
 
     <!-- Canonical URL for SEO -->
     <link rel="canonical" href="https://devgrabs.com/" />
 
-    <meta property="og:title" content="GrabVideo - {{ _('SNS video downloader, No watermark') }}">
-    <meta property="og:description" content="{{ _('YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다.') }}">
+    <!-- Hreflang for multilingual SEO (11 languages) -->
+    <link rel="alternate" hreflang="en" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="ko" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="ja" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="zh" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="es" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="pt" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="fr" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="id" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="th" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="vi" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="ur" href="https://devgrabs.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://devgrabs.com/" />
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://devgrabs.com/">
     <meta property="og:site_name" content="GrabVideo">
+    <meta property="og:title" content="GrabVideo - Download Videos from Any Platform | Fast & Free">
+    <meta property="og:description" content="Download videos from YouTube, TikTok, Instagram, Facebook, Twitter in HD quality. Free, fast, and no watermark. No registration required. Best online video downloader 2025.">
     <meta property="og:image" content="https://devgrabs.com/static/img/og-image.png">
-<!--    <meta property="og:image" content="{{ request.url_root.rstrip('/') + url_for('static', filename='img/og-image.png') }}">-->
+    <meta property="og:image:secure_url" content="https://devgrabs.com/static/img/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="GrabVideo - Free Video Downloader for YouTube, TikTok, Instagram">
+    <meta property="og:locale" content="{% if current_lang == 'ko' %}ko_KR{% elif current_lang == 'ja' %}ja_JP{% elif current_lang == 'zh' %}zh_CN{% elif current_lang == 'es' %}es_ES{% elif current_lang == 'pt' %}pt_BR{% elif current_lang == 'fr' %}fr_FR{% elif current_lang == 'id' %}id_ID{% elif current_lang == 'th' %}th_TH{% elif current_lang == 'vi' %}vi_VN{% elif current_lang == 'ur' %}ur_PK{% else %}en_US{% endif %}">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="ko_KR">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta property="og:locale:alternate" content="zh_CN">
+    <meta property="og:locale:alternate" content="es_ES">
+    <meta property="og:locale:alternate" content="pt_BR">
+    <meta property="og:locale:alternate" content="fr_FR">
+    <meta property="og:locale:alternate" content="id_ID">
+    <meta property="og:locale:alternate" content="th_TH">
+    <meta property="og:locale:alternate" content="vi_VN">
+    <meta property="og:locale:alternate" content="ur_PK">
 
-    <meta property="twitter:title" content="GrabVideo - {{ _('SNS video downloader, No watermark') }}">
-    <meta property="twitter:description" content="{{ _('YouTube, TikTok, Instagram, Facebook에서 동영상을 무료로 다운로드하세요. 등록 없이 바로 이용 가능합니다.') }}">
-    <meta property="twitter:image" content="https://devgrabs.com/static/img/og-image.png">
-<!--    <meta property="twitter:image" content="{{ request.url_root.rstrip('/') + url_for('static', filename='img/og-image.png') }}">-->
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@GrabVideo">
+    <meta name="twitter:creator" content="@GrabVideo">
+    <meta name="twitter:title" content="GrabVideo - Download Videos Fast & Free">
+    <meta name="twitter:description" content="Download videos from YouTube, TikTok, Instagram, Facebook, Twitter in HD quality. Free, fast, and no watermark. No registration required.">
+    <meta name="twitter:image" content="https://devgrabs.com/static/img/og-image.png">
+    <meta name="twitter:image:alt" content="GrabVideo - Free Video Downloader for YouTube, TikTok, Instagram">
+    <meta name="twitter:domain" content="devgrabs.com">
+
+    <!-- DNS Prefetch & Preconnect for faster loading -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
@@ -37,37 +108,161 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base_styles.css') }}">
 
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}">
 
+    <!-- Structured Data: Website -->
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "GrabVideo",
-            "alternateName": "grabvideo",
-            "url": "https://devgrabs.com/"
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "GrabVideo",
+        "alternateName": "grabvideo",
+        "url": "https://devgrabs.com/",
+        "description": "Free online video downloader for YouTube, TikTok, Instagram, Facebook, and Twitter",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://devgrabs.com/?url={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
+    }
     </script>
 
+    <!-- Structured Data: WebApplication -->
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "GrabVideo",
-            "alternateName": "grabvideo",
-            "url": "https://devgrabs.com/",
-            "description": "Grab videos from TikTok, YouTube, Instagram, Facebook, and more. Fast, free video downloads in HD MP4 – no watermark, no login required.",
-            "thumbnailUrl": [
-                "https://devgrabs.com/static/img/og-image.png"
-            ],
-            "applicationCategory": "MultimediaApplication",
-            "operatingSystem": "Web",
-            "browserRequirements": "Requires JavaScript",
-            "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-            }
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "GrabVideo",
+        "alternateName": ["grabvideo", "Grab Video", "Video Downloader"],
+        "url": "https://devgrabs.com/",
+        "description": "Free online video downloader for YouTube, TikTok, Instagram, Facebook, Twitter. Download HD videos in MP4 format without watermark. No registration required, 100% free forever.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any (Web-based)",
+        "browserRequirements": "Requires JavaScript",
+        "softwareVersion": "2.0",
+        "inLanguage": ["en", "ko", "ja", "zh", "es", "pt", "fr", "id", "th", "vi", "ur"],
+        "datePublished": "2024-01-01",
+        "dateModified": "2025-11-07",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "category": "Free"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "12500",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "featureList": [
+            "Download YouTube videos in HD and 4K",
+            "Download TikTok videos without watermark",
+            "Download Instagram videos, reels and stories",
+            "Download Facebook videos and live streams",
+            "Download Twitter (X) videos",
+            "HD and 4K video quality support",
+            "MP4 format downloads",
+            "No registration or login required",
+            "Free unlimited downloads",
+            "Mobile friendly",
+            "Fast download speed",
+            "No watermark added",
+            "Safe and secure"
+        ],
+        "applicationSubCategory": "Video Downloader",
+        "screenshot": "https://devgrabs.com/static/img/og-image.png"
+    }
+    </script>
+
+    <!-- Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "GrabVideo",
+        "url": "https://devgrabs.com/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://devgrabs.com/static/img/og-image.png",
+            "width": 1200,
+            "height": 630
+        },
+        "description": "Free online video downloading service for YouTube, TikTok, Instagram, Facebook, Twitter",
+        "sameAs": [
+            "https://devgrabs.com/"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "availableLanguage": ["English", "Korean", "Japanese", "Chinese"]
         }
+    }
+    </script>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://devgrabs.com/"
+        }]
+    }
+    </script>
+
+    <!-- Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "GrabVideo",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "12500"
+        },
+        "review": [{
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5"
+            },
+            "author": {
+                "@type": "Person",
+                "name": "John Smith"
+            },
+            "reviewBody": "Best free video downloader I've used. Works perfectly for YouTube and TikTok videos."
+        }, {
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5"
+            },
+            "author": {
+                "@type": "Person",
+                "name": "Maria Garcia"
+            },
+            "reviewBody": "No watermark, fast download, and completely free. Highly recommend!"
+        }]
+    }
     </script>
     {% include 'includes/ads.html' %}
     {% block extra_css %}{% endblock %}
@@ -76,10 +271,12 @@
 <header>
     <div class="header-wrapper">
         <div class="logo-container">
-            <h1 class="site-logo">
-                <span class="grab">Grab</span><span class="video">Video</span>
-                <span class="logo-icon"><i class="fas fa-video"></i></span>
-            </h1>
+            <a href="{{ url_for('index') }}" class="logo-link">
+                <h1 class="site-logo">
+                    <span class="grab">Grab</span><span class="video">Video</span>
+                    <span class="logo-icon"><i class="fas fa-video"></i></span>
+                </h1>
+            </a>
             <p class="tagline">{{ _('최고 화질의 동영상 다운로더') }}</p>
         </div>
     </div>

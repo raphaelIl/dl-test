@@ -1,15 +1,108 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('동영상 다운로더') }}{% endblock %}
+{% block page_title %}GrabVideo - Download Videos from YouTube, TikTok, Instagram & More{% endblock %}
 
 {% block extra_css %}
 <meta name="google-adsense-account" content="ca-pub-7433898198535486">
 <link rel="preload" href="{{ url_for('static', filename='css/index_styles.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
+
+<!-- Structured Data: HowTo -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Download Videos from YouTube, TikTok, Instagram, Facebook",
+    "description": "Learn how to download videos from social media platforms using GrabVideo",
+    "image": "https://devgrabs.com/static/img/og-image.png",
+    "totalTime": "PT2M",
+    "estimatedCost": {
+        "@type": "MonetaryAmount",
+        "currency": "USD",
+        "value": "0"
+    },
+    "tool": [{
+        "@type": "HowToTool",
+        "name": "Web Browser"
+    }],
+    "step": [{
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Copy Share Link",
+        "text": "Click the 'Share' button below or in the menu of the video on each platform to copy the generated URL.",
+        "image": "https://devgrabs.com/static/img/sharelink-1.png",
+        "url": "https://devgrabs.com/#step1"
+    }, {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Paste Share Link",
+        "text": "Paste the copied share link into the input field above.",
+        "image": "https://devgrabs.com/static/img/sharelink-2.png",
+        "url": "https://devgrabs.com/#step2"
+    }, {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Download",
+        "text": "Click the download button and wait a moment to save the video.",
+        "url": "https://devgrabs.com/#step3"
+    }]
+}
+</script>
+
+<!-- Structured Data: FAQPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [{
+        "@type": "Question",
+        "name": "Does the downloaded video have a watermark?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No, GrabVideo does not add any watermark or logo to the downloaded videos. It is provided with the original quality."
+        }
+    }, {
+        "@type": "Question",
+        "name": "Can I use it on mobile?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, GrabVideo is perfectly optimized for mobile environments. You can use it on smartphones or tablets just like on PC."
+        }
+    }, {
+        "@type": "Question",
+        "name": "What is the downloadable file size?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can stably download videos up to 30 minutes in length. File size varies depending on the quality, but support for larger sizes or longer files is planned for the future."
+        }
+    }, {
+        "@type": "Question",
+        "name": "What quality can I download videos in?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GrabVideo downloads videos in the highest quality possible. If the original video is in HD quality, you can download it in the same quality, including 4K support."
+        }
+    }, {
+        "@type": "Question",
+        "name": "Is GrabVideo free?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, GrabVideo is 100% free. All features are provided for free with no hidden costs or premium plans. No registration or login required."
+        }
+    }, {
+        "@type": "Question",
+        "name": "Which platforms are supported?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GrabVideo supports major social media platforms including YouTube, TikTok, Instagram, Facebook, and Twitter (X). More platforms will be added in the future."
+        }
+    }]
+}
+</script>
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<article class="container" itemscope itemtype="https://schema.org/WebApplication">
     <div class="language-dropzone">
         <div class="lang-btn" id="languageToggle">
             <i class="fas fa-globe"></i>
@@ -34,10 +127,20 @@
         <i class="fas fa-video"></i>
     </div>
 
-    <h1>{{ _('최고 화질의 SNS 동영상 다운로더') }}</h1>
-    <p class="description">
+    <h1 itemprop="name">{{ _('최고 화질의 SNS 동영상 다운로더')}} Free</h1>
+    <p class="description" itemprop="description">
         {{ _('GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) 등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다.') | safe }}
     </p>
+    <!-- SEO: Hidden English keywords for search engines -->
+    <div class="sr-only">
+        Free online video downloader. Download videos from YouTube, TikTok, Instagram, Facebook, Twitter.
+        HD video download, 4K video download, MP4 format, no watermark, no registration required.
+        YouTube downloader, YouTube to MP4, TikTok downloader, TikTok no watermark, Instagram video download, Instagram reels downloader,
+        Facebook video downloader, Twitter video download, X video download.
+        Fast and easy video grabber for social media platforms. Best video downloader 2025.
+        Download YouTube videos, download TikTok videos, download Instagram videos, save videos online.
+        Free video saver, online video grabber, social media video downloader.
+    </div>
 
     {% if error %}
     <div class="error">
@@ -59,31 +162,31 @@
         </button>
     </form>
 
-    <div class="how-to-section">
-        <h3>{{ _('사용 방법') }}</h3>
+    <section class="how-to-section" id="how-to-use">
+        <h2>{{ _('사용 방법') }}</h2>
         <div class="step-cards">
-            <div class="step-card">
+            <div class="step-card" id="step1">
                 <div class="step-number">1</div>
                 <div class="step-icon">
                     <i class="fas fa-copy"></i>
                 </div>
-                <h4>{{ _('공유 Link 복사') }}</h4>
+                <h3>{{ _('공유 Link 복사') }}</h3>
                 <p>{{ _('각 플랫폼의 동영상 아래 또는 메뉴에 있는 \'공유\' 버튼을 클릭하여 생성된 URL을 복사하세요.') }}</p>
             </div>
-            <div class="step-card">
+            <div class="step-card" id="step2">
                 <div class="step-number">2</div>
                 <div class="step-icon">
                     <i class="fas fa-paste"></i>
                 </div>
-                <h4>{{ _('공유 Link 붙여넣기') }}</h4>
+                <h3>{{ _('공유 Link 붙여넣기') }}</h3>
                 <p>{{ _('복사한 공유 Link을 위 입력란에 붙여넣으세요.') }}</p>
             </div>
-            <div class="step-card">
+            <div class="step-card" id="step3">
                 <div class="step-number">3</div>
                 <div class="step-icon">
                     <i class="fas fa-download"></i>
                 </div>
-                <h4>{{ _('다운로드') }}</h4>
+                <h3>{{ _('다운로드') }}</h3>
                 <p>{{ _('다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다.') }}</p>
             </div>
             <div class="share-guide-images">
@@ -98,90 +201,92 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="how-to-section">
-        <h3>{{ _('GrabVideo의 특별한 기능') }}</h3>
+    <section class="how-to-section" id="features">
+        <h2>{{ _('GrabVideo의 특별한 기능') }}</h2>
         <div class="step-cards">
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-mobile-alt"></i>
                 </div>
-                <h4>{{ _('모바일 완벽 호환') }}</h4>
+                <h3>{{ _('모바일 완벽 호환') }}</h3>
                 <p>{{ _('스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <h4>{{ _('완전 무료') }}</h4>
+                <h3>{{ _('완전 무료') }}</h3>
                 <p>{{ _('모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-desktop"></i>
                 </div>
-                <h4>{{ _('브라우저 기반') }}</h4>
+                <h3>{{ _('브라우저 기반') }}</h3>
                 <p>{{ _('전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-ban"></i>
                 </div>
-                <h4>{{ _('워터마크 없음') }}</h4>
+                <h3>{{ _('워터마크 없음') }}</h3>
                 <p>{{ _('다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <h4>{{ _('최고 화질, 음질') }}</h4>
+                <h3>{{ _('최고 화질, 음질') }}</h3>
                 <p>{{ _('4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-                <h4>{{ _('안전한 다운로드') }}</h4>
+                <h3>{{ _('안전한 다운로드') }}</h3>
                 <p>{{ _('악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-user-plus"></i>
                 </div>
-                <h4>{{ _('회원가입 불필요') }}</h4>
+                <h3>{{ _('회원가입 불필요') }}</h3>
                 <p>{{ _('계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다.') }}</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-tachometer-alt"></i>
                 </div>
-                <h4>{{ _('빠른 다운로드') }}</h4>
+                <h3>{{ _('빠른 다운로드') }}</h3>
                 <p>{{ _('최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다.') }}</p>
             </div>
         </div>
-    </div>
-    <div class="site-title">{{ _('지원하는 플랫폼') }}</div>
-    <div class="supported-sites">
-        <a href="https://www.youtube.com" title="YouTube" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-youtube site-icon"></i>
-        </a>
-        <a href="https://www.instagram.com" title="Instagram" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-instagram site-icon"></i>
-        </a>
-        <a href="https://www.tiktok.com" title="TikTok" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-tiktok site-icon"></i>
-        </a>
-        <a href="https://www.facebook.com" title="Facebook(Meta)" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-facebook site-icon"></i>
-        </a>
-        <a href="https://twitter.com" title="Twitter" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-twitter site-icon"></i>
-        </a>
-    </div>
+    </section>
+    <section class="platform-section" id="supported-platforms">
+        <h2 class="site-title">{{ _('지원하는 플랫폼') }}</h2>
+        <div class="supported-sites">
+            <a href="https://www.youtube.com" title="YouTube" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-youtube site-icon"></i>
+            </a>
+            <a href="https://www.instagram.com" title="Instagram" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-instagram site-icon"></i>
+            </a>
+            <a href="https://www.tiktok.com" title="TikTok" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-tiktok site-icon"></i>
+            </a>
+            <a href="https://www.facebook.com" title="Facebook(Meta)" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-facebook site-icon"></i>
+            </a>
+            <a href="https://twitter.com" title="Twitter" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-twitter site-icon"></i>
+            </a>
+        </div>
+    </section>
 
-    <div class="how-to-section">
-        <h3>{{ _('자주 묻는 질문') }}</h3>
+    <section class="how-to-section" id="faq">
+        <h2>{{ _('자주 묻는 질문') }}(FAQ)</h2>
         <div class="faq-section">
             <div class="faq-item">
                 <div class="faq-question">
@@ -263,15 +368,15 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
+</article>
 
-<div class="legal-notice">
+<aside class="legal-notice">
     <h4>{{ _('이용 안내') }}</h4>
     <p>
         {{ _('GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요.') }}
     </p>
-</div>
+</aside>
 {% endblock %}
 
 {% block extra_js %}

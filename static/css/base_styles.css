@@ -7,6 +7,19 @@
     --card-color: #ffffff;
 }
 
+/* Screen reader only - for SEO and accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background-color: var(--background-color);
@@ -30,6 +43,16 @@ header {
 
 .logo-container {
     display: inline-block;
+}
+
+.logo-link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.logo-link:hover {
+    opacity: 0.8;
 }
 
 .site-logo {

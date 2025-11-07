@@ -212,12 +212,19 @@ form button i {
     text-align: center;
 }
 
+.platform-section {
+    margin: 40px auto;
+    text-align: center;
+    max-width: 1200px;
+}
+
 .supported-sites {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 20px;
     margin-bottom: 30px;
+    margin-top: 30px;
 }
 
 .supported-sites a {
@@ -256,7 +263,10 @@ form button i {
     max-width: 1200px;
 }
 
-.how-to-section h3 {
+.how-to-section h2,
+.how-to-section h3,
+.platform-section h2,
+.site-title {
     margin-bottom: 20px;
     color: #2c3e50;
     font-weight: 700;
@@ -265,6 +275,13 @@ form button i {
     padding-bottom: 8px;
     text-align: center;
     width: 100%;
+}
+
+.step-card h3 {
+    font-size: 1.1rem;
+    margin: 10px 0;
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .step-cards {
@@ -438,6 +455,7 @@ form button i {
     text-align: center;
 }
 
+.legal-notice h2,
 .legal-notice h4 {
     color: #444;
     font-size: 1.2rem;
@@ -446,6 +464,7 @@ form button i {
     display: inline-block;
 }
 
+.legal-notice h2::after,
 .legal-notice h4::after {
     display: none;
 }
