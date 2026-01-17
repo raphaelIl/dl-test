@@ -114,6 +114,14 @@ def download():
         if not os.path.exists(download_path):
             os.makedirs(download_path)
 
+        # 초기 상태 먼저 설정 (레이스 컨디션 방지)
+        update_status(file_id, {
+            'status': 'processing',
+            'progress': 0,
+            'message': 'Initializing...',
+            'timestamp': datetime.now().timestamp()
+        })
+
         executor.submit(download_video, video_url, file_id, download_path, update_status)
         update_download_stats('started')
         return redirect(url_for('download_waiting', file_id=file_id))

@@ -244,21 +244,8 @@
                 })
                 .catch(error => {
                     console.error('Status check error:', error);
-
-                    const progressBar = document.getElementById('progress-bar');
-                    const progressText = document.getElementById('progress-text');
-                    const currentWidth = parseFloat(progressBar.style.width || '0');
-
-                    if (currentWidth < 95) {
-                        const increment = Math.max(0.2, Math.min(1, 95 - currentWidth) / 30);
-                        const newProgress = currentWidth + increment;
-                        progressBar.style.width = `${newProgress}%`;
-                        progressText.textContent = `${Math.round(newProgress)}%`;
-                    } else {
-                        setTimeout(() => {
-                            window.location.href = `/result/${fileId}`;
-                        }, 5000);
-                    }
+                    // 네트워크 에러 시 강제 리다이렉트 하지 않고 폴링 계속
+                    // 실제 완료 여부는 서버 status로만 판단
                 });
         }
     </script>

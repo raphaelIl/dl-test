@@ -14,9 +14,12 @@ services:
     environment:
       - DOWNLOAD_FOLDER=downloads
       - MAX_FILE_SIZE_MB=2048
-      - GUNICORN_WORKERS=3
-      - GUNICORN_THREADS=4
-      - MAX_WORKERS=2
+      - GUNICORN_WORKERS=1 # todo: 메모리 공유 이슈
+      - GUNICORN_THREADS=6
+      - MAX_WORKERS=3
+#      - GUNICORN_WORKERS=3
+#      - GUNICORN_THREADS=4
+#      - MAX_WORKERS=2
       - STATUS_MAX_AGE=1800
       - STATUS_CLEANUP_INTERVAL=60
 #      - DOWNLOAD_LIMITS=60 per 5 minutes
