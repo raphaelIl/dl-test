@@ -3,7 +3,7 @@ FROM python:3.11-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
-    ffmpeg \
+    curl unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,12 +15,25 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt && \
     pip install --no-cache-dir --user --upgrade "yt-dlp[default]"
 
+# deno 설치 (yt-dlp JavaScript 런타임)
+RUN curl -fsSL https://deno.land/install.sh | sh
+
 FROM python:3.11-slim
+
+# 런타임 의존성: ffmpeg (yt-dlp 비디오+오디오 병합에 필요)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# builder에서 빌드된 결과물만 복사
+# - /root/.local: Python 패키지 (yt-dlp, flask 등)
+# - /root/.deno: deno 바이너리 (yt-dlp JS 런타임)
 COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /root/.deno /root/.deno
+ENV PATH="/root/.deno/bin:/root/.local/bin:${PATH}"
 
 RUN mkdir -p /app/downloads /app/logs && \
     touch /app/logs/error.log /app/logs/app.log && \
