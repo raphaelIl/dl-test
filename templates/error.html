@@ -59,7 +59,7 @@
             <div class="language-drawer" id="languageDrawer">
                 <div class="language-options" id="languageOptions">
                     {% for code, name in languages.items() %}
-                        <a href="/{{ code }}{{ request.path[3:] if request.path|length > 3 else '/' }}"
+                        <a href="{{ url_for('set_language', language=code) }}"
                            class="language-option {% if current_lang == code %}active{% endif %}"
                            data-lang-code="{{ code }}">
                             <span class="language-flag">{{ code }}</span>

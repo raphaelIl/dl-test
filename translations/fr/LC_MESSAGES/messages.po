@@ -943,3 +943,7 @@ msgstr "Le fichier n'existe pas."
 
 msgid "파일 제공 중 오류가 발생했습니다."
 msgstr "Une erreur s'est produite lors de la fourniture du fichier."
+
+#: app.py:587 app.py:633
+msgid "다운로드가 완료되지 않았습니다."
+msgstr "Le téléchargement n'est pas terminé."
