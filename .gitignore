@@ -6,4 +6,14 @@
 /.env
 /download_stats.json
 /app_monolithic_backup.py
-/dl-test.iml
+
+# IDE / OS
+*.iml
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Build artifacts
+*.pot

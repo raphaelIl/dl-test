@@ -39,28 +39,6 @@ def get_random_user_agent():
     return random.choice(USER_AGENTS)
 
 
-def build_headers_for(url: str, *, ua: str | None = None, referer_mode: str = "root") -> dict:
-    """
-    HTTP 헤더 빌더 - 향상된 버전
-    referer_mode:
-      - "root": Referer = scheme://host/  (most compatible, RECOMMENDED)
-      - "page": Referer = input URL       (some sites require full page referer)
-    """
-    u = urlsplit(url)
-    origin = f"{u.scheme}://{u.netloc}"
-    referer = origin + "/" if referer_mode == "root" else url
-    headers = {
-        "Accept": "*/*",
-        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Connection": "keep-alive",
-        "Origin": origin,
-        "Referer": referer,
-    }
-    if ua:
-        headers["User-Agent"] = ua
-    return headers
-
-
 def default_user_agent():
     """기본 User-Agent 반환"""
     return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
