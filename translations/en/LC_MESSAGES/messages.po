@@ -74,6 +74,18 @@ msgstr "Source:"
 msgid "파일 다운로드"
 msgstr "Download File"
 
+#: templates/download_result.html
+msgid "바로 보기"
+msgstr "View"
+
+#: templates/download_result.html
+msgid "다운로드"
+msgstr "Download"
+
+#: templates/download_result.html
+msgid "모바일에서 다운로드가 안 되면 \"다운로드\" 버튼을 이용하세요."
+msgstr "If download doesn't work on mobile, use the \"Download\" button."
+
 #: templates/download_result.html:51 templates/download_waiting.html:84 templates/download_waiting.html:105 templates/error.html:87
 msgid "메인으로 돌아가기"
 msgstr "Back to Main"
@@ -862,3 +874,72 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
+
+#: templates/download_prepare.html
+msgid "다운로드 준비 중..."
+msgstr "Preparing download..."
+
+#: templates/download_prepare.html
+msgid "잠시만 기다려주세요. 다운로드가 곧 시작됩니다."
+msgstr "Please wait. Your download will start shortly."
+
+#: templates/download_prepare.html
+msgid "다운로드가 자동으로 시작되지 않으면 아래 버튼을 클릭하세요."
+msgstr "If the download doesn't start automatically, click the button below."
+
+#: templates/download_prepare.html
+msgid "수동으로 다운로드"
+msgstr "Download Manually"
+
+#: templates/download_prepare.html
+msgid "다운로드 실패"
+msgstr "Download Failed"
+
+#: templates/download_prepare.html
+msgid "다운로드 중 오류가 발생했습니다. 다시 시도해주세요."
+msgstr "An error occurred during download. Please try again."
+
+#: templates/download_prepare.html
+msgid "다시 시도"
+msgstr "Retry"
+
+#: app.py
+msgid "다운로드 준비 중 오류가 발생했습니다."
+msgstr "An error occurred while preparing the download."
+
+#: templates/download_prepare.html (server download)
+msgid "서버에서 파일을 다운로드하고 있습니다. 잠시만 기다려주세요."
+msgstr "Downloading file from server. Please wait."
+
+msgid "다운로드 시작 중..."
+msgstr "Starting download..."
+
+msgid "영상 길이와 서버 상태에 따라 시간이 걸릴 수 있습니다."
+msgstr "This may take some time depending on video length and server status."
+
+msgid "파일이 준비되었습니다. 다운로드가 자동으로 시작됩니다."
+msgstr "File is ready. Download will start automatically."
+
+msgid "파일 크기:"
+msgstr "File size:"
+
+msgid "다운로드 진행 중..."
+msgstr "Downloading..."
+
+msgid "다운로드 요청 중..."
+msgstr "Requesting download..."
+
+msgid "다운로드 시작 중 오류가 발생했습니다."
+msgstr "An error occurred while starting the download."
+
+msgid "파일이 준비되지 않았습니다."
+msgstr "File is not ready."
+
+msgid "파일을 찾을 수 없습니다."
+msgstr "File not found."
+
+msgid "파일이 존재하지 않습니다."
+msgstr "File does not exist."
+
+msgid "파일 제공 중 오류가 발생했습니다."
+msgstr "An error occurred while serving the file."

@@ -296,8 +296,14 @@ def has_ip_parameter(url):
         return False
 
 
-def proxy_stream_video(url):
-    """스트리밍 URL을 프록시로 제공"""
+def proxy_stream_video(url, force_download=False, filename=None):
+    """스트리밍 URL을 프록시로 제공
+
+    Args:
+        url: 스트리밍 URL
+        force_download: True면 Content-Disposition: attachment 헤더 추가 (다운로드 강제)
+        filename: 다운로드 시 파일명 (없으면 기본값 사용)
+    """
     try:
         # Range 헤더 처리를 위한 요청 헤더 설정
         headers = {}
@@ -312,11 +318,19 @@ def proxy_stream_video(url):
         # 원본 URL에서 스트리밍 데이터 요청
         response = requests.get(url, headers=headers, stream=True, timeout=30)
 
+        # 응답 상태 코드 확인 - 4xx, 5xx 에러 시 조기 반환
+        if response.status_code >= 400:
+            logging.error(f"프록시 대상 URL에서 에러 응답: {response.status_code}, URL: {url[:100]}...")
+            return render_error(f"Video source returned error ({response.status_code}). Please try again.")
+
         # 응답 헤더 설정
         def generate():
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    yield chunk
+            try:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        yield chunk
+            except Exception as e:
+                logging.error(f"스트리밍 중 청크 읽기 오류: {str(e)}")
 
         # Flask Response 객체 생성
         flask_response = Response(generate(), mimetype='video/mp4')
@@ -331,10 +345,19 @@ def proxy_stream_video(url):
         else:
             flask_response.headers['Accept-Ranges'] = 'bytes'
 
+        # 다운로드 강제 모드: Content-Disposition: attachment 헤더 추가
+        if force_download:
+            safe_filename = filename if filename else 'video.mp4'
+            encoded_filename = quote(safe_filename)
+            flask_response.headers['Content-Disposition'] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
+
         flask_response.status_code = response.status_code
 
         return flask_response
 
+    except requests.exceptions.Timeout:
+        logging.error(f"프록시 타임아웃: {url[:100]}...")
+        return render_error("Connection timed out. Please try again.")
     except requests.exceptions.RequestException as e:
         logging.error(f"스트리밍 프록시 중 네트워크 오류: {str(e)}")
         return render_error("A network error occurred during streaming.")
@@ -393,17 +416,167 @@ def stream_video(file_id):
         return render_error("An error occurred during streaming")
 
 
-@app.route('/download-file/<file_id>')
-def download_file(file_id):
-    """파일 다운로드 - 선택한 품질에 따라 다운로드 URL 결정"""
-    try:
-        # 요청된 품질 확인 (URL 파라미터에서 가져옴)
-        quality = request.args.get('quality', 'best')
+def do_server_download(file_id, video_url, download_path, quality='best'):
+    """서버 다운로드 실행 (백그라운드 태스크)"""
+    from download_utils import try_download_enhanced
 
-        # 상세 로깅 추가
-        client_ip = get_client_ip()
-        user_agent = request.headers.get('User-Agent', '')
-        logging.info(f"파일 다운로드 요청: file_id={file_id}, quality={quality}, IP={client_ip}, UA={user_agent[:50]}")
+    try:
+        # 다운로드 시작 상태 업데이트
+        update_status(file_id, {'server_download_status': 'downloading', 'server_download_progress': 0})
+
+        logging.info(f"서버 다운로드 시작: {file_id}, URL: {video_url[:50]}...")
+
+        # 실제 다운로드 실행
+        success = try_download_enhanced(video_url, download_path, use_cookies=True)
+
+        if success:
+            # 다운로드된 파일 확인
+            files = safely_access_files(download_path)
+            if files:
+                file_name = files[0]
+                file_path = safe_path_join(download_path, file_name)
+                if os.path.isfile(file_path):
+                    file_size = os.path.getsize(file_path)
+                    logging.info(f"서버 다운로드 성공: {file_name} ({readable_size(file_size)})")
+
+                    update_status(file_id, {
+                        'server_download_status': 'completed',
+                        'server_download_progress': 100,
+                        'server_file_name': file_name,
+                        'server_file_size': readable_size(file_size)
+                    })
+                    return
+
+        # 다운로드 실패
+        logging.error(f"서버 다운로드 실패: {file_id}")
+        update_status(file_id, {'server_download_status': 'failed', 'server_download_error': 'Download failed'})
+
+    except Exception as e:
+        logging.error(f"서버 다운로드 오류: {file_id} - {str(e)}", exc_info=True)
+        update_status(file_id, {'server_download_status': 'failed', 'server_download_error': str(e)})
+
+
+@app.route('/api/start-server-download/<file_id>', methods=['POST'])
+def api_start_server_download(file_id):
+    """서버 다운로드 시작 API"""
+    from flask import jsonify
+
+    try:
+        if not check_valid_file_id(file_id):
+            return jsonify({'success': False, 'error': 'Invalid file ID'}), 400
+
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            return jsonify({'success': False, 'error': 'Video info not found'}), 400
+
+        # 이미 다운로드 중이거나 완료된 경우
+        server_status = status.get('server_download_status')
+        if server_status == 'downloading':
+            return jsonify({'success': True, 'status': 'downloading', 'message': 'Download already in progress'})
+        if server_status == 'completed' and status.get('server_file_name'):
+            return jsonify({'success': True, 'status': 'completed', 'message': 'File already downloaded'})
+
+        # 원본 URL 가져오기
+        video_url = status.get('url')
+        if not video_url:
+            return jsonify({'success': False, 'error': 'Original URL not found'}), 400
+
+        # 다운로드 경로 설정
+        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
+        os.makedirs(download_path, exist_ok=True)
+
+        # 백그라운드에서 다운로드 시작
+        quality = request.args.get('quality', 'best')
+        executor.submit(do_server_download, file_id, video_url, download_path, quality)
+
+        return jsonify({'success': True, 'status': 'started', 'message': 'Download started'})
+
+    except Exception as e:
+        logging.error(f"서버 다운로드 시작 오류: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/download-status/<file_id>')
+def api_download_status(file_id):
+    """서버 다운로드 상태 확인 API"""
+    from flask import jsonify
+
+    try:
+        if not check_valid_file_id(file_id):
+            return jsonify({'success': False, 'error': 'Invalid file ID'}), 400
+
+        status = get_status(file_id)
+        if not status:
+            return jsonify({'success': False, 'error': 'Status not found'}), 404
+
+        server_status = status.get('server_download_status', 'not_started')
+
+        response = {
+            'success': True,
+            'status': server_status,
+            'progress': status.get('server_download_progress', 0),
+        }
+
+        if server_status == 'completed':
+            response['file_name'] = status.get('server_file_name')
+            response['file_size'] = status.get('server_file_size')
+            response['download_url'] = url_for('serve_server_file', file_id=file_id)
+        elif server_status == 'failed':
+            response['error'] = status.get('server_download_error', 'Unknown error')
+
+        return jsonify(response)
+
+    except Exception as e:
+        logging.error(f"다운로드 상태 확인 오류: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/serve-file/<file_id>')
+def serve_server_file(file_id):
+    """서버에 다운로드된 파일 제공"""
+    try:
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
+
+        status = get_status(file_id)
+        if not status or status.get('server_download_status') != 'completed':
+            return render_error(_("파일이 준비되지 않았습니다."))
+
+        file_name = status.get('server_file_name')
+        if not file_name:
+            return render_error(_("파일을 찾을 수 없습니다."))
+
+        download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
+        file_path = safe_path_join(download_path, file_name)
+
+        if not os.path.isfile(file_path):
+            return render_error(_("파일이 존재하지 않습니다."))
+
+        # 파일 제공 (attachment로 다운로드)
+        title = status.get('title', 'video')
+        safe_title = re.sub(r'[<>:"/\\|?*]', '', title)[:100]
+        download_filename = f"{safe_title}.mp4"
+
+        response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
+        encoded_filename = quote(download_filename)
+        response.headers["Content-Disposition"] = f"attachment; filename=\"{download_filename}\"; filename*=UTF-8''{encoded_filename}"
+
+        return response
+
+    except Exception as e:
+        logging.error(f"파일 제공 오류: {str(e)}", exc_info=True)
+        return render_error(_("파일 제공 중 오류가 발생했습니다."))
+
+
+@app.route('/download-prepare/<file_id>')
+def download_prepare(file_id):
+    """다운로드 준비 페이지 - 서버 다운로드 후 파일 제공
+
+    URL 파라미터:
+        quality: 화질 선택 (best, 720, 1080 등)
+    """
+    try:
+        quality = request.args.get('quality', 'best')
 
         if not check_valid_file_id(file_id):
             return render_error(_("유효하지 않은 파일 ID입니다."))
@@ -412,6 +585,61 @@ def download_file(file_id):
         status = get_status(file_id)
         if not status or status.get('status') != 'completed':
             return render_error(_("다운로드가 완료되지 않았습니다."))
+
+        title = status.get('title', 'video')
+        thumbnail = status.get('thumbnail', '')
+
+        # 서버 다운로드 상태 확인
+        server_status = status.get('server_download_status', 'not_started')
+        server_file_ready = (server_status == 'completed' and status.get('server_file_name'))
+
+        return render_template('download_prepare.html',
+                               title=title,
+                               thumbnail=thumbnail,
+                               file_id=file_id,
+                               quality=quality,
+                               server_status=server_status,
+                               server_file_ready=server_file_ready)
+
+    except Exception as e:
+        logging.error(f"다운로드 준비 중 오류: {str(e)}", exc_info=True)
+        return render_error(_("다운로드 준비 중 오류가 발생했습니다."))
+
+
+@app.route('/download-file/<file_id>')
+def download_file(file_id):
+    """파일 다운로드 - 선택한 품질에 따라 다운로드 URL 결정
+
+    URL 파라미터:
+        quality: 화질 선택 (best, 720, 1080 등)
+        mode: 다운로드 모드 (proxy면 서버 프록시를 통해 다운로드 강제)
+    """
+    try:
+        # 요청된 품질 확인 (URL 파라미터에서 가져옴)
+        quality = request.args.get('quality', 'best')
+        mode = request.args.get('mode', '')  # proxy면 프록시 다운로드 강제
+
+        # 상세 로깅 추가
+        client_ip = get_client_ip()
+        user_agent = request.headers.get('User-Agent', '')
+        logging.info(f"파일 다운로드 요청: file_id={file_id}, quality={quality}, mode={mode}, IP={client_ip}, UA={user_agent[:50]}")
+
+        if not check_valid_file_id(file_id):
+            return render_error(_("유효하지 않은 파일 ID입니다."))
+
+        # 상태 확인
+        status = get_status(file_id)
+        if not status or status.get('status') != 'completed':
+            return render_error(_("다운로드가 완료되지 않았습니다."))
+
+        # 프록시 모드 여부 확인
+        force_proxy = (mode == 'proxy')
+
+        # 파일명 생성 (프록시 다운로드 시 사용)
+        title = status.get('title', 'video')
+        # 파일명에서 특수문자 제거
+        safe_title = re.sub(r'[<>:"/\\|?*]', '', title)[:100]
+        download_filename = f"{safe_title}.mp4"
 
         # 스트리밍 정보가 있는 경우 처리
         streaming_info = status.get('streaming_info')
@@ -432,10 +660,10 @@ def download_file(file_id):
 
                     # 일치하는 품질의 URL이 있으면 처리
                     if matching_url:
-                        # 스트리밍 모드 확인 및 IP 파라미터 검사
-                        if IP_HIDE_MODE and has_ip_parameter(matching_url):
-                            logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: {quality_num}p")
-                            return proxy_stream_video(matching_url)
+                        # 프록시 모드이거나 IP 파라미터가 있으면 프록시로 제공
+                        if force_proxy or (IP_HIDE_MODE and has_ip_parameter(matching_url)):
+                            logging.info(f"다운로드 - 프록시로 제공: {quality_num}p (force_proxy={force_proxy})")
+                            return proxy_stream_video(matching_url, force_download=force_proxy, filename=download_filename)
                         else:
                             logging.info(f"선택된 품질({quality_num}p)로 리다이렉트: {matching_url[:50]}...")
                             return redirect(matching_url)
@@ -449,10 +677,10 @@ def download_file(file_id):
                 best_quality = streaming_info.get('best_quality', '알 수 없음')
                 best_url = streaming_info.get('best_url')
 
-                # 스트리밍 모드 확인 및 IP 파라미터 검사
-                if IP_HIDE_MODE and has_ip_parameter(best_url):
-                    logging.info(f"다운로드 - 스트리밍 모드 활성화, IP 파라미터 감지, 프록시로 제공: best({best_quality}p)")
-                    return proxy_stream_video(best_url)
+                # 프록시 모드이거나 IP 파라미터가 있으면 프록시로 제공
+                if force_proxy or (IP_HIDE_MODE and has_ip_parameter(best_url)):
+                    logging.info(f"다운로드 - 프록시로 제공: best({best_quality}p) (force_proxy={force_proxy})")
+                    return proxy_stream_video(best_url, force_download=force_proxy, filename=download_filename)
                 else:
                     logging.info(f"최고 품질({best_quality}p)로 리다이렉트")
                     return redirect(best_url)
@@ -461,10 +689,10 @@ def download_file(file_id):
         if status.get('is_direct_link', False) and status.get('direct_url'):
             direct_url = status.get('direct_url')
 
-            # 스트리밍 모드 확인 및 IP 파라미터 검사
-            if IP_HIDE_MODE and has_ip_parameter(direct_url):
-                logging.info(f"다운로드 - 직접 링크에서 IP 파라미터 감지, 프록시로 제공")
-                return proxy_stream_video(direct_url)
+            # 프록시 모드이거나 IP 파라미터가 있으면 프록시로 제공
+            if force_proxy or (IP_HIDE_MODE and has_ip_parameter(direct_url)):
+                logging.info(f"다운로드 - 직접 링크 프록시로 제공 (force_proxy={force_proxy})")
+                return proxy_stream_video(direct_url, force_download=force_proxy, filename=download_filename)
             else:
                 logging.info(f"직접 다운로드 링크로 리다이렉트: {direct_url[:50]}...")
                 return redirect(direct_url)

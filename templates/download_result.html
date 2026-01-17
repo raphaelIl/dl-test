@@ -111,6 +111,27 @@
                 text-align: center;
             }
         }
+
+        /* 모바일 안내 메시지 */
+        .mobile-notice {
+            display: none;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #856404;
+            text-align: center;
+        }
+
+        .mobile-notice.show {
+            display: block;
+        }
+
+        .mobile-notice i {
+            margin-right: 8px;
+        }
     </style>
 {% endblock %}
 
@@ -197,34 +218,56 @@
         </div>
         {% endif %}
 
-        <!-- 버튼 그룹 - 모든 버튼을 한 곳에 배치 -->
+        <!-- 버튼 그룹 - 바로 보기 / 다운로드 분리 -->
         <div class="view-options">
             {% if streaming_info %}
-            <!-- 다운로드 버튼 - JavaScript에서 동적으로 링크를 생성할 예정 -->
-            <a href="javascript:void(0);" class="btn btn-success" id="downloadButton" onclick="openDownloadInNewTab()">
-                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            <!-- 바로 보기 버튼 - 외부 URL로 리다이렉트 (서버 비용 없음) -->
+            <a href="javascript:void(0);" class="btn btn-primary" id="viewButton" target="_blank" rel="noopener">
+                <i class="fas fa-play"></i> {{ _('바로 보기') }}
+            </a>
+            <!-- 다운로드 버튼 - 프록시를 통한 다운로드 (모바일 지원) -->
+            <a href="javascript:void(0);" class="btn btn-success" id="downloadButton" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('다운로드') }}
             </a>
             {% else %}
-            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
-                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            <a href="{{ url_for('download_file', file_id=file_id) }}" class="btn btn-primary" target="_blank" rel="noopener">
+                <i class="fas fa-play"></i> {{ _('바로 보기') }}
+            </a>
+            <a href="{{ url_for('download_prepare', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('다운로드') }}
             </a>
             {% endif %}
 
-            <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
+        </div>
+
+        <!-- 모바일 안내 메시지 -->
+        <div class="mobile-notice" id="mobileNotice">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ _('모바일에서 다운로드가 안 되면 "다운로드" 버튼을 이용하세요.') }}</span>
         </div>
 
         {% elif is_direct_link and direct_url %}
         <!-- 직접 다운로드 링크 -->
         <div class="view-options">
-            <a href="{{ direct_url }}" class="btn btn-success" target="_blank" rel="noopener" download>
-                <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
+            <a href="{{ direct_url }}" class="btn btn-primary" target="_blank" rel="noopener">
+                <i class="fas fa-play"></i> {{ _('바로 보기') }}
+            </a>
+            <a href="{{ url_for('download_prepare', file_id=file_id) }}" class="btn btn-success" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> {{ _('다운로드') }}
             </a>
 
-            <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
+        </div>
+
+        <!-- 모바일 안내 메시지 -->
+        <div class="mobile-notice" id="mobileNotice">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ _('모바일에서 다운로드가 안 되면 "다운로드" 버튼을 이용하세요.') }}</span>
         </div>
 
         {% else %}
@@ -234,7 +277,7 @@
                 <i class="fas fa-download"></i> {{ _('파일 다운로드') }}
             </a>
 
-            <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
                 <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
             </a>
         </div>
@@ -243,6 +286,17 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 모바일 감지
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+
+            // 모바일 안내 메시지 표시
+            const mobileNotice = document.getElementById('mobileNotice');
+            if (mobileNotice && isMobile()) {
+                mobileNotice.classList.add('show');
+            }
+
             // 언어 드롭다운 처리
             const languageToggle = document.getElementById('languageToggle');
             const languageDrawer = document.getElementById('languageDrawer');
@@ -265,10 +319,25 @@
             // 화질 변경 처리
             const qualityButtons = document.querySelectorAll('.quality-btn');
             const mainVideo = document.getElementById('mainVideo');
+            const viewButton = document.getElementById('viewButton');
             const downloadButton = document.getElementById('downloadButton');
 
             // 현재 선택된 품질 저장
             let currentQuality = 'best';
+
+            // 버튼 URL 업데이트 함수
+            function updateButtonUrls(fileId, quality) {
+                if (viewButton) {
+                    // 바로 보기: 기존 리다이렉트 방식
+                    const viewUrl = `/download-file/${fileId}?quality=${quality}`;
+                    viewButton.href = viewUrl;
+                }
+                if (downloadButton) {
+                    // 다운로드: 준비 페이지로 이동 (안내 메시지 후 다운로드 시작)
+                    const downloadUrl = `/download-prepare/${fileId}?quality=${quality}`;
+                    downloadButton.href = downloadUrl;
+                }
+            }
 
             if (qualityButtons.length > 0 && mainVideo) {
                 qualityButtons.forEach(button => {
@@ -290,20 +359,10 @@
                         mainVideo.src = newUrl;
                         mainVideo.currentTime = currentTime;
 
-                        // 다운로드 버튼 URL 변경
-                        if (downloadButton) {
-                            // 파일 ID 추출
-                            const fileIdMatch = newUrl.match(/\/stream\/([^/?]+)/);
-                            if (fileIdMatch && fileIdMatch[1]) {
-                                const fileId = fileIdMatch[1];
-                                // 새로운 다운로드 URL 생성
-                                const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
-                                console.log(`다운로드 URL 변경: ${downloadUrl}`);
-                                downloadButton.href = downloadUrl;
-                                // target과 rel 속성 확인 및 설정
-                                downloadButton.setAttribute('target', '_blank');
-                                downloadButton.setAttribute('rel', 'noopener');
-                            }
+                        // 버튼 URL 변경
+                        const fileIdMatch = newUrl.match(/\/stream\/([^/?]+)/);
+                        if (fileIdMatch && fileIdMatch[1]) {
+                            updateButtonUrls(fileIdMatch[1], currentQuality);
                         }
 
                         if (wasPlaying) {
@@ -313,20 +372,13 @@
                 });
             }
 
-            // 페이지 로드 시 초기 다운로드 버튼 URL 설정
-            if (downloadButton && mainVideo) {
+            // 페이지 로드 시 초기 버튼 URL 설정
+            if (mainVideo) {
                 const source = mainVideo.querySelector('source');
                 if (source && source.src) {
                     const fileIdMatch = source.src.match(/\/stream\/([^/?]+)/);
                     if (fileIdMatch && fileIdMatch[1]) {
-                        const fileId = fileIdMatch[1];
-                        // 초기 다운로드 URL 설정
-                        const downloadUrl = `/download-file/${fileId}?quality=${currentQuality}`;
-                        console.log(`초기 다운로드 URL 설정: ${downloadUrl}`);
-                        downloadButton.href = downloadUrl;
-                        // target과 rel 속성 확인 및 설정
-                        downloadButton.setAttribute('target', '_blank');
-                        downloadButton.setAttribute('rel', 'noopener');
+                        updateButtonUrls(fileIdMatch[1], currentQuality);
                     }
                 }
             }
@@ -335,7 +387,6 @@
             if (mainVideo) {
                 mainVideo.addEventListener('error', function() {
                     console.error('비디오 로딩 에러:', this.error);
-                    // 에러 시 폴백 처리 가능
                 });
 
                 mainVideo.addEventListener('loadstart', function() {

@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('다운로드 준비 중...') }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/download_styles.css') }}">
+    <style>
+        .prepare-container {
+            text-align: center;
+            padding: 40px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .prepare-icon {
+            font-size: 64px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .prepare-icon.downloading {
+            color: #007bff;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .prepare-icon.spinning i {
+            animation: spin 2s linear infinite;
+        }
+
+        .prepare-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .prepare-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .video-thumbnail {
+            max-width: 320px;
+            border-radius: 8px;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-title {
+            font-size: 18px;
+            color: #333;
+            margin: 15px 0;
+            word-break: break-word;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.indeterminate {
+            width: 30%;
+            animation: indeterminate 1.5s ease-in-out infinite;
+        }
+
+        @keyframes indeterminate {
+            0% { margin-left: 0%; }
+            50% { margin-left: 70%; }
+            100% { margin-left: 0%; }
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .manual-download {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .manual-download p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .btn-manual {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-manual:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-manual:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .notice-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #856404;
+            text-align: left;
+        }
+
+        .notice-box.info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        .notice-box i {
+            margin-right: 8px;
+        }
+
+        .error-state {
+            display: none;
+        }
+
+        .error-state.show {
+            display: block;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- 다운로드 준비/진행 중 상태 -->
+        <div class="prepare-container" id="prepareState">
+            <div class="prepare-icon downloading spinning" id="prepareIcon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+
+            <h1 class="prepare-title" id="prepareTitle">{{ _('다운로드 준비 중...') }}</h1>
+
+            <p class="prepare-message" id="prepareMessage">
+                {{ _('서버에서 파일을 다운로드하고 있습니다. 잠시만 기다려주세요.') }}
+            </p>
+
+            {% if thumbnail %}
+            <div>
+                <img src="{{ thumbnail }}" alt="{{ title }}" class="video-thumbnail">
+            </div>
+            {% endif %}
+
+            <p class="video-title">{{ title }}</p>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar indeterminate" id="progressBar"></div>
+            </div>
+
+            <p class="status-text" id="statusText">{{ _('다운로드 시작 중...') }}</p>
+
+            <div class="notice-box info">
+                <i class="fas fa-info-circle"></i>
+                {{ _('영상 길이와 서버 상태에 따라 시간이 걸릴 수 있습니다.') }}
+            </div>
+
+            <div class="manual-download">
+                <a href="{{ url_for('index') }}" class="btn-back">
+                    <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- 다운로드 완료 상태 -->
+        <div class="prepare-container hidden" id="completeState">
+            <div class="prepare-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <h1 class="prepare-title">{{ _('다운로드 완료!') }}</h1>
+
+            <p class="prepare-message">
+                {{ _('파일이 준비되었습니다. 다운로드가 자동으로 시작됩니다.') }}
+            </p>
+
+            {% if thumbnail %}
+            <div>
+                <img src="{{ thumbnail }}" alt="{{ title }}" class="video-thumbnail">
+            </div>
+            {% endif %}
+
+            <p class="video-title">{{ title }}</p>
+
+            <p class="status-text" id="fileSizeText"></p>
+
+            <div class="manual-download">
+                <a href="#" class="btn-manual" id="downloadLink">
+                    <i class="fas fa-download"></i> {{ _('수동으로 다운로드') }}
+                </a>
+                <br>
+                <a href="{{ url_for('index') }}" class="btn-back">
+                    <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- 에러 상태 -->
+        <div class="prepare-container hidden" id="errorState">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+
+            <h1 class="prepare-title">{{ _('다운로드 실패') }}</h1>
+
+            <p class="error-message" id="errorMessage">
+                {{ _('다운로드 중 오류가 발생했습니다. 다시 시도해주세요.') }}
+            </p>
+
+            <div class="manual-download">
+                <button class="btn-manual" id="retryButton">
+                    <i class="fas fa-redo"></i> {{ _('다시 시도') }}
+                </button>
+                <br>
+                <a href="{{ url_for('index') }}" class="btn-back">
+                    <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileId = "{{ file_id }}";
+            const quality = "{{ quality }}";
+            const serverFileReady = {{ 'true' if server_file_ready else 'false' }};
+
+            const prepareState = document.getElementById('prepareState');
+            const completeState = document.getElementById('completeState');
+            const errorState = document.getElementById('errorState');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+            const fileSizeText = document.getElementById('fileSizeText');
+            const downloadLink = document.getElementById('downloadLink');
+            const retryButton = document.getElementById('retryButton');
+            const errorMessage = document.getElementById('errorMessage');
+
+            let pollInterval = null;
+
+            // 상태 전환 함수
+            function showState(state) {
+                prepareState.classList.add('hidden');
+                completeState.classList.add('hidden');
+                errorState.classList.add('hidden');
+
+                if (state === 'prepare') prepareState.classList.remove('hidden');
+                else if (state === 'complete') completeState.classList.remove('hidden');
+                else if (state === 'error') errorState.classList.remove('hidden');
+            }
+
+            // 다운로드 완료 처리
+            function handleComplete(data) {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+
+                showState('complete');
+
+                if (data.file_size) {
+                    fileSizeText.textContent = "{{ _('파일 크기:') }} " + data.file_size;
+                }
+
+                if (data.download_url) {
+                    downloadLink.href = data.download_url;
+
+                    // 자동 다운로드 시작
+                    setTimeout(function() {
+                        window.location.href = data.download_url;
+                    }, 1000);
+                }
+            }
+
+            // 에러 처리
+            function handleError(message) {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+
+                showState('error');
+                if (message) {
+                    errorMessage.textContent = message;
+                }
+            }
+
+            // 상태 폴링
+            function pollStatus() {
+                fetch(`/api/download-status/${fileId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            handleError(data.error || 'Unknown error');
+                            return;
+                        }
+
+                        if (data.status === 'completed') {
+                            handleComplete(data);
+                        } else if (data.status === 'failed') {
+                            handleError(data.error || '{{ _("다운로드 중 오류가 발생했습니다.") }}');
+                        } else if (data.status === 'downloading') {
+                            statusText.textContent = "{{ _('다운로드 진행 중...') }}";
+                            if (data.progress > 0) {
+                                progressBar.classList.remove('indeterminate');
+                                progressBar.style.width = data.progress + '%';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Status poll error:', error);
+                    });
+            }
+
+            // 서버 다운로드 시작
+            function startServerDownload() {
+                statusText.textContent = "{{ _('다운로드 요청 중...') }}";
+
+                fetch(`/api/start-server-download/${fileId}?quality=${quality}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        handleError(data.error || 'Failed to start download');
+                        return;
+                    }
+
+                    if (data.status === 'completed') {
+                        // 이미 다운로드 완료
+                        pollStatus();  // 상태 확인해서 download_url 가져오기
+                    } else {
+                        // 다운로드 시작됨, 폴링 시작
+                        statusText.textContent = "{{ _('다운로드 진행 중...') }}";
+                        pollInterval = setInterval(pollStatus, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Start download error:', error);
+                    handleError('{{ _("다운로드 시작 중 오류가 발생했습니다.") }}');
+                });
+            }
+
+            // 재시도 버튼
+            retryButton.addEventListener('click', function() {
+                showState('prepare');
+                progressBar.classList.add('indeterminate');
+                progressBar.style.width = '0%';
+                startServerDownload();
+            });
+
+            // 초기화
+            if (serverFileReady) {
+                // 이미 파일이 준비된 경우
+                pollStatus();
+            } else {
+                // 서버 다운로드 시작
+                startServerDownload();
+            }
+        });
+    </script>
+{% endblock %}

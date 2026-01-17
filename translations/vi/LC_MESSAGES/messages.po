@@ -86,6 +86,18 @@ msgstr "Nguồn:"
 msgid "파일 다운로드"
 msgstr "Tải tệp xuống"
 
+#: templates/download_result.html
+msgid "바로 보기"
+msgstr "Xem ngay"
+
+#: templates/download_result.html
+msgid "다운로드"
+msgstr "Tải xuống"
+
+#: templates/download_result.html
+msgid "모바일에서 다운로드가 안 되면 \"다운로드\" 버튼을 이용하세요."
+msgstr "Nếu không thể tải xuống trên điện thoại, hãy sử dụng nút \"Tải xuống\"."
+
 #: templates/download_result.html:51 templates/download_waiting.html:84
 #: templates/download_waiting.html:105 templates/error.html:87
 msgid "메인으로 돌아가기"
@@ -891,3 +903,72 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
+
+#: templates/download_prepare.html
+msgid "다운로드 준비 중..."
+msgstr "Đang chuẩn bị tải xuống..."
+
+#: templates/download_prepare.html
+msgid "잠시만 기다려주세요. 다운로드가 곧 시작됩니다."
+msgstr "Vui lòng chờ. Quá trình tải xuống sẽ bắt đầu ngay."
+
+#: templates/download_prepare.html
+msgid "다운로드가 자동으로 시작되지 않으면 아래 버튼을 클릭하세요."
+msgstr "Nếu tải xuống không tự động bắt đầu, hãy nhấp vào nút bên dưới."
+
+#: templates/download_prepare.html
+msgid "수동으로 다운로드"
+msgstr "Tải xuống thủ công"
+
+#: templates/download_prepare.html
+msgid "다운로드 실패"
+msgstr "Tải xuống thất bại"
+
+#: templates/download_prepare.html
+msgid "다운로드 중 오류가 발생했습니다. 다시 시도해주세요."
+msgstr "Đã xảy ra lỗi khi tải xuống. Vui lòng thử lại."
+
+#: templates/download_prepare.html
+msgid "다시 시도"
+msgstr "Thử lại"
+
+#: app.py
+msgid "다운로드 준비 중 오류가 발생했습니다."
+msgstr "Đã xảy ra lỗi khi chuẩn bị tải xuống."
+
+#: templates/download_prepare.html (server download)
+msgid "서버에서 파일을 다운로드하고 있습니다. 잠시만 기다려주세요."
+msgstr "Đang tải file từ máy chủ. Vui lòng chờ."
+
+msgid "다운로드 시작 중..."
+msgstr "Đang bắt đầu tải xuống..."
+
+msgid "영상 길이와 서버 상태에 따라 시간이 걸릴 수 있습니다."
+msgstr "Quá trình này có thể mất thời gian tùy thuộc vào độ dài video và tình trạng máy chủ."
+
+msgid "파일이 준비되었습니다. 다운로드가 자동으로 시작됩니다."
+msgstr "File đã sẵn sàng. Tải xuống sẽ tự động bắt đầu."
+
+msgid "파일 크기:"
+msgstr "Kích thước file:"
+
+msgid "다운로드 진행 중..."
+msgstr "Đang tải xuống..."
+
+msgid "다운로드 요청 중..."
+msgstr "Đang yêu cầu tải xuống..."
+
+msgid "다운로드 시작 중 오류가 발생했습니다."
+msgstr "Đã xảy ra lỗi khi bắt đầu tải xuống."
+
+msgid "파일이 준비되지 않았습니다."
+msgstr "File chưa sẵn sàng."
+
+msgid "파일을 찾을 수 없습니다."
+msgstr "Không tìm thấy file."
+
+msgid "파일이 존재하지 않습니다."
+msgstr "File không tồn tại."
+
+msgid "파일 제공 중 오류가 발생했습니다."
+msgstr "Đã xảy ra lỗi khi cung cấp file."
