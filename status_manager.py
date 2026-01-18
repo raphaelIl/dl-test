@@ -16,9 +16,12 @@ download_status = {}
 
 
 def update_status(file_id, status_data):
-    """다운로드 상태 업데이트"""
+    """다운로드 상태 업데이트 (기존 상태와 병합)"""
     with status_lock:
-        download_status[file_id] = status_data
+        if file_id in download_status:
+            download_status[file_id].update(status_data)
+        else:
+            download_status[file_id] = status_data
 
 
 def get_status(file_id):
@@ -37,6 +40,10 @@ def clean_status_dict():
             with status_lock:
                 for file_id in list(download_status.keys()):
                     status = download_status[file_id]
+                    # 잘못된 형태의 status 데이터 방어
+                    if not isinstance(status, dict) or 'status' not in status:
+                        to_delete.append(file_id)
+                        continue
                     if status['status'] in ['completed', 'error']:
                         timestamp = status.get('timestamp', 0)
                         if (now - datetime.fromtimestamp(timestamp)).total_seconds() > STATUS_MAX_AGE:
