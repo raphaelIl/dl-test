@@ -103,34 +103,14 @@
 
 {% block content %}
 <article class="container" itemscope itemtype="https://schema.org/WebApplication">
-    <div class="language-dropzone">
-        <div class="lang-btn" id="languageToggle">
-            <i class="fas fa-globe"></i>
-            {{ languages[current_lang] }}
-            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
-        </div>
-        <div class="language-drawer" id="languageDrawer">
-            <div class="language-options" id="languageOptions">
-                {% for code, name in languages.items() %}
-                <a href="{{ url_for('set_language', language=code) }}"
-                   class="language-option {% if current_lang == code %}active{% endif %}"
-                   data-lang-code="{{ code }}">
-                    <span class="language-flag">{{ code }}</span>
-                    {{ name }}
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
     <div class="logo">
         <i class="fas fa-video"></i>
     </div>
 
-    <h1 itemprop="name">{{ _('어떤 영상이든, 바로 Grab') }}</h1>
-    <p class="subtitle">{{ _('YouTube, TikTok, Instagram, Facebook, X') }}</p>
+    <h1 itemprop="name">Grab Any Video. Instantly.</h1>
+    <p class="subtitle">YouTube, TikTok, Instagram, Facebook, X</p>
     <p class="description" itemprop="description">
-        {{ _('링크 하나로 원본 품질 그대로. 무료, 워터마크 없음, 가입 불필요.') }}
+        One link. Original quality. Free, no watermark, no signup.
     </p>
     <!-- SEO: Hidden English keywords for search engines -->
     <div class="sr-only">
@@ -151,122 +131,122 @@
 
     <form method="post" action="{{ url_for('download') }}">
         <div class="form-group">
-            <label for="video_url">{{ _('동영상 URL') }}</label>
+            <label for="video_url">Video URL</label>
             <input type="text" id="video_url" name="video_url"
-                   placeholder="{{ _('원하는 동영상 공유 Link를 붙여넣으세요.') }}"
+                   placeholder="Paste the video share link here."
                    required
                    oninvalid="this.setCustomValidity('Please fill out this field')"
                    oninput="this.setCustomValidity('')">
         </div>
         <button type="submit">
-            <i class="fas fa-download"></i> {{ _('다운로드 시작') }}
+            <i class="fas fa-download"></i> Start Download
         </button>
     </form>
 
     <section class="how-to-section" id="how-to-use">
-        <h2>{{ _('사용 방법') }}</h2>
+        <h2>How to Use</h2>
         <div class="step-cards">
             <div class="step-card" id="step1">
                 <div class="step-number">1</div>
                 <div class="step-icon">
                     <i class="fas fa-copy"></i>
                 </div>
-                <h3>{{ _('공유 Link 복사') }}</h3>
-                <p>{{ _('각 플랫폼의 동영상 아래 또는 메뉴에 있는 \'공유\' 버튼을 클릭하여 생성된 URL을 복사하세요.') }}</p>
+                <h3>Copy Share Link</h3>
+                <p>Click the 'Share' button below the video or in the menu and copy the generated URL.</p>
             </div>
             <div class="step-card" id="step2">
                 <div class="step-number">2</div>
                 <div class="step-icon">
                     <i class="fas fa-paste"></i>
                 </div>
-                <h3>{{ _('공유 Link 붙여넣기') }}</h3>
-                <p>{{ _('복사한 공유 Link을 위 입력란에 붙여넣으세요.') }}</p>
+                <h3>Paste Share Link</h3>
+                <p>Paste the copied share link into the input field above.</p>
             </div>
             <div class="step-card" id="step3">
                 <div class="step-number">3</div>
                 <div class="step-icon">
                     <i class="fas fa-download"></i>
                 </div>
-                <h3>{{ _('다운로드') }}</h3>
-                <p>{{ _('다운로드 버튼을 클릭하고 잠시 기다리면 동영상을 저장할 수 있습니다.') }}</p>
+                <h3>Download</h3>
+                <p>Click the download button and wait briefly to save the video.</p>
             </div>
             <div class="share-guide-images">
                 <div class="share-step">
-                    <img src="{{ url_for('static', filename='img/sharelink-1.png') }}" alt="{{ _('공유 버튼') }}" class="share-image" loading="lazy">
-                    <p>{{ _('1. 동영상 아래 \'공유\' 버튼 클릭') }}</p>
+                    <img src="{{ url_for('static', filename='img/sharelink-1.png') }}" alt="Share Button" class="share-image" loading="lazy">
+                    <p>1. Click 'Share' button below the video</p>
                 </div>
                 <div class="share-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="share-step">
-                    <img src="{{ url_for('static', filename='img/sharelink-2.png') }}" alt="{{ _('링크 복사') }}" class="share-image" loading="lazy">
-                    <p>{{ _('2. \'복사\' 버튼으로 링크 복사') }}</p>
+                    <img src="{{ url_for('static', filename='img/sharelink-2.png') }}" alt="Copy Link" class="share-image" loading="lazy">
+                    <p>2. Copy the link with 'Copy' button</p>
                 </div>
             </div>
         </div>
     </section>
 
     <section class="how-to-section" id="features">
-        <h2>{{ _('GrabVideo의 특별한 기능') }}</h2>
+        <h2>GrabVideo's Special Features</h2>
         <div class="step-cards">
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-mobile-alt"></i>
                 </div>
-                <h3>{{ _('모바일 완벽 호환') }}</h3>
-                <p>{{ _('스마트폰이나 태블릿에서도 PC와 동일하게 작동합니다. 언제 어디서나 동영상을 다운로드하세요.') }}</p>
+                <h3>Perfect Mobile Compatibility</h3>
+                <p>Works the same on smartphones and tablets as on PC. Download videos anytime, anywhere.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <h3>{{ _('완전 무료') }}</h3>
-                <p>{{ _('모든 기능을 무료로 제공합니다. 숨겨진 비용이나 프리미엄 요금제가 없습니다.') }}</p>
+                <h3>Completely Free</h3>
+                <p>All features are free. No hidden costs or premium plans.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-desktop"></i>
                 </div>
-                <h3>{{ _('브라우저 기반') }}</h3>
-                <p>{{ _('전용 프로그램 설치가 필요없습니다. 브라우저를 통해 편하게 다운로드 받으세요.') }}</p>
+                <h3>Browser-Based</h3>
+                <p>No need to install dedicated programs. Download conveniently through your browser.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-ban"></i>
                 </div>
-                <h3>{{ _('워터마크 없음') }}</h3>
-                <p>{{ _('다운로드한 동영상에 로고나 워터마크를 추가하지 않습니다. 원본 품질 그대로 제공합니다.') }}</p>
+                <h3>No Watermark</h3>
+                <p>No logos or watermarks are added to downloaded videos. Provides original quality.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <h3>{{ _('최고 화질, 음질') }}</h3>
-                <p>{{ _('4K, HD 등 가능한 최고 화질과 음질로 MP4 동영상을 다운로드합니다. 품질 저하 없이 원본 그대로 제공합니다.') }}</p>
+                <h3>Highest Video & Audio Quality</h3>
+                <p>Download MP4 videos in the highest possible quality including 4K and HD. Provides original quality without degradation.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-                <h3>{{ _('안전한 다운로드') }}</h3>
-                <p>{{ _('악성 소프트웨어 없이 안전하게 사용할 수 있습니다. 개인정보 보호를 최우선으로 합니다.') }}</p>
+                <h3>Safe Downloads</h3>
+                <p>Use safely without malware. Privacy protection is our top priority.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-user-plus"></i>
                 </div>
-                <h3>{{ _('회원가입 불필요') }}</h3>
-                <p>{{ _('계정 생성이나 개인정보 입력 없이 즉시 사용할 수 있습니다. 번거로운 절차가 없습니다.') }}</p>
+                <h3>No Registration Required</h3>
+                <p>Use immediately without creating an account or entering personal information. No cumbersome procedures.</p>
             </div>
             <div class="step-card">
                 <div class="step-icon">
                     <i class="fas fa-tachometer-alt"></i>
                 </div>
-                <h3>{{ _('빠른 다운로드') }}</h3>
-                <p>{{ _('최적화된 알고리즘으로 빠른 속도로 동영상을 가져옵니다. 불필요한 대기 시간이 없습니다.') }}</p>
+                <h3>Fast Download</h3>
+                <p>Retrieve videos quickly with optimized algorithms. No unnecessary waiting time.</p>
             </div>
         </div>
     </section>
     <section class="platform-section" id="supported-platforms">
-        <h2 class="site-title">{{ _('지원하는 플랫폼') }}</h2>
+        <h2 class="site-title">Supported Platforms</h2>
         <div class="supported-sites">
             <a href="https://www.youtube.com" title="YouTube" target="_blank" rel="noopener noreferrer" class="platform-youtube">
                 <i class="fab fa-youtube site-icon"></i>
@@ -287,85 +267,85 @@
     </section>
 
     <section class="how-to-section" id="faq">
-        <h2>{{ _('자주 묻는 질문') }}(FAQ)</h2>
+        <h2>Frequently Asked Questions (FAQ)</h2>
         <div class="faq-section">
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('다운로드한 동영상에 워터마크가 있나요?') }}
+                    Are there watermarks on downloaded videos?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('아니요, GrabVideo는 다운로드한 동영상에 어떠한 워터마크나 로고도 추가하지 않습니다. 원본 그대로의 품질로 제공됩니다.') }}
+                    No, GrabVideo does not add any watermarks or logos to downloaded videos. Videos are provided in their original quality.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('공유 Link란 무엇인가요?') }}
+                    What is a Share Link?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('브라우저 주소창의 일반 URL은 플랫폼마다 구조가 달라 다운로드가 어려울 수 있습니다. 반면 \'공유하기\' 기능으로 생성된 URL은 동영상 정보를 정확하게 포함하고 있어 성공적인 다운로드가 가능합니다. 항상 각 플랫폼의 공유하기 기능을 통해 URL을 복사해주세요.') }}
+                    Regular URLs in the browser address bar may be difficult to download as structures vary by platform. However, URLs generated through the 'Share' feature contain accurate video information, enabling successful downloads. Always copy URLs through each platform's share feature.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('모바일에서도 사용할 수 있나요?') }}
+                    Can I use it on mobile?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('네, GrabVideo는 모바일 환경에 완벽하게 최적화되어 있습니다. 스마트폰이나 태블릿에서도 PC와 동일하게 사용할 수 있습니다.') }}
+                    Yes, GrabVideo is perfectly optimized for mobile environments. You can use it on smartphones and tablets just like on a PC.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('다운로드 링크가 접속이 안돼요.') }}
+                    I can't access the download link.
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('리소스 관리를 위해 다운로드 링크는 영구적이지 않습니다. 이 경우 메인 페이지로 돌아가 URL을 다시 입력하여 새로운 다운로드 링크를 받으세요.') }}
+                    For resource management, download links are not permanent. In this case, return to the main page and enter the URL again to receive a new download link.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('다운 가능한 파일 사이즈는 어떻게 되나요?') }}
+                    What file sizes can be downloaded?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('보통 30분 이내 길이의 동영상을 안정적으로 다운로드 할 수 있습니다. 파일 크기는 화질에 따라 다르지만 더 큰 용량이나 긴 파일 지원은 추후 지원할 예정입니다.') }}
+                    You can typically download videos up to 30 minutes in length reliably. File sizes vary depending on quality, with support for larger files and longer videos planned for future updates.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('어떤 품질로 동영상을 다운로드할 수 있나요?') }}
+                    What quality can videos be downloaded in?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('GrabVideo는 가능한 고화질로 동영상을 다운로드합니다. 원본 동영상이 HD 품질이라면 동일한 품질로 다운로드할 수 있습니다.') }}
+                    GrabVideo downloads videos in the highest possible quality. If the original video is in HD quality, you can download it in the same quality.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('다운로드 속도는 어떤가요?') }}
+                    How is the download speed?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('GrabVideo는 최적화된 알고리즘을 사용하여 빠른 다운로드 속도를 제공합니다. 다운로드 속도는 인터넷 연결 상태와 서버 상황에 따라 달라질 수 있습니다.') }}
+                    GrabVideo provides fast download speeds using optimized algorithms. Download speed may vary depending on your internet connection and server conditions.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    {{ _('다운로드한 콘텐츠는 어떻게 사용하면 좋을까요?') }}
+                    How should I use downloaded content?
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="faq-answer" style="display: none;">
-                    {{ _('GrabVideo는 여러분의 편의를 위한 기술적 도구입니다. 다운로드한 콘텐츠는 개인적인 감상 용도로 사용하시는 것을 추천해 드립니다. 콘텐츠 원작자의 창작물을 존중하는 문화가 더 많은 좋은 콘텐츠 제작으로 이어진다는 점을 기억해 주세요.') }}
+                    GrabVideo is a technical tool for your convenience. We recommend using downloaded content for personal viewing purposes. Remember that respecting content creators' work leads to the production of more quality content.
                 </div>
             </div>
         </div>
@@ -373,9 +353,9 @@
 </article>
 
 <aside class="legal-notice">
-    <h4>{{ _('이용 안내') }}</h4>
+    <h4>Usage Guidelines</h4>
     <p>
-        {{ _('GrabVideo는 편리한 동영상 다운로드 서비스를 제공합니다. 저희는 모든 콘텐츠 창작자의 노력을 존중하며, 다운로드한 콘텐츠는 개인적 감상 용도로 즐겨주시기 바랍니다. 각 플랫폼의 이용약관을 참고하시고, 콘텐츠 제작자의 창작 의도에 맞게 활용해주세요. GrabVideo를 통해 더 편리하고 즐거운 디지털 콘텐츠 경험을 만들어가세요.') }}
+        GrabVideo provides a convenient video download service. We respect the efforts of all content creators and ask that you enjoy downloaded content for personal viewing purposes. Please refer to each platform's terms of service and use content in accordance with the creator's intentions. Create a more convenient and enjoyable digital content experience with GrabVideo.
     </p>
 </aside>
 {% endblock %}
@@ -383,24 +363,6 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const languageToggle = document.getElementById('languageToggle');
-        const languageDrawer = document.getElementById('languageDrawer');
-
-        if (languageToggle && languageDrawer) {
-            languageToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                languageDrawer.classList.toggle('open');
-            });
-
-            document.addEventListener('click', function(e) {
-                if (languageDrawer.classList.contains('open') &&
-                    !languageDrawer.contains(e.target) &&
-                    e.target !== languageToggle) {
-                    languageDrawer.classList.remove('open');
-                }
-            });
-        }
-
         const faqQuestions = document.querySelectorAll('.faq-question');
         faqQuestions.forEach(question => {
             question.addEventListener('click', () => {

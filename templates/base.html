@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Download videos from YouTube, TikTok, Instagram, Facebook & Twitter instantly. HD quality, no watermark, completely free. Save any video in seconds - no signup required.">
-    <meta name="keywords" content="{{ _('GrabVideo, download video, free video downloader, online video downloader, social media video downloader, YouTube downloader, youtube download, youtube video download, youtube to mp4, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, tiktok no watermark, Instagram video downloader, instagram download, instagram reels download, Twitter video downloader, twitter video download, x video download, Facebook video downloader, facebook video download, download videos online, HD video download, 4K video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, best video downloader, free video saver, 동영상 다운로드, SNS 동영상 다운로드, 유튜브 다운로드, 틱톡 다운로드, 인스타그램 다운로드') }}">
+    <meta name="keywords" content="GrabVideo, download video, free video downloader, online video downloader, social media video downloader, YouTube downloader, youtube download, youtube video download, youtube to mp4, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, tiktok no watermark, Instagram video downloader, instagram download, instagram reels download, Twitter video downloader, twitter video download, x video download, Facebook video downloader, facebook video download, download videos online, HD video download, 4K video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, best video downloader, free video saver">
     <meta name="author" content="GrabVideo">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
@@ -17,7 +17,7 @@
     <meta name="rating" content="General">
     <meta name="distribution" content="Global">
     <meta name="revisit-after" content="1 days">
-    <meta name="language" content="English, Korean, Japanese, Chinese">
+    <meta name="language" content="English">
     <meta name="geo.region" content="GLOBAL">
     <meta name="coverage" content="Worldwide">
 
@@ -44,18 +44,8 @@
     <!-- Canonical URL for SEO -->
     <link rel="canonical" href="https://devgrabs.com/" />
 
-    <!-- Hreflang for multilingual SEO (11 languages) -->
+    <!-- Hreflang for SEO -->
     <link rel="alternate" hreflang="en" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="ko" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="ja" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="zh" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="es" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="pt" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="fr" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="id" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="th" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="vi" href="https://devgrabs.com/" />
-    <link rel="alternate" hreflang="ur" href="https://devgrabs.com/" />
     <link rel="alternate" hreflang="x-default" href="https://devgrabs.com/" />
 
     <!-- Open Graph / Facebook -->
@@ -69,18 +59,7 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="GrabVideo - Free Video Downloader for YouTube, TikTok, Instagram">
-    <meta property="og:locale" content="{% if current_lang == 'ko' %}ko_KR{% elif current_lang == 'ja' %}ja_JP{% elif current_lang == 'zh' %}zh_CN{% elif current_lang == 'es' %}es_ES{% elif current_lang == 'pt' %}pt_BR{% elif current_lang == 'fr' %}fr_FR{% elif current_lang == 'id' %}id_ID{% elif current_lang == 'th' %}th_TH{% elif current_lang == 'vi' %}vi_VN{% elif current_lang == 'ur' %}ur_PK{% else %}en_US{% endif %}">
-    <meta property="og:locale:alternate" content="en_US">
-    <meta property="og:locale:alternate" content="ko_KR">
-    <meta property="og:locale:alternate" content="ja_JP">
-    <meta property="og:locale:alternate" content="zh_CN">
-    <meta property="og:locale:alternate" content="es_ES">
-    <meta property="og:locale:alternate" content="pt_BR">
-    <meta property="og:locale:alternate" content="fr_FR">
-    <meta property="og:locale:alternate" content="id_ID">
-    <meta property="og:locale:alternate" content="th_TH">
-    <meta property="og:locale:alternate" content="vi_VN">
-    <meta property="og:locale:alternate" content="ur_PK">
+    <meta property="og:locale" content="en_US">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -143,7 +122,7 @@
         "operatingSystem": "Any (Web-based)",
         "browserRequirements": "Requires JavaScript",
         "softwareVersion": "2.0",
-        "inLanguage": ["en", "ko", "ja", "zh", "es", "pt", "fr", "id", "th", "vi", "ur"],
+        "inLanguage": ["en"],
         "datePublished": "2024-01-01",
         "dateModified": "2025-11-07",
         "offers": {
@@ -200,7 +179,7 @@
         "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "Customer Service",
-            "availableLanguage": ["English", "Korean", "Japanese", "Chinese"]
+            "availableLanguage": ["English"]
         }
     }
     </script>
@@ -277,7 +256,7 @@
                     <span class="logo-icon"><i class="fas fa-video"></i></span>
                 </h1>
             </a>
-            <p class="tagline">{{ _('최고 화질의 동영상 다운로더') }}</p>
+            <p class="tagline">Highest Quality Video Downloader</p>
         </div>
     </div>
 </header>
@@ -290,7 +269,7 @@
 
 <footer>
     <div class="footer-wrapper">
-        <p>&copy; {{ current_year }} GrabVideo - {{ _('동영상 다운로더') }}</p>
+        <p>&copy; {{ current_year }} GrabVideo - Video Downloader</p>
     </div>
 </footer>
 

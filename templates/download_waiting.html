@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('다운로드 진행 중') }}{% endblock %}
+{% block title %}Download in Progress{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -43,52 +43,32 @@
 
 {% block content %}
     <div class="container">
-        <div class="language-dropzone">
-            <div class="lang-btn" id="languageToggle">
-                <i class="fas fa-globe"></i>
-                {{ languages[current_lang] }}
-                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
-            </div>
-            <div class="language-drawer" id="languageDrawer">
-                <div class="language-options" id="languageOptions">
-                    {% for code, name in languages.items() %}
-                        <a href="{{ url_for('set_language', language=code) }}"
-                           class="language-option {% if current_lang == code %}active{% endif %}"
-                           data-lang-code="{{ code }}">
-                            <span class="language-flag">{{ code }}</span>
-                            {{ name }}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
         {% if status and status.status == 'error' %}
             <div class="error-container">
                 <i class="fas fa-exclamation-circle error-icon"></i>
-                <h1>{{ _('Download Fail') }}</h1>
+                <h1>Download Failed</h1>
                 <p class="error-message">{{ status.error }}</p>
 
                 {% if "This video is too big." in status.error %}
                 <div class="solution-box">
-                    <p><strong>{{ _('Solutions:') }}</strong></p>
+                    <p><strong>Solutions:</strong></p>
                     <ul>
-                        <li>{{_('Select shorter quality video.') }}</li>
-                        <li>{{_('Select lower quality video.') }}</li>
+                        <li>Select shorter quality video.</li>
+                        <li>Select lower quality video.</li>
                     </ul>
                 </div>
                 {% endif %}
 
                 <div class="actions">
-                    <a href="{{ url_for('index', lang=current_lang) }}" class="btn btn-primary">
-                        <i class="fas fa-redo"></i> {{ _('메인으로 돌아가기') }}
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-redo"></i> Back to Main
                     </a>
                 </div>
             </div>
         {% else %}
             <div class="spinner"></div>
-            <h1>{{ _('다운로드 진행 중') }}</h1>
-            <p id="status-text" class="status-text">{{ _('다운로드가 진행 중입니다...') }}</p>
+            <h1>Download in Progress</h1>
+            <p id="status-text" class="status-text">Download in progress...</p>
 
             <div class="progress-container">
                 <div id="progress-bar" class="progress-bar" style="width: 0%">
@@ -97,12 +77,12 @@
             </div>
 
             <p class="description">
-                {{ _('잠시만 기다려 주세요. 파일 크기와 인터넷 속도에 따라 시간이 다소 걸릴 수 있습니다.') }}
+                Please wait. The time required may vary depending on file size and internet speed.
             </p>
 
             <div class="actions" style="margin-top: 20px;">
-                <a href="{{ url_for('index', lang=current_lang) }}" class="btn">
-                    <i class="fas fa-home"></i> {{ _('메인으로 돌아가기') }}
+                <a href="{{ url_for('index') }}" class="btn">
+                    <i class="fas fa-home"></i> Back to Main
                 </a>
             </div>
         {% endif %}
@@ -112,24 +92,6 @@
 {% block extra_js %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const languageToggle = document.getElementById('languageToggle');
-            const languageDrawer = document.getElementById('languageDrawer');
-
-            if (languageToggle && languageDrawer) {
-                languageToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    languageDrawer.classList.toggle('open');
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (languageDrawer.classList.contains('open') &&
-                        !languageDrawer.contains(e.target) &&
-                        e.target !== languageToggle) {
-                        languageDrawer.classList.remove('open');
-                    }
-                });
-            }
-
             {% if not status or status.status != 'error' %}
             checkStatus();
             checkStatusInterval = setInterval(checkStatus, 2000);
@@ -175,7 +137,7 @@
 
                     if (data.status === 'completed') {
                         clearInterval(checkStatusInterval);
-                        statusText.textContent = '{{ _("다운로드 완료! 잠시 후 결과 페이지로 이동합니다...") }}';
+                        statusText.textContent = 'Download complete! Redirecting to results page...';
 
                         const currentWidth = parseFloat(progressBar.style.width || '0');
                         const duration = 500;
@@ -234,18 +196,14 @@
                             requestAnimationFrame(animateProgress);
                         }
 
-                        statusText.textContent = data.message || '{{ _("다운로드가 진행 중입니다...") }}';
+                        statusText.textContent = data.message || 'Download in progress...';
                     } else if (data.status === 'error') {
                         clearInterval(checkStatusInterval);
-
-                        // 오류 발생 시 페이지 새로고침 (상태 데이터와 함께)
                         window.location.href = `/download-waiting/${fileId}`;
                     }
                 })
                 .catch(error => {
                     console.error('Status check error:', error);
-                    // 네트워크 에러 시 강제 리다이렉트 하지 않고 폴링 계속
-                    // 실제 완료 여부는 서버 status로만 판단
                 });
         }
     </script>

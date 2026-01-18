@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('오류 발생') }}{% endblock %}
+{% block title %}Error Occurred{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -50,26 +50,6 @@
 
 {% block content %}
     <div class="container error-container">
-        <div class="language-dropzone">
-            <div class="lang-btn" id="languageToggle">
-                <i class="fas fa-globe"></i>
-                {{ languages[current_lang] }}
-                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
-            </div>
-            <div class="language-drawer" id="languageDrawer">
-                <div class="language-options" id="languageOptions">
-                    {% for code, name in languages.items() %}
-                        <a href="{{ url_for('set_language', language=code) }}"
-                           class="language-option {% if current_lang == code %}active{% endif %}"
-                           data-lang-code="{{ code }}">
-                            <span class="language-flag">{{ code }}</span>
-                            {{ name }}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <div class="error-card card">
@@ -77,7 +57,7 @@
                         <div class="error-icon">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
-                        <h2 class="mb-0">{{ _('오류가 발생했습니다') }}</h2>
+                        <h2 class="mb-0">An error has occurred</h2>
                     </div>
                     <div class="error-body text-center">
                         <div class="error-message">
@@ -85,11 +65,11 @@
                         </div>
                         {% if error_id %}
                         <div class="error-id text-muted mb-3">
-                            <small>{{ _('에러 코드') }}: {{ error_id }}</small>
+                            <small>Error Code: {{ error_id }}</small>
                         </div>
                         {% endif %}
-                        <a href="{{ url_for('index', lang=current_lang) }}" class="btn home-button">
-                            <i class="fas fa-home me-2"></i> {{ _('메인으로 돌아가기') }}
+                        <a href="{{ url_for('index') }}" class="btn home-button">
+                            <i class="fas fa-home me-2"></i> Back to Main
                         </a>
                     </div>
                 </div>
@@ -100,27 +80,7 @@
 
 {% block extra_js %}
     <script>
-        // Language dropdown functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const languageToggle = document.getElementById('languageToggle');
-            const languageDrawer = document.getElementById('languageDrawer');
-
-            if (languageToggle && languageDrawer) {
-                languageToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    languageDrawer.classList.toggle('open');
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (languageDrawer.classList.contains('open') &&
-                        !languageDrawer.contains(e.target) &&
-                        e.target !== languageToggle) {
-                        languageDrawer.classList.remove('open');
-                    }
-                });
-            }
-
-            // Animation effect
             const errorCard = document.querySelector('.error-card');
             errorCard.style.opacity = '0';
             errorCard.style.transform = 'translateY(20px)';

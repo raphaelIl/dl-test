@@ -1,4 +1,3 @@
-# TODO(2025.10.12.Sun): error message 기본 영어 -> 다국어로 컴파일
 """
 Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전 (스트리밍 우선)
 """
@@ -14,14 +13,13 @@ from urllib.parse import quote, urlparse, parse_qs
 from datetime import datetime
 
 from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response, Response
-from flask_babel import Babel, gettext as _
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # 분리된 모듈들 import
 from config import *
-from web_utils import get_client_ip, get_locale, get_browser_preferred_language, add_cache_headers, inject_languages
+from web_utils import get_client_ip, add_cache_headers
 from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
 from download_manager import download_video
 from status_manager import update_status, get_status, start_cleanup_thread
@@ -29,8 +27,6 @@ from stats import load_download_stats, save_download_stats, update_download_stat
 
 # Flask 앱 초기화
 app = Flask(__name__)
-app.config['BABEL_DEFAULT_LOCALE'] = 'en'
-app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
@@ -50,10 +46,6 @@ logging.basicConfig(
 werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.setLevel(logging.ERROR)
 app.logger.setLevel(logging.ERROR)
-
-# Babel 초기화
-babel = Babel(app)
-babel.init_app(app, locale_selector=get_locale)
 
 # 요청 제한 설정
 limiter = Limiter(
@@ -85,14 +77,6 @@ def after_request(response):
 @app.route('/')
 def index():
     """메인 페이지"""
-    if request.method == 'GET':
-        # 쿠키에 언어 설정이 없으면 브라우저 언어로 설정
-        if not request.cookies.get('language'):
-            preferred_lang = get_browser_preferred_language()
-            response = make_response(render_template('index.html', max_file_size_gb=MAX_FILE_SIZE/(1024*1024*1024)))
-            response.set_cookie('language', preferred_lang, max_age=30*24*60*60)  # 30일
-            return response
-
     return render_template('index.html', max_file_size_gb=MAX_FILE_SIZE/(1024*1024*1024))
 
 
@@ -105,7 +89,7 @@ def download():
     video_url = request.form['video_url']
 
     if not video_url:
-        return render_template('index.html', error=_('Please enter a URL.'))
+        return render_template('index.html', error='Please enter a URL.')
 
     try:
         file_id = str(uuid.uuid4())
@@ -128,43 +112,7 @@ def download():
 
     except Exception as e:
         logging.error(f"예상치 못한 오류 (URL: {video_url}): {str(e)}", exc_info=True)
-        return render_template('index.html', error=f'{_("An error occurred during download")}: {str(e)}')
-
-
-@app.route('/set-language/<language>')
-def set_language(language):
-    """언어 설정"""
-    if language not in LANGUAGES:
-        return redirect(url_for('index'))
-
-    # 리퍼러에서 돌아갈 페이지 결정
-    referrer = request.referrer
-    next_url = url_for('index')
-
-    # 리퍼러가 있으면 URL 분석
-    if referrer:
-        host_url = request.host_url.rstrip('/')
-        if referrer.startswith(host_url):
-            # 호스트 URL 제거하여 경로만 추출
-            path = referrer[len(host_url):]
-
-            # 경로 분석
-            if '/result/' in path:
-                match = re.search(r'/result/([0-9a-f\-]+)', path)
-                if match:
-                    file_id = match.group(1)
-                    next_url = url_for('result', file_id=file_id, _t=datetime.now().timestamp())
-
-            elif '/download-waiting/' in path:
-                match = re.search(r'/download-waiting/([0-9a-f\-]+)', path)
-                if match:
-                    file_id = match.group(1)
-                    next_url = url_for('download_waiting', file_id=file_id)
-
-    # 언어 쿠키 설정 및 리디렉션
-    response = make_response(redirect(next_url))
-    response.set_cookie('language', language, max_age=30*24*60*60)  # 30일
-    return response
+        return render_template('index.html', error=f'An error occurred during download: {str(e)}')
 
 
 @app.route('/download-waiting/<file_id>')
@@ -178,8 +126,7 @@ def download_waiting(file_id):
     if status['status'] == 'completed':
         return redirect(url_for('result', file_id=file_id))
 
-    return render_template('download_waiting.html', file_id=file_id, status=status,
-                           current_lang=get_locale(), languages=LANGUAGES)
+    return render_template('download_waiting.html', file_id=file_id, status=status)
 
 
 @app.route('/check-status/<file_id>')
@@ -223,9 +170,7 @@ def result(file_id):
                               is_direct_link=False,
                               thumbnail=status.get('thumbnail', ''),
                               duration=status.get('duration'),
-                              uploader=status.get('uploader', ''),
-                              current_lang=get_locale(),
-                              languages=LANGUAGES)
+                              uploader=status.get('uploader', ''))
 
     # 직접 다운로드 링크가 있는 경우 (우선순위 2)
     if status.get('is_direct_link', False) and status.get('direct_url'):
@@ -239,9 +184,7 @@ def result(file_id):
                               thumbnail=status.get('thumbnail', ''),
                               duration=status.get('duration'),
                               uploader=status.get('uploader', ''),
-                              source=status.get('source', ''),
-                              current_lang=get_locale(),
-                              languages=LANGUAGES)
+                              source=status.get('source', ''))
 
     # 기존 방식: 서버에서 다운로드한 파일 (우선순위 3)
     download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
@@ -259,16 +202,14 @@ def result(file_id):
                 file_size = readable_size(os.path.getsize(file_path))
 
     return render_template('download_result.html',
-                           title=status.get('title', _('Download Complete')),
+                           title=status.get('title', 'Download Complete'),
                            file_id=file_id,
                            url=status.get('url', ''),
                            file_name=file_name,
                            file_size=file_size,
                            is_direct_link=False,
                            has_streaming=False,
-                           thumbnail=status.get('thumbnail', ''),
-                           current_lang=get_locale(),
-                           languages=LANGUAGES)
+                           thumbnail=status.get('thumbnail', ''))
 
 
 def has_ip_parameter(url):
@@ -356,8 +297,10 @@ def proxy_stream_video(url, force_download=False, filename=None):
         # 다운로드 강제 모드: Content-Disposition: attachment 헤더 추가
         if force_download:
             safe_filename = filename if filename else 'video.mp4'
+            # ASCII 안전한 파일명 (fallback용)
+            ascii_filename = re.sub(r'[^\x00-\x7F]', '_', safe_filename)
             encoded_filename = quote(safe_filename)
-            flask_response.headers['Content-Disposition'] = f"attachment; filename=\"{safe_filename}\"; filename*=UTF-8''{encoded_filename}"
+            flask_response.headers['Content-Disposition'] = f"attachment; filename=\"{ascii_filename}\"; filename*=UTF-8''{encoded_filename}"
 
         flask_response.status_code = response.status_code
 
@@ -544,36 +487,40 @@ def serve_server_file(file_id):
     """서버에 다운로드된 파일 제공"""
     try:
         if not check_valid_file_id(file_id):
-            return render_error(_("유효하지 않은 파일 ID입니다."))
+            return render_error("Invalid file ID.")
 
         status = get_status(file_id)
         if not status or status.get('server_download_status') != 'completed':
-            return render_error(_("파일이 준비되지 않았습니다."))
+            return render_error("File is not ready.")
 
         file_name = status.get('server_file_name')
         if not file_name:
-            return render_error(_("파일을 찾을 수 없습니다."))
+            return render_error("File not found.")
 
         download_path = safe_path_join(DOWNLOAD_FOLDER, file_id)
         file_path = safe_path_join(download_path, file_name)
 
         if not os.path.isfile(file_path):
-            return render_error(_("파일이 존재하지 않습니다."))
+            return render_error("File does not exist.")
 
         # 파일 제공 (attachment로 다운로드)
         title = status.get('title', 'video')
-        safe_title = re.sub(r'[<>:"/\\|?*]', '', title)[:100]
+        # 파일명에서 특수문자 및 위험 문자 제거
+        safe_title = re.sub(r'[<>:"/\\|?*#\'\"]', '', title)[:100].strip()
         download_filename = f"{safe_title}.mp4"
 
-        response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
+        # ASCII 안전한 파일명 (fallback용)
+        ascii_filename = re.sub(r'[^\x00-\x7F]', '_', download_filename)
         encoded_filename = quote(download_filename)
-        response.headers["Content-Disposition"] = f"attachment; filename=\"{download_filename}\"; filename*=UTF-8''{encoded_filename}"
+
+        response = send_file(file_path, as_attachment=True, mimetype='video/mp4')
+        response.headers["Content-Disposition"] = f"attachment; filename=\"{ascii_filename}\"; filename*=UTF-8''{encoded_filename}"
 
         return response
 
     except Exception as e:
         logging.error(f"파일 제공 오류: {str(e)}", exc_info=True)
-        return render_error(_("파일 제공 중 오류가 발생했습니다."))
+        return render_error("An error occurred while serving the file.")
 
 
 @app.route('/download-prepare/<file_id>')
@@ -587,12 +534,12 @@ def download_prepare(file_id):
         quality = request.args.get('quality', 'best')
 
         if not check_valid_file_id(file_id):
-            return render_error(_("유효하지 않은 파일 ID입니다."))
+            return render_error("Invalid file ID.")
 
         # 상태 확인
         status = get_status(file_id)
         if not status or status.get('status') != 'completed':
-            return render_error(_("다운로드가 완료되지 않았습니다."))
+            return render_error("Download not completed.")
 
         title = status.get('title', 'video')
         thumbnail = status.get('thumbnail', '')
@@ -611,7 +558,7 @@ def download_prepare(file_id):
 
     except Exception as e:
         logging.error(f"다운로드 준비 중 오류: {str(e)}", exc_info=True)
-        return render_error(_("다운로드 준비 중 오류가 발생했습니다."))
+        return render_error("An error occurred while preparing download.")
 
 
 @app.route('/download-file/<file_id>')
@@ -633,12 +580,12 @@ def download_file(file_id):
         logging.info(f"파일 다운로드 요청: file_id={file_id}, quality={quality}, mode={mode}, IP={client_ip}, UA={user_agent[:50]}")
 
         if not check_valid_file_id(file_id):
-            return render_error(_("유효하지 않은 파일 ID입니다."))
+            return render_error("Invalid file ID.")
 
         # 상태 확인
         status = get_status(file_id)
         if not status or status.get('status') != 'completed':
-            return render_error(_("다운로드가 완료되지 않았습니다."))
+            return render_error("Download not completed.")
 
         # 프록시 모드 여부 확인
         force_proxy = (mode == 'proxy')
@@ -840,7 +787,8 @@ def handle_unexpected_error(e):
 # 컨텍스트 프로세서
 @app.context_processor
 def context_processor():
-    return inject_languages()
+    from datetime import datetime
+    return {'current_year': datetime.now().year}
 
 
 # 정리 함수

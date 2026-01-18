@@ -41,8 +41,8 @@ RUN mkdir -p /app/downloads /app/logs && \
 
 COPY . .
 
-# 번역 파일 컴파일
-RUN pybabel compile -d translations
+## 번역 파일 컴파일
+#RUN pybabel compile -d translations
 
 ENV PYTHONUNBUFFERED=1 \
     FLASK_ENV=production \

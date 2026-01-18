@@ -27,21 +27,6 @@ CACHE_CONFIG = {
     'default': os.getenv('CACHE_DEFAULT', '86400,86400')         # 브라우저/CDN 모두 1일
 }
 
-# 언어 설정
-LANGUAGES = {
-    'en': 'English',                # 영어
-    'id': 'Bahasa Indonesia',       # 인도네시아어
-    'pt_BR': 'Português (Brasil)',  # 브라질 포르투갈어
-    'es_MX': 'Español (México)',    # 멕시코 스페인어
-    'vi': 'Tiếng Việt',             # 베트남어
-    'fil': 'Filipino',              # 필리핀어(타갈로그어)
-    'th': 'ไทย',                    # 태국어
-    'fr': 'Français',               # 프랑스어
-    'ur': 'اردو',                   # 우르두어(파키스탄)
-    'ko': '한국어',                   # 한국어
-    'ja': '日本語',                   # 일본어
-    'zh': '中文',                    # 중국어
-}
 
 # 디렉토리 생성
 if not os.path.exists(DOWNLOAD_FOLDER):

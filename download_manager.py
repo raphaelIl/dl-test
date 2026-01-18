@@ -7,7 +7,6 @@ import logging
 import shutil
 import yt_dlp
 from datetime import datetime
-from flask_babel import gettext as _
 
 from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, validate_direct_download_link
 from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
@@ -397,7 +396,7 @@ def handle_download_error(file_id, update_status_callback, video_url, download_p
     logging.error(f"Download Fail (ID: {error_id}, URL: {video_url}): {str(error)}", exc_info=True)
 
     # 사용자에게는 친화적인 메시지만 표시
-    user_friendly_message = _("An unexpected error occurred. Please try again later.")
+    user_friendly_message = "An unexpected error occurred. Please try again later."
     error_message = f"{user_friendly_message} (Error ID: {error_id})"
 
     update_status_callback(file_id, {
