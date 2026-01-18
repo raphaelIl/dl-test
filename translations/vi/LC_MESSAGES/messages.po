@@ -143,17 +143,17 @@ msgstr "Đã xảy ra lỗi"
 msgid "오류가 발생했습니다"
 msgstr "Đã xảy ra lỗi"
 
-#: templates/index.html:37
-msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "Trình tải video SNS chất lượng cao nhất"
+#: templates/index.html:130
+msgid "어떤 영상이든, 바로 Grab"
+msgstr "Video nào cũng được. Ngay lập tức."
 
-#: templates/index.html:39
-msgid ""
-"GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) "
-"등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할"
-" 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr ""
-"Sử dụng GrabVideo để tải video chất lượng cao từ YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) và nhiều SNS khác một cách nhanh chóng và dễ dàng.<br>Hoàn toàn miễn phí, không cần đăng ký, không watermark.<br>Hoạt động hoàn hảo trên cả PC và thiết bị di động."
+#: templates/index.html:131
+msgid "YouTube, TikTok, Instagram, Facebook, X"
+msgstr "YouTube, TikTok, Instagram, Facebook, X"
+
+#: templates/index.html:133
+msgid "링크 하나로 원본 품질 그대로. 무료, 워터마크 없음, 가입 불필요."
+msgstr "Một link. Chất lượng gốc. Miễn phí, không watermark, không đăng ký."
 
 #: templates/index.html:50
 msgid "동영상 URL"

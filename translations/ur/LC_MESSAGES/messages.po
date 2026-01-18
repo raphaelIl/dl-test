@@ -143,17 +143,17 @@ msgstr "خرابی پیش آئی"
 msgid "오류가 발생했습니다"
 msgstr "خرابی پیش آ گئی ہے"
 
-#: templates/index.html:37
-msgid "최고 화질의 SNS 동영상 다운로더"
-msgstr "اعلی معیار کا SNS ویڈیو ڈاؤنلوڈر"
+#: templates/index.html:130
+msgid "어떤 영상이든, 바로 Grab"
+msgstr "کوئی بھی ویڈیو۔ فوری طور پر۔"
 
-#: templates/index.html:39
-msgid ""
-"GrabVideo를 사용하여 YouTube, TikTok, Instagram, Twitter(X), Facebook(Meta) "
-"등<br> 각종 SNS에서 최고 화질의 동영상을 빠르고 쉽게 다운로드하세요.<br>완전 무료이며, 회원가입이나 워터마크 없이 이용할"
-" 수 있습니다.<br>PC뿐만 아니라 모바일에서도 완벽하게 작동합니다."
-msgstr ""
-"GrabVideo کے ذریعے یوٹیوب، ٹک ٹاک، انسٹاگرام، ٹویٹر(X)، فیس بک (میٹا) وغیرہ سے اعلی معیار کی ویڈیوز تیزی اور آسانی سے ڈاؤنلوڈ کریں۔<br>یہ مکمل طور پر مفت ہے اور بغیر رجسٹریشن یا واٹر مارک کے استعمال کیا جا سکتا ہے۔<br>یہ نہ صرف پی سی بلکہ موبائل پر بھی مکمل طور پر کام کرتا ہے۔"
+#: templates/index.html:131
+msgid "YouTube, TikTok, Instagram, Facebook, X"
+msgstr "YouTube, TikTok, Instagram, Facebook, X"
+
+#: templates/index.html:133
+msgid "링크 하나로 원본 품질 그대로. 무료, 워터마크 없음, 가입 불필요."
+msgstr "ایک لنک۔ اصل کوالٹی۔ مفت، واٹر مارک نہیں، رجسٹریشن نہیں۔"
 
 #: templates/index.html:50
 msgid "동영상 URL"
