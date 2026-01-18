@@ -13,16 +13,6 @@
   <changefreq>daily</changefreq>
   <priority>1.00</priority>
   <xhtml:link rel="alternate" hreflang="en" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="ko" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="ja" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="zh" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="es" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="pt" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="fr" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="id" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="th" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="vi" href="https://devgrabs.com/" />
-  <xhtml:link rel="alternate" hreflang="ur" href="https://devgrabs.com/" />
   <xhtml:link rel="alternate" hreflang="x-default" href="https://devgrabs.com/" />
   <image:image>
     <image:loc>https://devgrabs.com/static/img/og-image.png</image:loc>

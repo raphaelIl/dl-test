@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Download videos from YouTube, TikTok, Instagram, Facebook & Twitter instantly. HD quality, no watermark, completely free. Save any video in seconds - no signup required.">
-    <meta name="keywords" content="GrabVideo, download video, free video downloader, online video downloader, social media video downloader, YouTube downloader, youtube download, youtube video download, youtube to mp4, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, tiktok no watermark, Instagram video downloader, instagram download, instagram reels download, Twitter video downloader, twitter video download, x video download, Facebook video downloader, facebook video download, download videos online, HD video download, 4K video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, best video downloader, free video saver">
+    <meta name="description" content="{% block meta_description %}Download videos from YouTube, TikTok, Instagram, Facebook & Twitter instantly. HD quality, no watermark, completely free. Save any video in seconds - no signup required.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}GrabVideo, download video, free video downloader, online video downloader, social media video downloader, YouTube downloader, youtube download, youtube video download, youtube to mp4, TikTok downloader, tiktok download, tiktok downloader, tiktok video download, tiktok no watermark, Instagram video downloader, instagram download, instagram reels download, Twitter video downloader, twitter video download, x video download, Facebook video downloader, facebook video download, download videos online, HD video download, 4K video download, save videos online, mp4 downloader, no watermark, high quality video download, download videos without watermark, video grabber, best video downloader, free video saver{% endblock %}">
     <meta name="author" content="GrabVideo">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    {% block meta_robots %}<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">{% endblock %}
     <meta name="googlebot" content="index, follow">
     <meta name="bingbot" content="index, follow">
     <meta name="theme-color" content="#3498db">
@@ -21,17 +21,14 @@
     <meta name="geo.region" content="GLOBAL">
     <meta name="coverage" content="Worldwide">
 
-    <!-- Google Analytics 4 - TODO: Add your Measurement ID -->
-    <!-- Uncomment and replace G-XXXXXXXXXX with your actual ID from https://analytics.google.com -->
-    <!--
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R35SSYPC6B"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', 'G-R35SSYPC6B');
     </script>
-    -->
 
     <!-- Search Engine Verification - TODO: Add after registering with search engines -->
     <!-- Uncomment and replace with actual verification codes -->
@@ -42,7 +39,7 @@
     <title>{% block page_title %}GrabVideo - Download Videos from YouTube, TikTok, Instagram & More{% endblock %}</title>
 
     <!-- Canonical URL for SEO -->
-    <link rel="canonical" href="https://devgrabs.com/" />
+    {% block canonical_url %}<link rel="canonical" href="https://devgrabs.com/" />{% endblock %}
 
     <!-- Hreflang for SEO -->
     <link rel="alternate" hreflang="en" href="https://devgrabs.com/" />
