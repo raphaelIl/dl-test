@@ -11,7 +11,7 @@ import yt_dlp
 import time
 from yt_dlp import YoutubeDL, DownloadError
 from urllib.parse import urlsplit, urljoin, unquote
-from config import MAX_FILE_SIZE
+from config import MAX_FILE_SIZE, MAX_VIDEO_HEIGHT, build_format_string
 import logging
 
 # 프록시 설정 - 필요시 여기에 실제 프록시 서버 추가
@@ -145,12 +145,15 @@ def find_m3u8_candidates(detail_url: str, text: str) -> list[str]:
     return [u for _, u in scored]
 
 
-def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None = None, use_cookies=False) -> bool:
+def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None = None, use_cookies=False, max_height: int | None = None) -> bool:
     """
     효율적인 다운로드 함수 - Docker 환경 대응 및 m3u8 실제 변환
     직접 링크 추출 시도 -> 실패 시 영상 다운로드로 fallback
     """
     from urllib.parse import urlparse
+
+    if max_height is None:
+        max_height = MAX_VIDEO_HEIGHT
 
     # URL 분석으로 기본 정보 추출
     parsed = urlparse(detail_url)
@@ -162,8 +165,8 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
     # 모든 사이트에 대해 실제 비디오 파일 변환 설정 적용 (다운로드 필요할 경우)
     # m3u8 파일이 아닌 실제 비디오 파일을 다운로드하도록 포맷 설정 개선
     base.update({
-        # 최대 1080p로 제한하고 mp4 우선
-        'format': 'best[height<=1080][ext=mp4]/best[height<=1080]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+        # 최대 해상도로 제한하고 mp4 우선
+        'format': build_format_string(max_height),
         'merge_output_format': 'mp4',
         # m3u8를 native로 처리하여 실제 비디오 파일로 변환
         'hls_prefer_native': True,
@@ -287,7 +290,7 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
                 # m3u8를 실제 비디오 파일로 변환하는 설정 강화
                 'hls_prefer_native': True,
                 'hls_use_mpegts': False,
-                'format': 'best[height<=1080][ext=mp4]/best[height<=1080]',
+                'format': f'best[height<={max_height}][ext=mp4]/best[height<={max_height}]',
                 'merge_output_format': 'mp4',
                 # 세그먼트를 하나의 파일로 병합
                 'concurrent_fragment_downloads': 4,

@@ -21,6 +21,22 @@ DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 # 스트리밍 모드 설정 - IP 숨김 기능
 IP_HIDE_MODE = os.getenv('IP_HIDE_MODE', 'true').lower() in ('true', '1', 'yes', 'on')
 
+# 영상 해상도 설정
+MAX_VIDEO_HEIGHT = int(os.getenv('MAX_VIDEO_HEIGHT', '1080'))
+
+
+def build_format_string(max_height):
+    """yt-dlp format 문자열을 동적으로 생성 (height 값만 파라미터화)"""
+    h = max_height
+    return (
+        f'best[height<={h}][ext=mp4]/'
+        f'best[height<={h}]/'
+        f'bestvideo[height<={h}][ext=mp4]+bestaudio[ext=m4a]/'
+        f'bestvideo[height<={h}]+bestaudio/'
+        f'best[height<={h}]'
+    )
+
+
 CACHE_CONFIG = {
     'css_js': os.getenv('CACHE_CSS_JS', '31536000,604800'),      # 브라우저 1년, CDN 1주일
     'media': os.getenv('CACHE_MEDIA', '31536000,31536000'),      # 브라우저/CDN 모두 1년

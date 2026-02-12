@@ -275,7 +275,7 @@ def proxy_stream_video(url, force_download=False, filename=None):
         # 응답 헤더 설정
         def generate():
             try:
-                for chunk in response.iter_content(chunk_size=8192):
+                for chunk in response.iter_content(chunk_size=1048576):
                     if chunk:
                         yield chunk
             except Exception as e:

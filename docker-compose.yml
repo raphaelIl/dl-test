@@ -14,8 +14,9 @@ services:
     environment:
       - DOWNLOAD_FOLDER=downloads
       - MAX_FILE_SIZE_MB=2048
+      - MAX_VIDEO_HEIGHT=1080
       - GUNICORN_WORKERS=1 # todo: 메모리 공유 이슈
-      - GUNICORN_THREADS=6
+      - GUNICORN_THREADS=9
       - MAX_WORKERS=3
 #      - GUNICORN_WORKERS=3
 #      - GUNICORN_THREADS=4

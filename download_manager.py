@@ -8,6 +8,7 @@ import shutil
 import yt_dlp
 from datetime import datetime
 
+from config import MAX_VIDEO_HEIGHT, build_format_string
 from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, validate_direct_download_link
 from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
 from stats import update_download_stats
@@ -67,11 +68,14 @@ def detect_url_type_and_strategy(video_url):
     return strategies
 
 
-def extract_streaming_urls(video_url):
+def extract_streaming_urls(video_url, max_height=None):
     """스트리밍 URL을 추출하는 함수 - 브라우저 직접 재생 우선, 강화된 우회 기능 추가"""
     from download_utils import get_random_user_agent, PROXY_LIST
     import random
     import time
+
+    if max_height is None:
+        max_height = MAX_VIDEO_HEIGHT
 
     # 1. URL 타입 분석으로 최적 전략 결정
     strategy = detect_url_type_and_strategy(video_url)
@@ -129,7 +133,7 @@ def extract_streaming_urls(video_url):
         'extractor_retries': 1,
         'file_access_retries': 1,
         # 브라우저 재생 가능한 포맷 우선
-        'format': 'best[height<=1080][ext=mp4]/best[height<=1080]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+        'format': build_format_string(max_height),
         'http_headers': {
             'User-Agent': user_agent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -235,7 +239,7 @@ def extract_streaming_urls(video_url):
                     if (url and ext == 'mp4' and
                         vcodec and vcodec != 'none' and
                         acodec and acodec != 'none' and
-                        height > 0 and height <= 1080 and  # 최대 1080p
+                        height > 0 and height <= max_height and
                         not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
                         protocol not in ['m3u8', 'm3u8_native', 'hls']):
 
@@ -264,7 +268,7 @@ def extract_streaming_urls(video_url):
                         if (url and ext in ['webm', 'mp4'] and
                             vcodec and vcodec != 'none' and
                             acodec and acodec != 'none' and
-                            height > 0 and height <= 1080 and  # 최대 1080p
+                            height > 0 and height <= max_height and
                             not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
                             protocol not in ['m3u8', 'm3u8_native', 'hls']):
 
@@ -290,7 +294,7 @@ def extract_streaming_urls(video_url):
 
                         if (url and url.startswith('http') and
                             ext in ['mp4', 'webm', 'mkv'] and
-                            height > 0 and height <= 1080 and  # 최대 1080p
+                            height > 0 and height <= max_height and
                             not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
                             protocol not in ['m3u8', 'm3u8_native', 'hls']):
 
@@ -414,7 +418,7 @@ def handle_download_error(file_id, update_status_callback, video_url, download_p
         pass
 
 
-def download_video(video_url, file_id, download_path, update_status_callback):
+def download_video(video_url, file_id, download_path, update_status_callback, max_height=None):
     """메인 다운로드 함수 - 스트리밍 우선, 서버 다운로드 fallback"""
     server_download_success = False  # 서버 다운로드 성공 여부 추적
 
@@ -423,7 +427,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
 
         # 1. 스트리밍 URL 추출 시도 (주요 방식)
         logging.info(f"🎬 스트리밍 URL 추출 시도: {video_url}")
-        streaming_info = extract_streaming_urls(video_url)
+        streaming_info = extract_streaming_urls(video_url, max_height=max_height)
 
         if streaming_info and streaming_info.get('best_url'):
             logging.info(f"✅ 스트리밍 URL 추출 성공, 서버 다운로드 없이 완료")
@@ -475,7 +479,7 @@ def download_video(video_url, file_id, download_path, update_status_callback):
 
         try:
             # 향상된 다운로드 시도 (download_utils.py의 함수 사용)
-            download_success = try_download_enhanced(video_url, download_path, use_cookies=True)
+            download_success = try_download_enhanced(video_url, download_path, use_cookies=True, max_height=max_height)
 
             if download_success:
                 logging.info(f"✅ 서버 다운로드 성공: {video_url}")
