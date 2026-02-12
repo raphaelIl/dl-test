@@ -17,3 +17,4 @@ __pycache__/
 
 # Build artifacts
 *.pot
+/.claude/
