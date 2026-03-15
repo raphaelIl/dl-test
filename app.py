@@ -18,7 +18,8 @@ from flask_limiter.errors import RateLimitExceeded
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # 분리된 모듈들 import
-from config import *
+from config import *  # noqa: F403
+import redis_client
 from web_utils import get_client_ip, add_cache_headers
 from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
 from download_manager import download_video
@@ -47,10 +48,11 @@ werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.setLevel(logging.ERROR)
 app.logger.setLevel(logging.ERROR)
 
-# 요청 제한 설정
+# 요청 제한 설정 (Redis 사용 가능 시 공유 스토리지)
 limiter = Limiter(
     key_func=get_client_ip,
     default_limits=None,
+    storage_uri=REDIS_URL if redis_client.check_health() else "memory://",
 )
 limiter.init_app(app)
 
@@ -820,6 +822,22 @@ def init_app():
             logging.warning(f"기존 다운로드 통계 로드: total={stats.get('total', 0)}, completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}")
     except Exception as e:
         logging.error(f"다운로드 통계 초기화 중 오류: {str(e)}")
+
+    # Redis 헬스체크
+    redis_ok = redis_client.check_health()
+    logging.warning(f"Redis 상태: {'연결됨' if redis_ok else 'fallback 모드'} ({REDIS_URL})")
+
+    # 기존 파일 통계를 Redis로 마이그레이션 (Redis 첫 연결 시)
+    if redis_ok:
+        try:
+            r = redis_client.get_redis()
+            if not r.exists("dl:stats"):
+                file_stats = load_download_stats()
+                if file_stats.get("total", 0) > 0:
+                    save_download_stats(file_stats)
+                    logging.warning(f"기존 파일 통계를 Redis로 마이그레이션: {file_stats}")
+        except Exception as e:
+            logging.warning(f"통계 마이그레이션 실패 (무시): {e}")
 
     # 시작 정보 로깅
     try:

@@ -336,9 +336,18 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
 
 
 def get_video_info(url):
-    """비디오 정보 가져오기"""
+    """비디오 정보 가져오기 (캐시 우선)"""
+    import metadata_cache
+
+    cached = metadata_cache.get_cached_info(url)
+    if cached:
+        return cached
+
     with yt_dlp.YoutubeDL({'quiet': False, 'simulate': True}) as ydl:
-        return ydl.extract_info(url, download=False)
+        info = ydl.extract_info(url, download=False)
+    if info:
+        metadata_cache.set_cached_info(url, info)
+    return info
 
 
 def extract_direct_download_link(url):
@@ -389,30 +398,40 @@ def extract_direct_download_link(url):
         ydl_opts['socket_timeout'] = 45
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
+        import metadata_cache
 
-            # 플레이리스트의 경우 첫 번째 항목 사용
-            if 'entries' in info:
-                info = info['entries'][0]
+        # 캐시 확인
+        info = metadata_cache.get_cached_info(url)
+        if info is None:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+            if info:
+                metadata_cache.set_cached_info(url, info)
 
-            if not info:
-                return None
+        if not info:
+            return None
 
-            # 직접 다운로드 URL 추출
-            direct_url = info.get('url')
-            if not direct_url:
-                return None
+        # 플레이리스트의 경우 첫 번째 항목 사용
+        if 'entries' in info:
+            info = info['entries'][0]
 
-            return {
-                'url': direct_url,
-                'title': info.get('title', 'video'),
-                'ext': info.get('ext', 'mp4'),
-                'thumbnail': info.get('thumbnail'),
-                'duration': info.get('duration'),
-                'uploader': info.get('uploader'),
-                'source': info.get('extractor', '').lower()
-            }
+        if not info:
+            return None
+
+        # 직접 다운로드 URL 추출
+        direct_url = info.get('url')
+        if not direct_url:
+            return None
+
+        return {
+            'url': direct_url,
+            'title': info.get('title', 'video'),
+            'ext': info.get('ext', 'mp4'),
+            'thumbnail': info.get('thumbnail'),
+            'duration': info.get('duration'),
+            'uploader': info.get('uploader'),
+            'source': info.get('extractor', '').lower()
+        }
     except Exception as e:
         logging.warning(f"직접 다운로드 링크 추출 실패 (재시도 없음): {str(e)}")
         return None

@@ -10,6 +10,7 @@ from datetime import datetime
 
 from config import MAX_VIDEO_HEIGHT, build_format_string
 from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, validate_direct_download_link
+import metadata_cache
 from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
 from stats import update_download_stats
 
@@ -206,9 +207,18 @@ def extract_streaming_urls(video_url, max_height=None):
 
             logging.info(f"🎬 스마트 전략으로 비디오 정보 추출 시도 {attempt+1}/{max_attempts}: {video_url}")
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(video_url, download=False)
+            # 캐시 확인 (첫 시도에서만)
+            info = None
+            if attempt == 0:
+                info = metadata_cache.get_cached_info(video_url)
 
+            if info is None:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(video_url, download=False)
+                if info:
+                    metadata_cache.set_cached_info(video_url, info)
+
+            if True:  # 기존 들여쓰기 유지를 위한 블록
                 if not info:
                     logging.warning(f"❌ 비디오 정보 추출 실패: {video_url}")
                     continue  # 다음 시도로

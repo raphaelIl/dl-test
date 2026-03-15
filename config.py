@@ -18,6 +18,9 @@ MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
 DOWNLOAD_LIMITS = os.getenv('DOWNLOAD_LIMITS', "20 per hour, 100 per minute").split(',')
 DOWNLOAD_LIMITS = [limit.strip() for limit in DOWNLOAD_LIMITS]
 
+# Redis 설정
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+
 # 스트리밍 모드 설정 - IP 숨김 기능
 IP_HIDE_MODE = os.getenv('IP_HIDE_MODE', 'true').lower() in ('true', '1', 'yes', 'on')
 
