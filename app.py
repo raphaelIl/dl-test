@@ -20,7 +20,7 @@ import redis_client
 # 분리된 모듈들 import
 from config import *  # noqa: F403
 from download_manager import download_video
-from stats import load_download_stats, save_download_stats, update_download_stats
+from stats import load_download_stats, update_download_stats
 from status_manager import update_status, get_status, start_cleanup_thread
 from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
 from web_utils import get_client_ip, add_cache_headers
@@ -814,46 +814,21 @@ def init_app():
         )
     executor = ThreadPoolExecutor(max_workers=effective_max_workers)
 
-    # 다운로드 통계 파일 초기화
-    try:
-        if not os.path.exists(DOWNLOAD_STATS_FILE):
-            initial_stats = {
-                'total': 0,
-                'completed': 0,
-                'errors': 0,
-                'last_updated': datetime.now().isoformat()
-            }
-            save_download_stats(initial_stats)
-            logging.info(f"다운로드 통계 파일 초기화: {DOWNLOAD_STATS_FILE}")
-        else:
-            stats = load_download_stats()
-            logging.info(
-                f"기존 다운로드 통계 로드: total={stats.get('total', 0)}, completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}")
-    except Exception as e:
-        logging.error(f"다운로드 통계 초기화 중 오류: {str(e)}")
-
     # Redis 헬스체크
     redis_ok = redis_client.check_health()
     gunicorn_workers = int(os.environ.get('GUNICORN_WORKERS', 1))
-    logging.info(f"Redis 상태: {'연결됨' if redis_ok else 'fallback 모드'} ({REDIS_URL})")
-    if not redis_ok and gunicorn_workers > 1:
+    logging.info(f"Redis 상태: {'연결됨' if redis_ok else '미연결'} ({REDIS_URL})")
+    if not redis_ok:
         logging.error(
-            f"[CRITICAL] Redis 불가 + GUNICORN_WORKERS={gunicorn_workers}: "
-            "상태/통계/Rate Limit이 워커 간 공유되지 않습니다. "
-            "Redis를 복구하거나 GUNICORN_WORKERS=1로 설정하십시오."
+            f"[CRITICAL] Redis 불가: 상태/통계/Rate Limit/캐시가 동작하지 않습니다. "
+            "Redis를 복구하십시오."
         )
-
-    # 기존 파일 통계를 Redis로 마이그레이션 (Redis 첫 연결 시)
-    if redis_ok:
-        try:
-            r = redis_client.get_redis()
-            if not r.exists("dl:stats"):
-                file_stats = load_download_stats()
-                if file_stats.get("total", 0) > 0:
-                    save_download_stats(file_stats)
-                    logging.info(f"기존 파일 통계를 Redis로 마이그레이션: {file_stats}")
-        except Exception as e:
-            logging.warning(f"통계 마이그레이션 실패 (무시): {e}")
+    else:
+        stats = load_download_stats()
+        logging.info(
+            f"다운로드 통계: total={stats.get('total', 0)}, "
+            f"completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}"
+        )
 
     # 시작 정보 로깅
     try:

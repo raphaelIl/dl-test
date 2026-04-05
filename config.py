@@ -2,6 +2,7 @@
 애플리케이션 설정 관리
 """
 import os
+
 from dotenv import load_dotenv
 
 # 환경 변수 로드
@@ -11,7 +12,6 @@ load_dotenv()
 ALLOWED_HEALTH_IPS = os.getenv('ALLOWED_HEALTH_IPS', '127.0.0.1,125.177.83.187,172.31.0.0/16').split(',')
 MAX_WORKERS = int(os.getenv('MAX_WORKERS', 3))
 DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', 'downloads')
-DOWNLOAD_STATS_FILE = os.getenv('DOWNLOAD_STATS_FILE', 'download_stats.json')
 STATUS_MAX_AGE = int(os.getenv('STATUS_MAX_AGE', 120))  # 2mins
 STATUS_CLEANUP_INTERVAL = int(os.getenv('STATUS_CLEANUP_INTERVAL', 60))  # 1min
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE_MB', 40000)) * 1024 * 1024
