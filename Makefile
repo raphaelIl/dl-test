@@ -3,11 +3,14 @@ DOCKER_HUB_USER = raphael1021
 IMAGE_NAME = dl-test
 CONTAINER_NAME = video-downloader
 
-.PHONY: build-restart restart clean-all clean-image clean build-latest build
+# Redis를 제외한 앱 서비스 목록
+APP_SERVICES = grab-video cloudflared
 
-start: build restart
+.PHONY: build-restart restart restart-app clean-all clean-image clean build-latest build
 
-start-latest: build-latest restart
+start: build restart-app
+
+start-latest: build-latest restart-app
 
 clean:
 	@echo "docker compose down --remove-orphans"
@@ -18,6 +21,10 @@ restart: clean
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
 	@echo "caffeinate -i docker compose up"
 	caffeinate -i docker compose up
+
+restart-app:
+	@echo "앱 서비스만 재시작 (Redis 유지)"
+	docker compose restart $(APP_SERVICES)
 
 build-latest:
 	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"

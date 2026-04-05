@@ -1,30 +1,29 @@
 """
 Flask 애플리케이션 메인 파일 - 단일 URL 구조 버전 (스트리밍 우선)
 """
-import os
+import atexit
+import logging
 import re
 import uuid
-import logging
-import atexit
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from urllib.parse import quote, urlparse
+
 import psutil
 import requests
-from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import quote, urlparse, parse_qs
-from datetime import datetime
-
-from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, make_response, Response
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, Response
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import redis_client
 # 분리된 모듈들 import
 from config import *  # noqa: F403
-import redis_client
-from web_utils import get_client_ip, add_cache_headers
-from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
 from download_manager import download_video
-from status_manager import update_status, get_status, start_cleanup_thread
 from stats import load_download_stats, save_download_stats, update_download_stats
+from status_manager import update_status, get_status, start_cleanup_thread
+from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
+from web_utils import get_client_ip, add_cache_headers
 
 # Flask 앱 초기화
 app = Flask(__name__)
@@ -48,11 +47,11 @@ werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.setLevel(logging.ERROR)
 app.logger.setLevel(logging.ERROR)
 
-# 요청 제한 설정 (Redis 사용 가능 시 공유 스토리지)
+# 요청 제한 설정 — 항상 Redis 사용 (Flask-Limiter가 자체 fallback 처리)
 limiter = Limiter(
     key_func=get_client_ip,
     default_limits=None,
-    storage_uri=REDIS_URL if redis_client.check_health() else "memory://",
+    storage_uri=REDIS_URL,
 )
 limiter.init_app(app)
 
@@ -798,13 +797,22 @@ def cleanup_on_exit():
     """애플리케이션 종료 시 정리"""
     if executor:
         executor.shutdown(wait=True)
-    logging.warning("애플리케이션 종료: 리소스 정리 완료")
+    logging.info("애플리케이션 종료: 리소스 정리 완료")
 
 
 def init_app():
     """애플리케이션 초기화"""
     global executor
-    executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+
+    # 멀티워커 시 워커당 다운로드 스레드 수를 분배
+    gunicorn_workers = int(os.environ.get('GUNICORN_WORKERS', 1))
+    effective_max_workers = max(1, MAX_WORKERS // gunicorn_workers)
+    if gunicorn_workers > 1 and effective_max_workers != MAX_WORKERS:
+        logging.warning(
+            f"MAX_WORKERS={MAX_WORKERS}을 {gunicorn_workers}워커에 분배: "
+            f"워커당 {effective_max_workers}개 (총 {effective_max_workers * gunicorn_workers}개)"
+        )
+    executor = ThreadPoolExecutor(max_workers=effective_max_workers)
 
     # 다운로드 통계 파일 초기화
     try:
@@ -816,16 +824,24 @@ def init_app():
                 'last_updated': datetime.now().isoformat()
             }
             save_download_stats(initial_stats)
-            logging.warning(f"다운로드 통계 파일 초기화: {DOWNLOAD_STATS_FILE}")
+            logging.info(f"다운로드 통계 파일 초기화: {DOWNLOAD_STATS_FILE}")
         else:
             stats = load_download_stats()
-            logging.warning(f"기존 다운로드 통계 로드: total={stats.get('total', 0)}, completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}")
+            logging.info(
+                f"기존 다운로드 통계 로드: total={stats.get('total', 0)}, completed={stats.get('completed', 0)}, errors={stats.get('errors', 0)}")
     except Exception as e:
         logging.error(f"다운로드 통계 초기화 중 오류: {str(e)}")
 
     # Redis 헬스체크
     redis_ok = redis_client.check_health()
-    logging.warning(f"Redis 상태: {'연결됨' if redis_ok else 'fallback 모드'} ({REDIS_URL})")
+    gunicorn_workers = int(os.environ.get('GUNICORN_WORKERS', 1))
+    logging.info(f"Redis 상태: {'연결됨' if redis_ok else 'fallback 모드'} ({REDIS_URL})")
+    if not redis_ok and gunicorn_workers > 1:
+        logging.error(
+            f"[CRITICAL] Redis 불가 + GUNICORN_WORKERS={gunicorn_workers}: "
+            "상태/통계/Rate Limit이 워커 간 공유되지 않습니다. "
+            "Redis를 복구하거나 GUNICORN_WORKERS=1로 설정하십시오."
+        )
 
     # 기존 파일 통계를 Redis로 마이그레이션 (Redis 첫 연결 시)
     if redis_ok:
@@ -835,7 +851,7 @@ def init_app():
                 file_stats = load_download_stats()
                 if file_stats.get("total", 0) > 0:
                     save_download_stats(file_stats)
-                    logging.warning(f"기존 파일 통계를 Redis로 마이그레이션: {file_stats}")
+                    logging.info(f"기존 파일 통계를 Redis로 마이그레이션: {file_stats}")
         except Exception as e:
             logging.warning(f"통계 마이그레이션 실패 (무시): {e}")
 
@@ -849,13 +865,13 @@ def init_app():
         gunicorn_workers = int(os.environ.get('GUNICORN_WORKERS', 1))
         gunicorn_threads = int(os.environ.get('GUNICORN_THREADS', 4))
 
-        logging.warning(f"애플리케이션 시작 정보:")
-        logging.warning(f"CPU: 물리적 {cpu_count}코어, 논리적 {logical_cpus}코어")
-        logging.warning(f"메모리: {total_memory}GB")
-        logging.warning(f"다운로드 워커: {MAX_WORKERS}")
-        logging.warning(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
-        logging.warning(f"최대 파일 크기: {round(MAX_FILE_SIZE/(1024*1024), 2)}MB")
-        logging.warning(f"스트리밍 모드: {'활성화' if IP_HIDE_MODE else '비활성화'} (IP 파라미터 숨김: {'ON' if IP_HIDE_MODE else 'OFF'})")
+        logging.info(f"애플리케이션 시작 정보:")
+        logging.info(f"CPU: 물리적 {cpu_count}코어, 논리적 {logical_cpus}코어")
+        logging.info(f"메모리: {total_memory}GB")
+        logging.info(f"다운로드 워커: {MAX_WORKERS}")
+        logging.info(f"Gunicorn 워커: {gunicorn_workers}, 스레드: {gunicorn_threads}")
+        logging.info(f"최대 파일 크기: {round(MAX_FILE_SIZE / (1024 * 1024), 2)}MB")
+        logging.info(f"스트리밍 모드: {'활성화' if IP_HIDE_MODE else '비활성화'} (IP 파라미터 숨김: {'ON' if IP_HIDE_MODE else 'OFF'})")
 
     except Exception as e:
         logging.error(f"시작 정보 로깅 중 오류 발생: {str(e)}")

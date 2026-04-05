@@ -2,12 +2,14 @@
 상태 관리 모듈 — Redis JSON + Lua atomic merge, in-memory fallback
 """
 import json
-import os
-import time
-import shutil
 import logging
+import os
+import shutil
 import threading
+import time
 from datetime import datetime
+
+import redis
 
 from config import STATUS_MAX_AGE, STATUS_CLEANUP_INTERVAL, DOWNLOAD_FOLDER
 from utils import safe_path_join
@@ -38,12 +40,16 @@ def _ttl_for(status_data: dict) -> int:
     return STATUS_MAX_AGE  # completed/error → 환경변수 (기본 1800초)
 
 
-def _get_merge_sha(r):
-    """Lua Script SHA를 한 번만 등록하고 캐시"""
+def _eval_merge(r, key: str, payload: str, ttl: str):
+    """Lua Script 실행 — NOSCRIPT 시 자동 재로드"""
     global _merge_sha
     if _merge_sha is None:
         _merge_sha = r.script_load(_LUA_MERGE)
-    return _merge_sha
+    try:
+        return r.evalsha(_merge_sha, 1, key, payload, ttl)
+    except redis.exceptions.NoScriptError:
+        _merge_sha = r.script_load(_LUA_MERGE)
+        return r.evalsha(_merge_sha, 1, key, payload, ttl)
 
 
 # ── Public API (인터페이스 100% 유지) ────────────────────────────
@@ -58,8 +64,7 @@ def update_status(file_id: str, status_data: dict):
             key = f"{_KEY_PREFIX}{file_id}"
             ttl = _ttl_for(status_data)
             payload = json.dumps(status_data, ensure_ascii=False)
-            sha = _get_merge_sha(r)
-            r.evalsha(sha, 1, key, payload, str(ttl))
+            _eval_merge(r, key, payload, str(ttl))
             return
         except Exception as e:
             logging.error(f"Redis update_status 실패, fallback 전환: {e}")
@@ -116,9 +121,25 @@ def _fallback_get(file_id: str) -> dict:
 
 # ── Cleanup loop ─────────────────────────────────────────────────
 
+_CLEANUP_LOCK_KEY = "dl:cleanup_lock"
+
+
+def _acquire_cleanup_lock() -> bool:
+    """Redis SET NX로 cleanup 리더 선출 — 한 워커만 정리 수행"""
+    import redis_client
+    if not redis_client.is_available():
+        return True  # fallback 모드에서는 모든 워커가 자기 in-memory 정리
+    try:
+        r = redis_client.get_redis()
+        # TTL을 정리 주기의 2배로 설정 — 워커 죽어도 자동 해제
+        return r.set(_CLEANUP_LOCK_KEY, os.getpid(), nx=True, ex=STATUS_CLEANUP_INTERVAL * 2)
+    except Exception:
+        return True  # Redis 에러 시 안전하게 정리 허용
+
+
 def _cleanup_loop():
     """백그라운드 정리 스레드
-    - Redis 모드: TTL이 자동 만료 담당 → 파일시스템 고아 폴더 정리만
+    - Redis 모드: TTL이 자동 만료 담당 → 파일시스템 고아 폴더 정리만 (리더 워커만)
     - Fallback 모드: 기존 in-memory 정리 + 파일시스템 정리
     """
     import redis_client
@@ -126,14 +147,13 @@ def _cleanup_loop():
     while True:
         try:
             if redis_client.is_available():
-                # Redis 복구 주기적 확인
                 redis_client.check_health()
-                _cleanup_orphan_folders()
+                # 멀티워커 환경에서 한 워커만 폴더 정리 수행
+                if _acquire_cleanup_lock():
+                    _cleanup_orphan_folders()
             else:
-                # fallback: in-memory 만료 정리
                 _cleanup_fallback_store()
                 _cleanup_orphan_folders()
-                # Redis 복구 시도
                 redis_client.check_health()
         except Exception as e:
             logging.error(f"상태 정보 정리 중 오류: {e}")
@@ -161,14 +181,43 @@ def _cleanup_fallback_store():
             logging.info(f"[fallback] 상태 정보 정리됨: {file_id}")
 
 
-def _cleanup_orphan_folders():
-    """downloads/ 디렉토리에서 Redis에 상태가 없는 고아 폴더 삭제"""
+def _get_active_file_ids() -> set[str]:
+    """Redis SCAN으로 활성 상태의 file_id 집합을 한 번에 조회"""
     import redis_client
+    active = set()
+    if redis_client.is_available():
+        try:
+            r = redis_client.get_redis()
+            cursor = 0
+            while True:
+                cursor, keys = r.scan(cursor, match=f"{_KEY_PREFIX}*", count=200)
+                for key in keys:
+                    # "dl:status:xxxx-xxxx" → "xxxx-xxxx"
+                    active.add(key[len(_KEY_PREFIX):])
+                if cursor == 0:
+                    break
+        except Exception as e:
+            logging.warning(f"Redis SCAN 실패, 폴더 정리 건너뜀: {e}")
+            return None  # SCAN 실패 시 정리하지 않음 (안전)
+    # fallback store도 포함
+    with _fallback_lock:
+        active.update(_fallback_store.keys())
+    return active
 
+
+def _cleanup_orphan_folders():
+    """downloads/ 디렉토리에서 상태가 없는 고아 폴더 삭제
+    Redis SCAN 1회로 활성 키를 가져와서 비교 (폴더별 개별 조회 제거)
+    """
     if not os.path.exists(DOWNLOAD_FOLDER):
         return
 
+    active_ids = _get_active_file_ids()
+    if active_ids is None:
+        return  # Redis 에러 시 안전하게 건너뜀
+
     try:
+        now = time.time()
         for name in os.listdir(DOWNLOAD_FOLDER):
             folder = safe_path_join(DOWNLOAD_FOLDER, name)
             if not os.path.isdir(folder):
@@ -176,30 +225,19 @@ def _cleanup_orphan_folders():
 
             # 폴더 수정 시간이 STATUS_MAX_AGE보다 오래된 것만 대상
             try:
-                mtime = os.path.getmtime(folder)
-                age = time.time() - mtime
-                if age < STATUS_MAX_AGE:
+                if now - os.path.getmtime(folder) < STATUS_MAX_AGE:
                     continue
             except OSError:
                 continue
 
-            # Redis/fallback에 상태가 남아있으면 건드리지 않음
-            has_status = False
-            if redis_client.is_available():
-                try:
-                    r = redis_client.get_redis()
-                    has_status = r.exists(f"{_KEY_PREFIX}{name}") > 0
-                except Exception:
-                    pass
-            if not has_status:
-                with _fallback_lock:
-                    has_status = name in _fallback_store
+            # 활성 상태가 있으면 건드리지 않음
+            if name in active_ids:
+                continue
 
-            if not has_status:
-                try:
-                    shutil.rmtree(folder)
-                    logging.info(f"고아 폴더 정리됨: {name}")
-                except Exception as e:
-                    logging.error(f"폴더 삭제 중 오류: {name}, {e}")
+            try:
+                shutil.rmtree(folder)
+                logging.info(f"고아 폴더 정리됨: {name}")
+            except Exception as e:
+                logging.error(f"폴더 삭제 중 오류: {name}, {e}")
     except Exception as e:
         logging.error(f"고아 폴더 정리 중 오류: {e}")

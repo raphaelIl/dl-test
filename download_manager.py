@@ -1,18 +1,20 @@
 """
 다운로드 매니저 - 다운로드 프로세스 관리 (수정된 버전)
 """
-import os
 import gc
 import logging
+import os
 import shutil
-import yt_dlp
 from datetime import datetime
 
-from config import MAX_VIDEO_HEIGHT, build_format_string
-from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, validate_direct_download_link
+import yt_dlp
+
 import metadata_cache
-from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
+from config import MAX_VIDEO_HEIGHT, build_format_string
+from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, \
+    validate_direct_download_link
 from stats import update_download_stats
+from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
 
 
 def detect_url_type_and_strategy(video_url):
@@ -67,6 +69,71 @@ def detect_url_type_and_strategy(video_url):
         strategies['timeout_settings'] = 'long'
 
     return strategies
+
+
+_EXCLUDED_PROTOCOLS = {'m3u8', 'm3u8_native', 'hls'}
+_EXCLUDED_URL_PATTERNS = ('m3u8', 'dash', '.mpd')
+
+
+def _is_streamable(url: str, protocol: str) -> bool:
+    """m3u8/dash/hls 프로토콜 제외 필터"""
+    if protocol in _EXCLUDED_PROTOCOLS:
+        return False
+    url_lower = url.lower()
+    return not any(p in url_lower for p in _EXCLUDED_URL_PATTERNS)
+
+
+def _filter_playable_formats(formats: list, max_height: int) -> list:
+    """브라우저 직접 재생 가능한 포맷을 우선순위별로 필터링
+
+    Priority 1: mp4 + video + audio (최우선)
+    Priority 2: webm/mp4 + video + audio
+    Priority 3: HTTP direct (mp4/webm/mkv, 코덱 무관)
+    """
+    _FILTER_RULES = [
+        # (allowed_exts, require_codecs, require_http, type_name, priority)
+        (['mp4'], True, False, 'video_audio_mp4', 1),
+        (['webm', 'mp4'], True, False, 'video_audio_web', 2),
+        (['mp4', 'webm', 'mkv'], False, True, 'http_direct', 3),
+    ]
+
+    for allowed_exts, require_codecs, require_http, type_name, priority in _FILTER_RULES:
+        results = []
+        for i, fmt in enumerate(formats):
+            url = fmt.get('url', '')
+            ext = fmt.get('ext', '')
+            vcodec = fmt.get('vcodec', 'none')
+            acodec = fmt.get('acodec', 'none')
+            height = fmt.get('height', 0)
+            protocol = fmt.get('protocol', '')
+
+            if not url or ext not in allowed_exts:
+                continue
+            if height <= 0 or height > max_height:
+                continue
+            if not _is_streamable(url, protocol):
+                continue
+            if require_codecs and (not vcodec or vcodec == 'none' or not acodec or acodec == 'none'):
+                continue
+            if require_http and not url.startswith('http'):
+                continue
+
+            results.append({
+                'url': url,
+                'format_id': fmt.get('format_id', f'{ext}_{i}'),
+                'quality': height,
+                'ext': ext,
+                'filesize': fmt.get('filesize'),
+                'type': type_name,
+                'vcodec': vcodec,
+                'acodec': acodec,
+                'priority': priority,
+            })
+
+        if results:
+            return results
+
+    return []
 
 
 def extract_streaming_urls(video_url, max_height=None):
@@ -234,89 +301,7 @@ def extract_streaming_urls(video_url, max_height=None):
                 logging.info(f"📋 {len(formats)}개의 포맷 발견")
 
                 # 브라우저 직접 재생 가능한 URL 수집 (m3u8 제외)
-                direct_playable_urls = []
-
-                # 1차: mp4 비디오+오디오 통합 포맷 (최우선) - m3u8 제외
-                for i, fmt in enumerate(formats):
-                    url = fmt.get('url', '')
-                    ext = fmt.get('ext', '')
-                    vcodec = fmt.get('vcodec', 'none')
-                    acodec = fmt.get('acodec', 'none')
-                    height = fmt.get('height', 0)
-                    protocol = fmt.get('protocol', '')
-
-                    # m3u8 및 dash 프로토콜 제외
-                    if (url and ext == 'mp4' and
-                        vcodec and vcodec != 'none' and
-                        acodec and acodec != 'none' and
-                        height > 0 and height <= max_height and
-                        not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
-                        protocol not in ['m3u8', 'm3u8_native', 'hls']):
-
-                        direct_playable_urls.append({
-                            'url': url,
-                            'format_id': fmt.get('format_id', f'mp4_{i}'),
-                            'quality': height,
-                            'ext': ext,
-                            'filesize': fmt.get('filesize'),
-                            'type': 'video_audio_mp4',
-                            'vcodec': vcodec,
-                            'acodec': acodec,
-                            'priority': 1
-                        })
-
-                # 2차: 기타 브라우저 재생 가능한 포맷 (webm 포함) - m3u8 제외
-                if not direct_playable_urls:
-                    for i, fmt in enumerate(formats):
-                        url = fmt.get('url', '')
-                        ext = fmt.get('ext', '')
-                        vcodec = fmt.get('vcodec', 'none')
-                        acodec = fmt.get('acodec', 'none')
-                        height = fmt.get('height', 0)
-                        protocol = fmt.get('protocol', '')
-
-                        if (url and ext in ['webm', 'mp4'] and
-                            vcodec and vcodec != 'none' and
-                            acodec and acodec != 'none' and
-                            height > 0 and height <= max_height and
-                            not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
-                            protocol not in ['m3u8', 'm3u8_native', 'hls']):
-
-                            direct_playable_urls.append({
-                                'url': url,
-                                'format_id': fmt.get('format_id', f'web_{i}'),
-                                'quality': height,
-                                'ext': ext,
-                                'filesize': fmt.get('filesize'),
-                                'type': 'video_audio_web',
-                                'vcodec': vcodec,
-                                'acodec': acodec,
-                                'priority': 2
-                            })
-
-                # 3차: HTTP 직접 URL만 허용 (m3u8 완전 제외)
-                if not direct_playable_urls:
-                    for i, fmt in enumerate(formats):
-                        url = fmt.get('url', '')
-                        ext = fmt.get('ext', '')
-                        height = fmt.get('height', 0)
-                        protocol = fmt.get('protocol', '')
-
-                        if (url and url.startswith('http') and
-                            ext in ['mp4', 'webm', 'mkv'] and
-                            height > 0 and height <= max_height and
-                            not any(x in url.lower() for x in ['m3u8', 'dash', '.mpd']) and
-                            protocol not in ['m3u8', 'm3u8_native', 'hls']):
-
-                            direct_playable_urls.append({
-                                'url': url,
-                                'format_id': fmt.get('format_id', f'http_{i}'),
-                                'quality': height,
-                                'ext': ext,
-                                'filesize': fmt.get('filesize'),
-                                'type': 'http_direct',
-                                'priority': 3
-                            })
+                direct_playable_urls = _filter_playable_formats(formats, max_height)
 
                 if not direct_playable_urls:
                     logging.warning(f"❌ 브라우저 직접 재생 가능한 URL이 없음 (m3u8 제외): {video_url}")
@@ -483,19 +468,29 @@ def download_video(video_url, file_id, download_path, update_status_callback, ma
         except Exception as e:
             logging.warning(f"직접 링크 추출 실패: {e}")
 
+        # 메타데이터 한 번만 조회 (서버DL 성공/실패 양쪽에서 재사용)
+        video_meta = None
+        try:
+            video_meta = get_video_info(video_url)
+        except Exception as e:
+            logging.warning(f"메타데이터 추출 실패: {e}")
+
+        meta_title = (video_meta.get('title') if video_meta else None) or "Video"
+        meta_thumbnail = video_meta.get('thumbnail') if video_meta else None
+        meta_duration = video_meta.get('duration') if video_meta else None
+        meta_uploader = video_meta.get('uploader') if video_meta else None
+
         # 3. 서버 다운로드 시도 (fallback 방식)
         logging.info(f"⚠️ 스트리밍/직접링크 실패, 서버 다운로드 시도: {video_url}")
         update_status_callback(file_id, {'status': 'downloading', 'progress': 30})
 
         try:
-            # 향상된 다운로드 시도 (download_utils.py의 함수 사용)
             download_success = try_download_enhanced(video_url, download_path, use_cookies=True, max_height=max_height)
 
             if download_success:
                 logging.info(f"✅ 서버 다운로드 성공: {video_url}")
-                server_download_success = True  # 성공 플래그 설정
+                server_download_success = True
 
-                # 다운로드된 파일 확인
                 files = safely_access_files(download_path)
                 if files:
                     file_name = files[0]
@@ -503,62 +498,33 @@ def download_video(video_url, file_id, download_path, update_status_callback, ma
                     if os.path.isfile(file_path):
                         file_size = readable_size(os.path.getsize(file_path))
 
-                        # 기본 비디오 정보 추출 시도
-                        title = "Downloaded Video"
-                        thumbnail = None
-                        duration = None
-                        uploader = None
-
-                        try:
-                            video_info = get_video_info(video_url)
-                            if video_info:
-                                title = video_info.get('title', title)
-                                thumbnail = video_info.get('thumbnail')
-                                duration = video_info.get('duration')
-                                uploader = video_info.get('uploader')
-                        except Exception as e:
-                            logging.warning(f"서버 다운로드 후 메타데이터 추출 실패: {e}")
-
                         update_status_completed(
                             file_id,
                             update_status_callback,
                             video_url,
-                            title,
+                            meta_title,
                             is_direct_link=False,
                             file_name=file_name,
                             file_size=file_size,
-                            thumbnail=thumbnail,
-                            duration=duration,
-                            uploader=uploader
+                            thumbnail=meta_thumbnail,
+                            duration=meta_duration,
+                            uploader=meta_uploader
                         )
                         return
 
         except Exception as e:
             logging.warning(f"서버 다운로드도 실패: {e}")
 
-        # 4. 모든 방법 실패 - 최소한의 정보로 완료 처리 (서버 다운로드 없음)
+        # 4. 모든 방법 실패 — 원본 URL만으로 완료 처리
         logging.warning(f"⚠️ 모든 다운로드 방법 실패, 원본 URL만 제공: {video_url}")
 
-        # 기본 비디오 정보라도 가져오기 시도
-        title = "Video"
-        thumbnail = None
-        try:
-            video_info = get_video_info(video_url)
-            if video_info:
-                title = video_info.get('title', title)
-                thumbnail = video_info.get('thumbnail')
-        except Exception as e:
-            logging.warning(f"기본 정보 추출도 실패: {e}")
-
-        # 원본 URL만으로 완료 처리 (사용자가 원본 사이트로 이동하게 됨)
         update_status_completed(
             file_id,
             update_status_callback,
             video_url,
-            title,
+            meta_title,
             is_direct_link=False,
-            thumbnail=thumbnail,
-            # 원본 URL을 저장하여 나중에 리다이렉트에 사용
+            thumbnail=meta_thumbnail,
             original_url=video_url
         )
 

@@ -22,6 +22,7 @@ def _init_pool():
     _pool = redis.ConnectionPool.from_url(
         REDIS_URL,
         decode_responses=True,
+        max_connections=10,
         socket_timeout=1,
         socket_connect_timeout=1,
         retry_on_timeout=False,

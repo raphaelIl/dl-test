@@ -19,6 +19,82 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
+# 운영 설정 가이드
+
+## Gunicorn 워커/스레드 구조
+
+```
+                          ┌─ Thread 1 ── HTTP 요청 처리 (상태 폴링, 페이지 응답)
+                          ├─ Thread 2 ── HTTP 요청 처리 (프록시 스트리밍)
+  Worker 1 (프로세스) ────├─ Thread 3 ── HTTP 요청 처리
+                          └─ DL Pool ──┬─ DL Thread 1 (yt-dlp 추출/다운로드)
+                                       └─ DL Thread 2 (yt-dlp 추출/다운로드)
+
+                          ┌─ Thread 1 ── HTTP 요청 처리
+                          ├─ Thread 2 ── HTTP 요청 처리
+  Worker 2 (프로세스) ────├─ Thread 3 ── HTTP 요청 처리
+                          └─ DL Pool ──┬─ DL Thread 1 (yt-dlp 추출/다운로드)
+                                       └─ DL Thread 2 (yt-dlp 추출/다운로드)
+
+  Redis ───────────────── 상태/통계/캐시/Rate Limit 공유 (워커 간 통신)
+```
+
+### 설정값 설명
+
+| 환경변수               | 의미                                                                  | 영향               |
+|--------------------|---------------------------------------------------------------------|------------------|
+| `GUNICORN_WORKERS` | **프로세스 수**. 완전히 독립된 프로세스로, 하나가 죽어도 나머지 정상 동작                        | 늘리면 안정성 ↑, 메모리 ↑ |
+| `GUNICORN_THREADS` | **워커당 HTTP 스레드 수**. 한 워커가 동시 처리할 수 있는 요청 수                          | 늘리면 동시 요청 처리량 ↑  |
+| `MAX_WORKERS`      | **전체 다운로드 스레드 수**. 워커 수로 자동 분배됨 (`MAX_WORKERS // GUNICORN_WORKERS`) | 동시 다운로드 수 결정     |
+
+- 총 동시 HTTP 처리 = `GUNICORN_WORKERS × GUNICORN_THREADS`
+- 총 동시 다운로드 = `MAX_WORKERS` (워커별 분배)
+
+### 서버 사양별 추천 설정
+
+| 서버 사양     | WORKERS | THREADS | MAX_WORKERS | 동시 HTTP | 동시 DL | 피크 메모리 |
+|-----------|---------|---------|-------------|---------|-------|--------|
+| 1코어 / 1GB | 1       | 4       | 2           | 4       | 2     | ~1.2GB |
+| 2코어 / 2GB | 2       | 4       | 2           | 8       | 2     | ~1.5GB |
+| 2코어 / 4GB | 2       | 4       | 4           | 8       | 4     | ~2.5GB |
+| 4코어 / 8GB | 3       | 4       | 6           | 12      | 6     | ~4GB   |
+
+> **메모리 계산**: 워커 기본 ~120MB + yt-dlp 실행 시 건당 200~500MB  
+> **주의**: 멀티워커(`WORKERS > 1`)는 Redis 필수. Redis 불가 시 상태/통계가 워커 간 공유되지 않음
+
+### 예시: 2코어 4GB 서버
+
+```yaml
+# docker-compose.yml
+environment:
+  - GUNICORN_WORKERS=2     # 2 프로세스 (한쪽 죽어도 서비스 유지)
+  - GUNICORN_THREADS=4     # 워커당 4스레드 (총 8 동시 HTTP)
+  - MAX_WORKERS=4          # 총 4 동시 다운로드 (워커당 2)
+  - REDIS_URL=redis://redis:6379/0
+```
+
+## Redis 의존성
+
+상태 관리, 통계, 메타데이터 캐시, Rate Limit 모두 Redis를 사용합니다.
+
+| 기능         | Redis 정상                      | Redis 장애 시                  |
+|------------|-------------------------------|-----------------------------|
+| 다운로드 상태    | Redis JSON + Lua atomic merge | in-memory fallback (워커별 격리) |
+| 통계         | Redis HINCRBY atomic counter  | 파일 기반 fallback              |
+| 메타데이터 캐시   | Redis 캐시 (TTL 30분)            | 캐시 없이 매번 추출 (성능 저하)         |
+| Rate Limit | Redis 공유 카운터                  | Flask-Limiter 자체 fallback   |
+
+> **롤백**: `REDIS_URL` 환경변수 제거 후 재시작하면 전체 fallback 모드로 동작 (단일 워커 권장)
+
+## Makefile 명령어
+
+```bash
+make restart       # 전체 재시작 (Redis 포함)
+make restart-app   # 앱만 재시작 (Redis 유지, 설정 변경 시 사용)
+make start         # 빌드 + 앱 재시작
+make clean         # 전체 컨테이너 종료
+```
+
 # 프로젝트 아키텍처
 
 ## 전체 시스템 구조
@@ -32,7 +108,6 @@ graph TB
     
     subgraph "Flask Application (app.py)"
         ROUTE[라우트 핸들러]
-        LANG[다국어 지원<br/>11개 언어]
         LIMIT[Rate Limiting<br/>IP별 제한]
         PROXY_STREAM[프록시 스트리밍<br/>IP 숨김 기능]
     end
@@ -68,8 +143,8 @@ graph TB
     end
     
     subgraph "Storage & State"
+        REDIS[Redis<br/>상태/통계/캐시/Rate Limit]
         FS[파일 시스템<br/>임시 다운로드]
-        MEMORY[메모리 상태<br/>실시간 추적]
         LOGS[로그 파일<br/>상세 기록]
     end
     
@@ -91,10 +166,9 @@ graph TB
     RETRY_LOGIC --> UTILS
     UTILS --> YT_DLP
     UTILS --> PROXY_SERVERS
-    STATUS --> MEMORY
+    STATUS --> REDIS
     MANAGER --> FS
     MANAGER --> LOGS
-    ROUTE --> LANG
     ROUTE --> LIMIT
     MANAGER --> STATS
 ```
@@ -441,8 +515,10 @@ graph LR
     end
     
     subgraph "System Management"
-        SM[status_manager.py<br/>실시간 상태 추적<br/>+ 자동 정리]
-        STATS[stats.py<br/>다운로드 통계<br/>+ 성능 모니터링]
+        SM[status_manager.py<br/>Redis 상태 추적<br/>+ Lua atomic merge]
+        STATS[stats.py<br/>Redis atomic counter]
+        RC[redis_client.py<br/>연결 풀 + fallback]
+        MC[metadata_cache.py<br/>yt-dlp 메타데이터 캐싱]
         UTILS[utils.py<br/>공통 유틸리티]
         WU[web_utils.py<br/>웹 관련 기능]
     end
@@ -450,7 +526,7 @@ graph LR
     subgraph "External Dependencies"
         YTDLP[yt-dlp<br/>비디오 추출 엔진]
         FLASK[Flask + Extensions<br/>웹 프레임워크]
-        BABEL[Flask-Babel<br/>11개 언어 지원]
+        REDIS_EXT[Redis<br/>상태/통계/캐시]
         REQUESTS[Requests<br/>프록시 스트리밍]
     end
     
@@ -462,8 +538,11 @@ graph LR
     DM --> DU
     DM --> UTILS
     DU --> YTDLP
+    SM --> RC
+    MC --> RC
+    STATS --> RC
+    RC --> REDIS_EXT
     APP --> FLASK
-    APP --> BABEL
     CONFIG --> APP
     
     style APP fill:#e1f5fe
@@ -485,14 +564,20 @@ graph LR
 - **쿠키 제거**: 추적 방지
 - **프록시 로테이션**: 차단 우회
 
-### 다국어 및 사용성
-- **11개 언어 지원**: 글로벌 사용자 대응
+### 확장성 및 안정성
+
+- **Redis 기반 상태 관리**: 멀티워커 지원, Lua Script atomic merge
+- **메타데이터 캐싱**: 동일 URL 재요청 시 yt-dlp 호출 생략 (TTL 30분)
+- **자동 fallback**: Redis 장애 시 in-memory/파일 기반으로 자동 전환
+- **Cleanup 리더 선출**: Redis SET NX로 한 워커만 파일 정리 수행
+
+### 사용성
 - **반응형 UI**: 모바일/데스크톱 최적화
 - **실시간 진행률**: 2초마다 상태 업데이트
-- **자동 정리**: 메모리 및 디스크 최적화
+- **자동 정리**: Redis TTL + 고아 폴더 정리 스레드
 
 ### 모니터링 및 관리
 - **상세 로깅**: 단계별 처리 과정 기록
-- **통계 수집**: 성공/실패율 추적
-- **헬스체크**: 시스템 상태 모니터링
-- **Rate Limiting**: 서버 부하 방지
+- **통계 수집**: Redis atomic counter (성공/실패율)
+- **헬스체크**: 시스템 + Redis 상태 모니터링
+- **Rate Limiting**: Redis 공유 스토리지 (멀티워커 정확한 제한)

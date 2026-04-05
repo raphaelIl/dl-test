@@ -1,18 +1,19 @@
 """
 다운로드 관련 유틸리티 함수들 - 향상된 버전
 """
-import os
-import re
-import html
 import base64
-import requests
-import random
-import yt_dlp
-import time
-from yt_dlp import YoutubeDL, DownloadError
-from urllib.parse import urlsplit, urljoin, unquote
-from config import MAX_FILE_SIZE, MAX_VIDEO_HEIGHT, build_format_string
+import html
 import logging
+import os
+import random
+import re
+from urllib.parse import urlsplit, urljoin, unquote
+
+import requests
+import yt_dlp
+from yt_dlp import YoutubeDL, DownloadError
+
+from config import MAX_FILE_SIZE, MAX_VIDEO_HEIGHT, build_format_string
 
 # 프록시 설정 - 필요시 여기에 실제 프록시 서버 추가
 PROXY_LIST = [
@@ -317,7 +318,7 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
                             try:
                                 os.remove(os.path.join(download_dir, f))
                                 logging.info(f"불필요한 m3u8 파일 삭제: {f}")
-                            except:
+                            except Exception:
                                 pass
                     return True
                 else:
