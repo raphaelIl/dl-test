@@ -3,7 +3,7 @@ FROM python:3.11-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
-    curl unzip \
+    curl unzip xz-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,19 +18,25 @@ RUN pip install --no-cache-dir --user -r requirements.txt && \
 # deno 설치 (yt-dlp JavaScript 런타임)
 RUN curl -fsSL https://deno.land/install.sh | sh
 
-FROM python:3.11-slim
+# ffmpeg/ffprobe static binary (yt-dlp 공식 빌드, 런타임 의존성 없음)
+ARG TARGETARCH
+RUN case "${TARGETARCH}" in \
+      arm64) FFMPEG_ARCH="linuxarm64" ;; \
+      amd64) FFMPEG_ARCH="linux64" ;; \
+      *) echo "Unsupported arch: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    curl -fsSL "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${FFMPEG_ARCH}-gpl.tar.xz" | \
+    tar -xJ --strip-components=2 -C /usr/local/bin/ --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
 
-# 런타임 의존성: ffmpeg (yt-dlp 비디오+오디오 병합에 필요)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.11-slim
 
 WORKDIR /app
 
 # builder에서 빌드된 결과물만 복사
+# - /usr/local/bin/ffmpeg,ffprobe: static binary
 # - /root/.local: Python 패키지 (yt-dlp, flask 등)
 # - /root/.deno: deno 바이너리 (yt-dlp JS 런타임)
+COPY --from=builder /usr/local/bin/ffmpeg /usr/local/bin/ffprobe /usr/local/bin/
 COPY --from=builder /root/.local /root/.local
 COPY --from=builder /root/.deno /root/.deno
 ENV PATH="/root/.deno/bin:/root/.local/bin:${PATH}"

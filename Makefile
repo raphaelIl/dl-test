@@ -12,6 +12,7 @@ APP_SERVICES = grab-video cloudflared
 deploy: build
 	@echo "앱 서비스만 재생성 (Redis 유지)"
 	docker compose up -d --no-deps --force-recreate $(APP_SERVICES)
+	caffeinate -i docker compose logs -f $(APP_SERVICES)
 
 # 앱 서비스만 단순 재시작 (이미지 변경 없이 컨테이너만 restart)
 restart-app:
@@ -22,6 +23,7 @@ restart-app:
 restart: clean
 	@echo "docker compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
+	caffeinate -i docker compose logs -f
 
 clean:
 	@echo "docker compose down --remove-orphans"
