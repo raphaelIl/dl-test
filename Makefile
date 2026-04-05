@@ -6,35 +6,36 @@ CONTAINER_NAME = video-downloader
 # Redis를 제외한 앱 서비스 목록
 APP_SERVICES = grab-video cloudflared
 
-.PHONY: build-restart restart restart-app clean-all clean-image clean build-latest build
+.PHONY: deploy restart restart-app clean-all clean-image clean build build-push push
 
-start: build restart-app
+# 로컬 빌드 → 앱만 재생성 (Redis 유지, push 없음) — 일상 배포용
+deploy: build
+	@echo "앱 서비스만 재생성 (Redis 유지)"
+	docker compose up -d --no-deps --force-recreate $(APP_SERVICES)
 
-start-latest: build-latest restart-app
+# 앱 서비스만 단순 재시작 (이미지 변경 없이 컨테이너만 restart)
+restart-app:
+	@echo "앱 서비스만 재시작 (Redis 유지)"
+	docker compose restart $(APP_SERVICES)
+
+# 전체 재시작 (Redis 포함) — 초기 셋업 또는 Redis 설정 변경 시
+restart: clean
+	@echo "docker compose up -d"
+	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
 
 clean:
 	@echo "docker compose down --remove-orphans"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose down --remove-orphans || true
 
-restart: clean
-	@echo "docker compose up -d"
-	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
-	@echo "caffeinate -i docker compose up"
-	caffeinate -i docker compose up
-
-restart-app:
-	@echo "앱 서비스만 재시작 (Redis 유지)"
-	docker compose restart $(APP_SERVICES)
-
-build-latest:
-	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
-	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
-	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
-
+# 로컬 빌드만 (push 없음)
 build:
 	@echo "빌드 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
 	docker build -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION) -t $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest .
+
+# 빌드 + Docker Hub push
+build-push: build push
+
+push:
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)"
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 	@echo "푸시 시작: $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest"

@@ -89,10 +89,18 @@ environment:
 ## Makefile 명령어
 
 ```bash
-make restart       # 전체 재시작 (Redis 포함)
-make restart-app   # 앱만 재시작 (Redis 유지, 설정 변경 시 사용)
-make start         # 빌드 + 앱 재시작
+# 일상 배포
+make deploy        # 로컬 빌드 → 앱만 재생성 (Redis 유지) ← 주로 사용
+make restart-app   # 앱 컨테이너만 재시작 (이미지 변경 없이)
+
+# 전체 관리
+make restart       # 전체 down → up (Redis 포함, 초기 셋업/Redis 설정 변경 시)
 make clean         # 전체 컨테이너 종료
+
+# 빌드/배포
+make build         # 로컬 빌드만 (push 없음)
+make build-push    # 빌드 + Docker Hub push
+make push          # Docker Hub push만 (이미 빌드된 이미지)
 ```
 
 # 프로젝트 아키텍처
