@@ -48,18 +48,3 @@ def update_download_stats(status: str):
         pipe.execute()
     except Exception as e:
         logging.error(f"Redis 통계 업데이트 실패: {e}")
-
-
-def save_download_stats(stats: dict):
-    """통계를 저장 (초기화용)"""
-    try:
-        r = redis_client.get_redis()
-        stats["last_updated"] = datetime.now().isoformat()
-        r.hset(_REDIS_KEY, mapping={
-            "total": str(stats.get("total", 0)),
-            "completed": str(stats.get("completed", 0)),
-            "errors": str(stats.get("errors", 0)),
-            "last_updated": stats["last_updated"],
-        })
-    except Exception as e:
-        logging.error(f"Redis 통계 저장 실패: {e}")

@@ -11,8 +11,6 @@ venv/
 .venv/
 ENV/
 .env
-download_stats.json
-
 # development files
 .git
 .gitignore
@@ -27,7 +25,6 @@ download_stats.json
 *.md
 Dockerfile
 docker-compose*.yml
-app_monolithic_backup.py
 
 # system files
 .DS_Store

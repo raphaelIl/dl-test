@@ -11,6 +11,7 @@ from datetime import datetime
 
 import redis
 
+import redis_client
 from config import STATUS_MAX_AGE, STATUS_CLEANUP_INTERVAL, DOWNLOAD_FOLDER
 from utils import safe_path_join
 
@@ -56,8 +57,6 @@ def _eval_merge(r, key: str, payload: str, ttl: str):
 
 def update_status(file_id: str, status_data: dict):
     """다운로드 상태 업데이트 (기존 상태와 병합)"""
-    import redis_client
-
     if redis_client.is_available():
         try:
             r = redis_client.get_redis()
@@ -76,8 +75,6 @@ def update_status(file_id: str, status_data: dict):
 
 def get_status(file_id: str) -> dict:
     """다운로드 상태 조회"""
-    import redis_client
-
     if redis_client.is_available():
         try:
             r = redis_client.get_redis()
@@ -126,7 +123,6 @@ _CLEANUP_LOCK_KEY = "dl:cleanup_lock"
 
 def _acquire_cleanup_lock() -> bool:
     """Redis SET NX로 cleanup 리더 선출 — 한 워커만 정리 수행"""
-    import redis_client
     if not redis_client.is_available():
         return True  # fallback 모드에서는 모든 워커가 자기 in-memory 정리
     try:
@@ -142,8 +138,6 @@ def _cleanup_loop():
     - Redis 모드: TTL이 자동 만료 담당 → 파일시스템 고아 폴더 정리만 (리더 워커만)
     - Fallback 모드: 기존 in-memory 정리 + 파일시스템 정리
     """
-    import redis_client
-
     while True:
         try:
             if redis_client.is_available():
@@ -183,7 +177,6 @@ def _cleanup_fallback_store():
 
 def _get_active_file_ids() -> set[str]:
     """Redis SCAN으로 활성 상태의 file_id 집합을 한 번에 조회"""
-    import redis_client
     active = set()
     if redis_client.is_available():
         try:

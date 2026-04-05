@@ -285,52 +285,51 @@ def extract_streaming_urls(video_url, max_height=None):
                 if info:
                     metadata_cache.set_cached_info(video_url, info)
 
-            if True:  # 기존 들여쓰기 유지를 위한 블록
-                if not info:
-                    logging.warning(f"❌ 비디오 정보 추출 실패: {video_url}")
-                    continue  # 다음 시도로
+            if not info:
+                logging.warning(f"❌ 비디오 정보 추출 실패: {video_url}")
+                continue  # 다음 시도로
 
-                logging.info(f"✅ 비디오 정보 추출 성공: {info.get('title', 'Unknown')}")
+            logging.info(f"✅ 비디오 정보 추출 성공: {info.get('title', 'Unknown')}")
 
-                # 포맷 정보 확인
-                formats = info.get('formats', [])
-                if not formats:
-                    logging.warning(f"❌ 포맷 정보 없음: {video_url}")
-                    continue  # 다음 시도로
+            # 포맷 정보 확인
+            formats = info.get('formats', [])
+            if not formats:
+                logging.warning(f"❌ 포맷 정보 없음: {video_url}")
+                continue  # 다음 시도로
 
-                logging.info(f"📋 {len(formats)}개의 포맷 발견")
+            logging.info(f"📋 {len(formats)}개의 포맷 발견")
 
-                # 브라우저 직접 재생 가능한 URL 수집 (m3u8 제외)
-                direct_playable_urls = _filter_playable_formats(formats, max_height)
+            # 브라우저 직접 재생 가능한 URL 수집 (m3u8 제외)
+            direct_playable_urls = _filter_playable_formats(formats, max_height)
 
-                if not direct_playable_urls:
-                    logging.warning(f"❌ 브라우저 직접 재생 가능한 URL이 없음 (m3u8 제외): {video_url}")
-                    continue  # 다음 시도로
+            if not direct_playable_urls:
+                logging.warning(f"❌ 브라우저 직접 재생 가능한 URL이 없음 (m3u8 제외): {video_url}")
+                continue  # 다음 시도로
 
-                # 우선순위와 품질별로 정렬
-                direct_playable_urls.sort(key=lambda x: (x.get('priority', 999), -x.get('quality', 0)))
+            # 우선순위와 품질별로 정렬
+            direct_playable_urls.sort(key=lambda x: (x.get('priority', 999), -x.get('quality', 0)))
 
-                best_format = direct_playable_urls[0]
-                result = {
-                    'title': info.get('title', 'Unknown Title'),
-                    'thumbnail': info.get('thumbnail'),
-                    'duration': info.get('duration'),
-                    'uploader': info.get('uploader'),
-                    'description': info.get('description'),
-                    'view_count': info.get('view_count'),
-                    'upload_date': info.get('upload_date'),
-                    'streaming_urls': direct_playable_urls,
-                    'best_url': best_format['url'],
-                    'best_quality': best_format['quality'],
-                    'best_ext': best_format['ext']
-                }
+            best_format = direct_playable_urls[0]
+            result = {
+                'title': info.get('title', 'Unknown Title'),
+                'thumbnail': info.get('thumbnail'),
+                'duration': info.get('duration'),
+                'uploader': info.get('uploader'),
+                'description': info.get('description'),
+                'view_count': info.get('view_count'),
+                'upload_date': info.get('upload_date'),
+                'streaming_urls': direct_playable_urls,
+                'best_url': best_format['url'],
+                'best_quality': best_format['quality'],
+                'best_ext': best_format['ext']
+            }
 
-                logging.info(f"✅ 스마트 전략 성공! (시도 {attempt+1}/{max_attempts})")
-                logging.info(f"   📺 제목: {result['title']}")
-                logging.info(f"   🎬 최고 품질: {result['best_quality']}p ({result['best_ext']})")
-                logging.info(f"   📋 총 {len(direct_playable_urls)}개 포맷 (m3u8 제외)")
+            logging.info(f"✅ 스마트 전략 성공! (시도 {attempt + 1}/{max_attempts})")
+            logging.info(f"   📺 제목: {result['title']}")
+            logging.info(f"   🎬 최고 품질: {result['best_quality']}p ({result['best_ext']})")
+            logging.info(f"   📋 총 {len(direct_playable_urls)}개 포맷 (m3u8 제외)")
 
-                return result
+            return result
 
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e).lower()

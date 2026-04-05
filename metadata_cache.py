@@ -5,6 +5,8 @@ import hashlib
 import json
 import logging
 
+import redis_client
+
 _KEY_PREFIX = "dl:meta:"
 _DEFAULT_TTL = 1800  # 30분 (스트리밍 URL 유효기간 6시간 대비 안전 마진)
 
@@ -54,8 +56,6 @@ def _extract_cacheable(info: dict) -> dict:
 
 def get_cached_info(url: str) -> dict | None:
     """Redis에서 캐시 조회, 없거나 Redis 불가 시 None"""
-    import redis_client
-
     if not redis_client.is_available():
         return None
 
@@ -72,8 +72,6 @@ def get_cached_info(url: str) -> dict | None:
 
 def set_cached_info(url: str, info: dict, ttl: int = _DEFAULT_TTL):
     """캐싱 가능한 필드만 선별하여 Redis에 저장"""
-    import redis_client
-
     if not redis_client.is_available():
         return
 

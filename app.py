@@ -11,7 +11,7 @@ from urllib.parse import quote, urlparse
 
 import psutil
 import requests
-from flask import Flask, render_template, request, send_file, url_for, redirect, abort, send_from_directory, Response
+from flask import Flask, render_template, request, send_file, url_for, redirect, abort, Response, jsonify
 from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -411,7 +411,6 @@ def do_server_download(file_id, video_url, download_path, quality='best'):
 @app.route('/api/start-server-download/<file_id>', methods=['POST'])
 def api_start_server_download(file_id):
     """서버 다운로드 시작 API"""
-    from flask import jsonify
 
     try:
         if not check_valid_file_id(file_id):
@@ -451,7 +450,6 @@ def api_start_server_download(file_id):
 @app.route('/api/download-status/<file_id>')
 def api_download_status(file_id):
     """서버 다운로드 상태 확인 API"""
-    from flask import jsonify
 
     try:
         if not check_valid_file_id(file_id):
@@ -738,8 +736,6 @@ def health_check():
     try:
         stats = load_download_stats()
 
-        in_progress = 0
-
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
@@ -747,7 +743,6 @@ def health_check():
             "downloads": {
                 "total": stats.get('total', 0),
                 "completed": stats.get('completed', 0),
-                "in_progress": in_progress,
                 "errors": stats.get('errors', 0)
             }
         }
