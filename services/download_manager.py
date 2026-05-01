@@ -9,12 +9,12 @@ from datetime import datetime
 
 import yt_dlp
 
-import metadata_cache
 from config import MAX_VIDEO_HEIGHT, build_format_string
-from download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, \
+from infrastructure import metadata_cache
+from services.download_utils import try_download_enhanced, get_video_info, extract_direct_download_link, \
     validate_direct_download_link
-from stats import update_download_stats
-from utils import safely_access_files, generate_error_id, safe_path_join, readable_size
+from services.stats import update_download_stats
+from utils.general import safely_access_files, generate_error_id, safe_path_join, readable_size
 
 
 def detect_url_type_and_strategy(video_url):
@@ -138,7 +138,7 @@ def _filter_playable_formats(formats: list, max_height: int) -> list:
 
 def extract_streaming_urls(video_url, max_height=None):
     """스트리밍 URL을 추출하는 함수 - 브라우저 직접 재생 우선, 강화된 우회 기능 추가"""
-    from download_utils import get_random_user_agent, PROXY_LIST
+    from services.download_utils import get_random_user_agent, PROXY_LIST
     import random
     import time
 

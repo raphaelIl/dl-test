@@ -16,14 +16,14 @@ from flask_limiter import Limiter
 from flask_limiter.errors import RateLimitExceeded
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-import redis_client
+from infrastructure import redis_client
 # 분리된 모듈들 import
 from config import *  # noqa: F403
-from download_manager import download_video
-from stats import load_download_stats, update_download_stats
-from status_manager import update_status, get_status, start_cleanup_thread
-from utils import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
-from web_utils import get_client_ip, add_cache_headers
+from services.download_manager import download_video
+from services.stats import load_download_stats, update_download_stats
+from services.status_manager import update_status, get_status, start_cleanup_thread
+from utils.general import safe_path_join, safely_access_files, generate_error_id, check_ip_allowed, readable_size
+from utils.web import get_client_ip, add_cache_headers
 
 # Flask 앱 초기화
 app = Flask(__name__)
@@ -370,7 +370,7 @@ def stream_video(file_id):
 
 def do_server_download(file_id, video_url, download_path, quality='best'):
     """서버 다운로드 실행 (백그라운드 태스크)"""
-    from download_utils import try_download_enhanced
+    from services.download_utils import try_download_enhanced
 
     try:
         # 다운로드 시작 상태 업데이트
@@ -672,7 +672,7 @@ def download_file(file_id):
         original_url = status.get('url', '')
         if original_url:
             try:
-                from download_manager import extract_streaming_urls
+                from services.download_manager import extract_streaming_urls
                 logging.info(f"실시간 스트리밍 URL 추출 시도: {original_url[:50]}...")
 
                 streaming_info = extract_streaming_urls(original_url)

@@ -14,6 +14,7 @@ import yt_dlp
 from yt_dlp import YoutubeDL, DownloadError
 
 from config import MAX_FILE_SIZE, MAX_VIDEO_HEIGHT, build_format_string
+from infrastructure import metadata_cache
 
 # 프록시 설정 - 필요시 여기에 실제 프록시 서버 추가
 PROXY_LIST = [
@@ -338,8 +339,6 @@ def try_download_enhanced(detail_url: str, download_dir: str, *, ua: str | None 
 
 def get_video_info(url):
     """비디오 정보 가져오기 (캐시 우선)"""
-    import metadata_cache
-
     cached = metadata_cache.get_cached_info(url)
     if cached:
         return cached
@@ -399,8 +398,6 @@ def extract_direct_download_link(url):
         ydl_opts['socket_timeout'] = 45
 
     try:
-        import metadata_cache
-
         # 캐시 확인
         info = metadata_cache.get_cached_info(url)
         if info is None:

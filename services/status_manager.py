@@ -11,9 +11,9 @@ from datetime import datetime
 
 import redis
 
-import redis_client
 from config import STATUS_MAX_AGE, STATUS_CLEANUP_INTERVAL, DOWNLOAD_FOLDER
-from utils import safe_path_join
+from infrastructure import redis_client
+from utils.general import safe_path_join
 
 # ── Redis Lua Script (atomic merge + SETEX) ──────────────────────
 _LUA_MERGE = """

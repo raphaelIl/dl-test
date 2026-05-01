@@ -5,7 +5,7 @@ import hashlib
 import json
 import logging
 
-import redis_client
+from infrastructure import redis_client
 
 _KEY_PREFIX = "dl:meta:"
 _DEFAULT_TTL = 1800  # 30분 (스트리밍 URL 유효기간 6시간 대비 안전 마진)

@@ -4,7 +4,7 @@
 import logging
 from datetime import datetime
 
-import redis_client
+from infrastructure import redis_client
 
 _REDIS_KEY = "dl:stats"
 _DEFAULT_STATS = {
