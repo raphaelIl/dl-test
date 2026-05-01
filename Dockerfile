@@ -63,6 +63,7 @@ CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:5000 \
     --workers ${GUNICORN_WORKERS:-2} \
     --threads ${GUNICORN_THREADS:-4} \
     --timeout 300 \
+    --graceful-timeout 60 \
     --max-requests 1000 \
     --max-requests-jitter 100 \
     --error-logfile ${GUNICORN_ERROR_LOGFILE:-/app/logs/error.log} \

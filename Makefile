@@ -23,7 +23,7 @@ restart-app:
 restart: clean
 	@echo "docker compose up -d"
 	VERSION=$(VERSION) DOCKER_HUB_USER=$(DOCKER_HUB_USER) IMAGE_NAME=$(IMAGE_NAME) docker compose up -d
-	caffeinate -i docker compose logs -f
+	caffeinate -i docker compose logs -f $(APP_SERVICES)
 
 clean:
 	@echo "docker compose down --remove-orphans"

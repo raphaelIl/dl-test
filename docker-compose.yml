@@ -17,6 +17,7 @@ services:
 #    image: ${DOCKER_HUB_USER}/${IMAGE_NAME}:${VERSION}
     container_name: grab-video
     restart: always
+    stop_grace_period: 70s  # gunicorn graceful-timeout(60s) + 버퍼
     ports:
       - "80:5000"
     volumes:
@@ -36,7 +37,7 @@ services:
       - DOWNLOAD_LIMITS=30 per minute
       - TZ=Asia/Seoul
       - PYTHONUNBUFFERED=1
-      - ALLOWED_HEALTH_IPS=127.0.0.1,125.177.83.187,172.16.0.0/12,192.168.0.0/16
+      - ALLOWED_HEALTH_IPS=127.0.0.1,116.36.243.86,172.16.0.0/12,192.168.0.0/16
       - GUNICORN_LOG_LEVEL=error
       - GUNICORN_ACCESS_LOGFILE=None # GUNICORN_ACCESS_LOGFILE=/app/logs/access.log
 #      - GUNICORN_ACCESS_LOG_FORMAT=%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s %(L)s

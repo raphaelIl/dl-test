@@ -791,9 +791,13 @@ def context_processor():
 
 # 정리 함수
 def cleanup_on_exit():
-    """애플리케이션 종료 시 정리"""
+    """애플리케이션 종료 시 정리 — 대기 중 작업은 취소, 실행 중 다운로드는 완료까지 대기
+
+    gunicorn --graceful-timeout 시간 내에 끝나지 않으면 SIGKILL로 강제 종료됨.
+    """
     if executor:
-        executor.shutdown(wait=True)
+        logging.info("graceful shutdown: 진행 중 다운로드 완료 대기...")
+        executor.shutdown(wait=True, cancel_futures=True)
     logging.info("애플리케이션 종료: 리소스 정리 완료")
 
 
