@@ -1,4 +1,5 @@
 yt-dlp
+curl_cffi>=0.10,<0.15
 redis>=5.0.0
 Flask~=3.1.0
 Flask-Limiter~=3.12
