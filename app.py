@@ -734,12 +734,14 @@ def health_check():
         abort(403)
 
     try:
+        redis_ok = redis_client.check_health()
         stats = load_download_stats()
 
         health_data = {
-            "status": "healthy",
+            "status": "healthy" if redis_ok else "degraded",
             "timestamp": datetime.now().isoformat(),
             "version": os.getenv('APP_VERSION', '1.0.0'),
+            "redis": "ok" if redis_ok else "unavailable",
             "downloads": {
                 "total": stats.get('total', 0),
                 "completed": stats.get('completed', 0),
@@ -747,7 +749,7 @@ def health_check():
             }
         }
 
-        return health_data, 200
+        return health_data, 200 if redis_ok else 503
     except Exception as e:
         logging.error(f"헬스 체크 중 오류: {str(e)}", exc_info=True)
         return {"status": "unhealthy", "error": str(e)}, 500

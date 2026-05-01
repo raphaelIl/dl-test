@@ -67,6 +67,7 @@ def get_cached_info(url: str) -> dict | None:
             return json.loads(raw)
     except Exception as e:
         logging.warning(f"메타데이터 캐시 조회 실패: {e}")
+        redis_client.mark_unavailable()
     return None
 
 
@@ -84,3 +85,4 @@ def set_cached_info(url: str, info: dict, ttl: int = _DEFAULT_TTL):
         logging.info(f"메타데이터 캐시 저장: {url[:60]}")
     except Exception as e:
         logging.warning(f"메타데이터 캐시 저장 실패: {e}")
+        redis_client.mark_unavailable()
